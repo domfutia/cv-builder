@@ -85,45 +85,51 @@ export const CVDocument: React.FC<{
   const sbTagBg = isSidebarDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.07)";
   const sbTagText = isSidebarDark ? "#ffffff" : "#18181b";
 
-  // Avatar styles
+  // Base font size multipliers from user selection
+  const baseFontSizePx = {
+    sm: 11,
+    base: 12.2,
+    lg: 13.5,
+  }[settings.fontSize || "base"];
+
+  // Base spacing multipliers from user selection
+  const baseSectionGapPx = {
+    compact: 10,
+    normal: 14,
+    relaxed: 20,
+  }[settings.spacing || "normal"];
+
+  const baseItemGapPx = {
+    compact: 5,
+    normal: 8,
+    relaxed: 12,
+  }[settings.spacing || "normal"];
+
+  const basePagePadPx = {
+    compact: 24,
+    normal: 32,
+    relaxed: 40,
+  }[settings.spacing || "normal"];
+
+  const baseAvatarSizePx = {
+    sm: 80,
+    md: 96,
+    lg: 112,
+  }[settings.avatarSize || "md"];
+
+  // Avatar shape classes
   const avatarShapeClasses = {
     circle: "rounded-full",
     rounded: "rounded-2xl",
     square: "rounded-none",
   }[settings.avatarShape || "circle"];
 
-  const avatarSizeClasses = {
-    sm: "w-20 h-20",
-    md: "w-24 h-24",
-    lg: "w-28 h-28",
-  }[settings.avatarSize || "md"];
-
-  // Font size mapping (Configurable by user)
-  const fontSizeClasses = {
-    sm: "text-[11px] leading-snug",
-    base: "text-[12px] leading-normal",
-    lg: "text-[13px] leading-relaxed",
-  }[settings.fontSize || "base"];
-
-  // Spacing mapping (Adjustable by user via settings)
-  const spacingClasses = {
-    compact: "space-y-2",
-    normal: "space-y-3.5",
-    relaxed: "space-y-5",
-  }[settings.spacing || "normal"];
-
-  const itemSpacingClasses = {
-    compact: "space-y-1",
-    normal: "space-y-2",
-    relaxed: "space-y-3",
-  }[settings.spacing || "normal"];
-
   const sectionOrder = settings.sectionOrder && settings.sectionOrder.length > 0
     ? settings.sectionOrder
     : defaultSectionOrder;
 
   // =========================================================================
-  // DUAL-MEASUREMENT A4 AUTO-FIT ENGINE (Guarantees 100% fit on 1 A4 page)
+  // CONTINUOUS DUAL-STAGE SINGLE-PAGE A4 AUTO-FIT ENGINE
   // =========================================================================
   useLayoutEffect(() => {
     const calculateAutoFit = () => {
@@ -132,37 +138,48 @@ export const CVDocument: React.FC<{
       const A4_TARGET_HEIGHT_PX = 1122.5; // Standard 297mm height at 96 DPI
       const targetHeight = rootRef.current.clientHeight || A4_TARGET_HEIGHT_PX;
 
-      let unscaledHeight = 0;
+      let measuredHeight = 0;
 
       if (settings.template === "modern") {
         const sbHeight = sidebarRef.current ? sidebarRef.current.scrollHeight : 0;
         const mainHeight = mainColRef.current ? mainColRef.current.scrollHeight : 0;
-        unscaledHeight = Math.max(sbHeight, mainHeight);
+        measuredHeight = Math.max(sbHeight, mainHeight);
       } else {
-        unscaledHeight = innerStackRef.current
+        measuredHeight = innerStackRef.current
           ? innerStackRef.current.scrollHeight
           : contentRef.current
           ? contentRef.current.scrollHeight
           : 0;
       }
 
-      if (unscaledHeight > 0) {
-        if (unscaledHeight > targetHeight) {
-          // Calculate scale ratio with a safety buffer so no text is ever clipped
-          const calculatedScale = Math.min(1.0, Math.max(0.3, (targetHeight - 10) / unscaledHeight));
-          const cleanScale = Number(calculatedScale.toFixed(4));
-          setAutoFitScale(cleanScale);
-          if (onScaleChange) onScaleChange(cleanScale);
-        } else {
-          setAutoFitScale(1);
-          if (onScaleChange) onScaleChange(1);
+      if (measuredHeight > 0) {
+        // If measured height exceeds target height, calculate exact scale
+        const currentScale = autoFitScale;
+        const effectiveHeight = measuredHeight * currentScale;
+
+        if (effectiveHeight > targetHeight - 4) {
+          // Scale down smoothly
+          const newScale = Math.min(1.0, Math.max(0.3, (targetHeight - 8) / measuredHeight));
+          const cleanScale = Number(newScale.toFixed(3));
+          if (Math.abs(cleanScale - currentScale) > 0.003) {
+            setAutoFitScale(cleanScale);
+            if (onScaleChange) onScaleChange(cleanScale);
+          }
+        } else if (effectiveHeight < targetHeight - 40 && currentScale < 0.99) {
+          // Scale up smoothly if content reduced
+          const newScale = Math.min(1.0, (targetHeight - 12) / measuredHeight);
+          const cleanScale = Number(newScale.toFixed(3));
+          if (Math.abs(cleanScale - currentScale) > 0.003) {
+            setAutoFitScale(cleanScale);
+            if (onScaleChange) onScaleChange(cleanScale);
+          }
         }
       }
     };
 
     calculateAutoFit();
-    const timer1 = setTimeout(calculateAutoFit, 60);
-    const timer2 = setTimeout(calculateAutoFit, 250);
+    const timer1 = setTimeout(calculateAutoFit, 40);
+    const timer2 = setTimeout(calculateAutoFit, 180);
 
     const observer = new ResizeObserver(() => {
       calculateAutoFit();
@@ -178,7 +195,7 @@ export const CVDocument: React.FC<{
       clearTimeout(timer2);
       observer.disconnect();
     };
-  }, [cvData, settings, onScaleChange]);
+  }, [cvData, settings, autoFitScale, onScaleChange]);
 
   // Dynamic Section Labels Helper
   const getSectionTitle = (key: string, defaultTitle: string) => {
@@ -196,26 +213,26 @@ export const CVDocument: React.FC<{
 
       if (isSidebar) {
         return (
-          <div key={`sec-custom-${matchingCustom.id}-sb`} className="space-y-2 break-inside-avoid page-break-inside-avoid">
+          <div key={`sec-custom-${matchingCustom.id}-sb`} className="space-y-[calc(6px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
             <h3
-              className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+              className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
             >
               {title}
             </h3>
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-[calc(4px*var(--cv-scale,1))] text-[calc(10.5px*var(--cv-scale,1))]">
               {matchingCustom.items.map((item) => (
-                <div key={item.id} className="space-y-0.5">
+                <div key={item.id} className="space-y-[calc(1px*var(--cv-scale,1))]">
                   <div className="font-semibold break-words leading-snug" style={{ color: sbTextPrimary }}>
                     {item.title}
                   </div>
                   {item.subtitle && (
-                    <div className="text-[11px] break-words" style={{ color: sbTextMuted }}>
+                    <div className="text-[calc(9.5px*var(--cv-scale,1))] break-words" style={{ color: sbTextMuted }}>
                       {item.subtitle} {item.date ? `(${item.date})` : ""}
                     </div>
                   )}
                   {item.description && (
-                    <p className="text-[11px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                    <p className="text-[calc(9.5px*var(--cv-scale,1))] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
                       {item.description}
                     </p>
                   )}
@@ -227,49 +244,49 @@ export const CVDocument: React.FC<{
       }
 
       return (
-        <div key={`sec-custom-${matchingCustom.id}`} className="space-y-2 break-inside-avoid page-break-inside-avoid">
+        <div key={`sec-custom-${matchingCustom.id}`} className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
           <h2
-            className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+            className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
             style={{ color: accentColor }}
           >
             {title}
           </h2>
 
-          <div className={itemSpacingClasses}>
+          <div className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))]">
             {matchingCustom.items.map((item) => (
               <div
                 key={item.id}
-                className="break-inside-avoid page-break-inside-avoid space-y-0.5"
+                className="break-inside-avoid page-break-inside-avoid space-y-[calc(2px*var(--cv-scale,1))]"
               >
                 <div className="flex items-baseline justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <span
-                      className="font-bold text-[12.5px] break-words"
+                      className="font-bold break-words text-[calc(var(--cv-font-base,12px)*1.05*var(--cv-scale,1))]"
                       style={{ color: primaryTextColor }}
                     >
                       {item.title}
                     </span>
                     {item.subtitle && (
-                      <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>
+                      <span className="font-medium ml-1.5 break-words text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                         • {item.subtitle}
                       </span>
                     )}
                   </div>
                   {item.date && (
-                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>
+                    <span className="font-mono shrink-0 opacity-80 text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                       {item.date}
                     </span>
                   )}
                 </div>
 
                 {item.description && (
-                  <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>
+                  <p className="leading-normal break-words whitespace-normal text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
                     {item.description}
                   </p>
                 )}
 
                 {item.highlights && item.highlights.length > 0 && (
-                  <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
+                  <ul className="list-disc list-outside ml-4 space-y-[calc(1px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
                     {item.highlights.map((h, i) => (
                       <li key={i} className="leading-snug break-words whitespace-normal">
                         {h}
@@ -289,28 +306,28 @@ export const CVDocument: React.FC<{
         if (!summary) return null;
         if (isSidebar) {
           return (
-            <div key="sec-summary-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+            <div key="sec-summary-sb" className="space-y-[calc(4px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 {getSectionTitle("summary", "Profilo")}
               </h3>
-              <p className="leading-relaxed font-normal text-xs break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+              <p className="leading-relaxed font-normal break-words whitespace-normal text-[calc(10.5px*var(--cv-scale,1))]" style={{ color: sbTextSecondary }}>
                 {summary}
               </p>
             </div>
           );
         }
         return (
-          <div key="sec-summary" className="break-inside-avoid page-break-inside-avoid space-y-1">
+          <div key="sec-summary" className="break-inside-avoid page-break-inside-avoid space-y-[calc(3px*var(--cv-scale,1))]">
             <h2
-              className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+              className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {getSectionTitle("summary", "Profilo Professionale")}
             </h2>
-            <p className="leading-relaxed font-normal text-justify break-words whitespace-normal text-xs" style={{ color: bodyTextColor }}>
+            <p className="leading-relaxed font-normal text-justify break-words whitespace-normal text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
               {summary}
             </p>
           </div>
@@ -319,52 +336,52 @@ export const CVDocument: React.FC<{
       case "experience":
         if (experiences.length === 0) return null;
         return (
-          <div key="sec-experience" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+          <div key="sec-experience" className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
             <h2
-              className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+              className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {getSectionTitle("experience", "Esperienze Lavorative")}
             </h2>
 
-            <div className={itemSpacingClasses}>
+            <div className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))]">
               {experiences.map((exp) => (
                 <div
                   key={exp.id}
-                  className="break-inside-avoid page-break-inside-avoid space-y-0.5"
+                  className="break-inside-avoid page-break-inside-avoid space-y-[calc(2px*var(--cv-scale,1))]"
                 >
                   <div className="flex items-baseline justify-between gap-4 flex-wrap">
                     <div className="min-w-0">
                       <span
-                        className="font-bold text-[12.5px] break-words"
+                        className="font-bold break-words text-[calc(var(--cv-font-base,12px)*1.05*var(--cv-scale,1))]"
                         style={{ color: primaryTextColor }}
                       >
                         {exp.position}
                       </span>
                       {exp.company && (
-                        <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>
+                        <span className="font-medium ml-1.5 break-words text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                           • {exp.company}
                         </span>
                       )}
                       {exp.location && (
-                        <span className="text-xs ml-1.5 opacity-70 break-words" style={{ color: secondaryTextColor }}>
+                        <span className="ml-1.5 opacity-70 break-words text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                           ({exp.location})
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>
+                    <span className="font-mono shrink-0 opacity-80 text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                       {exp.startDate} — {exp.isCurrent ? "Presente" : exp.endDate || "Presente"}
                     </span>
                   </div>
 
                   {exp.description && (
-                    <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>
+                    <p className="leading-normal break-words whitespace-normal text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
                       {exp.description}
                     </p>
                   )}
 
                   {exp.highlights && exp.highlights.length > 0 && (
-                    <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
+                    <ul className="list-disc list-outside ml-4 space-y-[calc(1px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
                       {exp.highlights.map((h, i) => (
                         <li key={i} className="leading-snug break-words whitespace-normal">
                           {h}
@@ -381,40 +398,40 @@ export const CVDocument: React.FC<{
       case "education":
         if (educations.length === 0) return null;
         return (
-          <div key="sec-education" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+          <div key="sec-education" className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
             <h2
-              className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+              className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {getSectionTitle("education", "Formazione & Studi")}
             </h2>
 
-            <div className={itemSpacingClasses}>
+            <div className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))]">
               {educations.map((edu) => (
                 <div
                   key={edu.id}
-                  className="break-inside-avoid page-break-inside-avoid space-y-0.5"
+                  className="break-inside-avoid page-break-inside-avoid space-y-[calc(1.5px*var(--cv-scale,1))]"
                 >
                   <div className="flex items-baseline justify-between gap-4 flex-wrap">
                     <div className="min-w-0">
                       <span
-                        className="font-bold text-[12.5px] break-words"
+                        className="font-bold break-words text-[calc(var(--cv-font-base,12px)*1.05*var(--cv-scale,1))]"
                         style={{ color: primaryTextColor }}
                       >
                         {edu.degree}
                       </span>
                       {edu.institution && (
-                        <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>
+                        <span className="font-medium ml-1.5 break-words text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                           • {edu.institution}
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>
+                    <span className="font-mono shrink-0 opacity-80 text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                       {edu.startDate} — {edu.isCurrent ? "In corso" : edu.endDate}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: secondaryTextColor }}>
+                  <div className="flex items-center gap-2 flex-wrap text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                     {edu.fieldOfStudy && <span className="break-words">{edu.fieldOfStudy}</span>}
                     {edu.grade && (
                       <span className="font-medium" style={{ color: primaryTextColor }}>
@@ -425,7 +442,7 @@ export const CVDocument: React.FC<{
                   </div>
 
                   {edu.details && (
-                    <p className="text-xs italic mt-0.5 break-words whitespace-normal" style={{ color: bodyTextColor }}>
+                    <p className="italic mt-0.5 break-words whitespace-normal text-[calc(var(--cv-font-base,12px)*0.9*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
                       {edu.details}
                     </p>
                   )}
@@ -439,27 +456,27 @@ export const CVDocument: React.FC<{
         if (skillCategories.length === 0) return null;
         if (isSidebar) {
           return (
-            <div key="sec-skills-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+            <div key="sec-skills-sb" className="space-y-[calc(6px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 {getSectionTitle("skills", "Competenze")}
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-[calc(5px*var(--cv-scale,1))]">
                 {skillCategories.map((cat) => (
-                  <div key={cat.id} className="space-y-1">
+                  <div key={cat.id} className="space-y-[calc(2px*var(--cv-scale,1))]">
                     <h4
-                      className="text-[11px] font-semibold uppercase tracking-tight break-words"
+                      className="font-semibold uppercase tracking-tight break-words text-[calc(10px*var(--cv-scale,1))]"
                       style={{ color: sbTextSecondary }}
                     >
                       {cat.name}
                     </h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-[calc(3px*var(--cv-scale,1))]">
                       {cat.skills.map((s, idx) => (
                         <span
                           key={idx}
-                          className="px-1.5 py-0.5 rounded text-[10px] font-medium break-words whitespace-normal"
+                          className="rounded font-medium break-words whitespace-normal px-[calc(5px*var(--cv-scale,1))] py-[calc(1.5px*var(--cv-scale,1))] text-[calc(9.5px*var(--cv-scale,1))]"
                           style={{
                             backgroundColor: sbTagBg,
                             color: sbTagText,
@@ -477,25 +494,25 @@ export const CVDocument: React.FC<{
           );
         }
         return (
-          <div key="sec-skills" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+          <div key="sec-skills" className="space-y-[calc(4px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
             <h2
-              className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+              className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {getSectionTitle("skills", "Competenze & Tecnologie")}
             </h2>
 
-            <div className="grid grid-cols-1 gap-1.5 pt-0.5">
+            <div className="grid grid-cols-1 gap-[calc(4px*var(--cv-scale,1))] pt-0.5">
               {skillCategories.map((cat) => (
-                <div key={cat.id} className="text-xs flex flex-row items-baseline gap-2">
-                  <span className="font-semibold shrink-0 w-32 break-words text-[11.5px]" style={{ color: primaryTextColor }}>
+                <div key={cat.id} className="flex flex-row items-baseline gap-2 text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]">
+                  <span className="font-semibold shrink-0 w-32 break-words" style={{ color: primaryTextColor }}>
                     {cat.name}:
                   </span>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-[calc(3px*var(--cv-scale,1))]">
                     {cat.skills.map((s, sIdx) => (
                       <span
                         key={sIdx}
-                        className="px-1.5 py-0.5 rounded text-[10px] font-medium break-words"
+                        className="rounded font-medium break-words px-[calc(5px*var(--cv-scale,1))] py-[calc(1.5px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.85*var(--cv-scale,1))]"
                         style={{
                           backgroundColor: tagBgColor,
                           color: tagTextColor,
@@ -515,16 +532,16 @@ export const CVDocument: React.FC<{
         if (languages.length === 0) return null;
         if (isSidebar) {
           return (
-            <div key="sec-languages-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+            <div key="sec-languages-sb" className="space-y-[calc(4px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 {getSectionTitle("languages", "Lingue")}
               </h3>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-[calc(3px*var(--cv-scale,1))] text-[calc(10.5px*var(--cv-scale,1))]">
                 {languages.map((l) => (
-                  <div key={l.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
+                  <div key={l.id} className="flex justify-between gap-2 flex-wrap">
                     <span className="font-semibold break-words" style={{ color: sbTextPrimary }}>
                       {l.language}
                     </span>
@@ -538,13 +555,13 @@ export const CVDocument: React.FC<{
           );
         }
         return (
-          <div key="sec-languages" className="space-y-1 break-inside-avoid page-break-inside-avoid">
-            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>
+          <div key="sec-languages" className="space-y-[calc(3px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
+            <h3 className="font-bold uppercase tracking-widest pb-0.5 border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]" style={{ color: accentColor }}>
               {getSectionTitle("languages", "Lingue")}
             </h3>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: bodyTextColor }}>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
               {languages.map((l) => (
-                <div key={l.id} className="inline-flex items-center gap-1 text-[11px]">
+                <div key={l.id} className="inline-flex items-center gap-1">
                   <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{l.language}:</span>
                   <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>{l.proficiency}</span>
                 </div>
@@ -557,20 +574,20 @@ export const CVDocument: React.FC<{
         if (certifications.length === 0) return null;
         if (isSidebar) {
           return (
-            <div key="sec-certifications-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+            <div key="sec-certifications-sb" className="space-y-[calc(4px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 {getSectionTitle("certifications", "Certificazioni")}
               </h3>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-[calc(3px*var(--cv-scale,1))] text-[calc(10.5px*var(--cv-scale,1))]">
                 {certifications.map((c) => (
-                  <div key={c.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>
+                  <div key={c.id} className="space-y-[calc(1px*var(--cv-scale,1))]">
+                    <div className="font-semibold break-words leading-tight" style={{ color: sbTextPrimary }}>
                       {c.name}
                     </div>
-                    <div className="text-[10px] break-words" style={{ color: sbTextMuted }}>
+                    <div className="text-[calc(9.5px*var(--cv-scale,1))] break-words" style={{ color: sbTextMuted }}>
                       {c.issuer} {c.date ? `(${c.date})` : ""}
                     </div>
                   </div>
@@ -580,13 +597,13 @@ export const CVDocument: React.FC<{
           );
         }
         return (
-          <div key="sec-certifications" className="space-y-1 break-inside-avoid page-break-inside-avoid">
-            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>
+          <div key="sec-certifications" className="space-y-[calc(3px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
+            <h3 className="font-bold uppercase tracking-widest pb-0.5 border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]" style={{ color: accentColor }}>
               {getSectionTitle("certifications", "Certificazioni")}
             </h3>
-            <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
+            <div className="space-y-[calc(2px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]" style={{ color: bodyTextColor }}>
               {certifications.map((c) => (
-                <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
+                <div key={c.id} className="flex justify-between gap-2 flex-wrap">
                   <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{c.name}</span>
                   <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>
                     {c.issuer} ({c.date})
@@ -601,21 +618,21 @@ export const CVDocument: React.FC<{
         if (projects.length === 0) return null;
         if (isSidebar) {
           return (
-            <div key="sec-projects-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+            <div key="sec-projects-sb" className="space-y-[calc(4px*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 {getSectionTitle("projects", "Progetti")}
               </h3>
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-[calc(3px*var(--cv-scale,1))] text-[calc(10.5px*var(--cv-scale,1))]">
                 {projects.map((p) => (
-                  <div key={p.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>
+                  <div key={p.id} className="space-y-[calc(1px*var(--cv-scale,1))]">
+                    <div className="font-semibold break-words leading-tight" style={{ color: sbTextPrimary }}>
                       {p.name} {p.role ? `(${p.role})` : ""}
                     </div>
                     {p.description && (
-                      <p className="text-[10px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                      <p className="text-[calc(9.5px*var(--cv-scale,1))] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
                         {p.description}
                       </p>
                     )}
@@ -626,18 +643,18 @@ export const CVDocument: React.FC<{
           );
         }
         return (
-          <div key="sec-projects" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
+          <div key="sec-projects" className="space-y-[calc(var(--cv-item-gap,8px)*var(--cv-scale,1))] break-inside-avoid page-break-inside-avoid">
             <h2
-              className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+              className="font-bold uppercase tracking-widest pb-[calc(2px*var(--cv-scale,1))] border-b border-black/10 text-[calc(11px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {getSectionTitle("projects", "Progetti di Rilievo")}
             </h2>
-            <div className="grid grid-cols-1 gap-1.5">
+            <div className="grid grid-cols-1 gap-[calc(4px*var(--cv-scale,1))]">
               {projects.map((p) => (
-                <div key={p.id} className="text-xs space-y-0.5">
+                <div key={p.id} className="space-y-[calc(1.5px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.95*var(--cv-scale,1))]">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <span className="font-bold break-words text-[12px]" style={{ color: primaryTextColor }}>
+                    <span className="font-bold break-words" style={{ color: primaryTextColor }}>
                       {p.name} {p.role ? `(${p.role})` : ""}
                     </span>
                     {p.link && (
@@ -645,7 +662,7 @@ export const CVDocument: React.FC<{
                         href={formatUrl(p.link)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10.5px] font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all"
+                        className="font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all text-[calc(var(--cv-font-base,12px)*0.85*var(--cv-scale,1))]"
                         style={{ color: secondaryTextColor }}
                       >
                         <span>{p.link.replace(/^https?:\/\//, "")}</span>
@@ -654,16 +671,16 @@ export const CVDocument: React.FC<{
                     )}
                   </div>
                   {p.description && (
-                    <p className="text-xs break-words whitespace-normal" style={{ color: bodyTextColor }}>
+                    <p className="break-words whitespace-normal" style={{ color: bodyTextColor }}>
                       {p.description}
                     </p>
                   )}
                   {p.technologies.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-0.5">
+                    <div className="flex flex-wrap gap-[calc(3px*var(--cv-scale,1))] pt-0.5">
                       {p.technologies.map((t, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-1.5 py-0.5 rounded text-[9.5px] break-words"
+                          className="rounded break-words px-[calc(4px*var(--cv-scale,1))] py-[calc(1px*var(--cv-scale,1))] text-[calc(var(--cv-font-base,12px)*0.8*var(--cv-scale,1))]"
                           style={{ backgroundColor: tagBgColor, color: tagTextColor }}
                         >
                           {t}
@@ -681,6 +698,16 @@ export const CVDocument: React.FC<{
         return null;
     }
   };
+
+  // Dynamic CSS variables passed to document root
+  const rootCustomProperties = {
+    "--cv-scale": autoFitScale,
+    "--cv-font-base": `${baseFontSizePx}px`,
+    "--cv-section-gap": `${baseSectionGapPx}px`,
+    "--cv-item-gap": `${baseItemGapPx}px`,
+    "--cv-page-pad": `${basePagePadPx}px`,
+    "--cv-avatar-size": `${baseAvatarSizePx}px`,
+  } as React.CSSProperties;
 
   // =========================================================================
   // TEMPLATE 1: CIVVU Minimal (Single Page A4 with Dynamic Auto-Fit)
@@ -704,41 +731,42 @@ export const CVDocument: React.FC<{
           maxHeight: "297mm",
           backgroundColor: paperBgColor,
           color: primaryTextColor,
+          ...rootCustomProperties,
         }}
       >
-        {/* Scaled Auto-Fit Content Container */}
         <div
           ref={contentRef}
-          className={cn(
-            "p-8 sm:p-10 transition-transform duration-75",
-            fontSizeClasses
-          )}
+          className="w-full h-full box-border"
           style={{
+            padding: `calc(var(--cv-page-pad, 32px) * var(--cv-scale, 1))`,
             transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
-            transformOrigin: "top left",
-            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+            transformOrigin: "top center",
+            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(3)}%` : "100%",
           }}
         >
-          <div ref={innerStackRef} className={spacingClasses}>
+          <div
+            ref={innerStackRef}
+            className="w-full space-y-[calc(var(--cv-section-gap,14px)*var(--cv-scale,1))]"
+          >
             {/* Header Section */}
-            <div className="border-b border-black/10 pb-3 break-inside-avoid">
+            <div className="border-b border-black/10 pb-[calc(10px*var(--cv-scale,1))] break-inside-avoid">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1 flex-1 min-w-0">
+                <div className="space-y-[calc(2px*var(--cv-scale,1))] flex-1 min-w-0">
                   <h1
-                    className="text-2xl font-extrabold tracking-tight break-words leading-tight"
+                    className="font-extrabold tracking-tight break-words leading-tight text-[calc(24px*var(--cv-scale,1))]"
                     style={{ color: primaryTextColor }}
                   >
                     {personalInfo.fullName || "Tuo Nome"}
                   </h1>
                   <p
-                    className="text-sm font-semibold tracking-tight break-words"
+                    className="font-semibold tracking-tight break-words text-[calc(13.5px*var(--cv-scale,1))]"
                     style={{ color: accentColor }}
                   >
                     {personalInfo.jobTitle || "Titolo Professionale"}
                   </p>
 
                   {/* Contact Pills with Clickable Links */}
-                  <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1.5 text-[11px]" style={{ color: secondaryTextColor }}>
+                  <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1 text-[calc(11px*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
                     {personalInfo.email && (
                       <a
                         href={`mailto:${personalInfo.email}`}
@@ -811,9 +839,12 @@ export const CVDocument: React.FC<{
                   <div
                     className={cn(
                       "overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-2xs",
-                      avatarSizeClasses,
                       avatarShapeClasses
                     )}
+                    style={{
+                      width: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                      height: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                    }}
                   >
                     <img
                       src={personalInfo.avatarUrl}
@@ -860,26 +891,26 @@ export const CVDocument: React.FC<{
           maxHeight: "297mm",
           background: `linear-gradient(to right, ${sidebarBgColor} 33%, ${paperBgColor} 33%)`,
           color: primaryTextColor,
+          ...rootCustomProperties,
         }}
       >
         {/* Scaled Auto-Fit Content Container */}
         <div
           ref={contentRef}
-          className={cn(
-            "flex flex-row transition-transform duration-75",
-            fontSizeClasses
-          )}
+          className="flex flex-row w-full h-full"
           style={{
             transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
             transformOrigin: "top left",
-            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(3)}%` : "100%",
           }}
         >
           {/* Left Customizable Sidebar (Strict 33% width) */}
           <div
             ref={sidebarRef}
-            className="w-[33%] p-6 space-y-4 shrink-0 border-r"
+            className="w-[33%] shrink-0 border-r"
             style={{
+              padding: `calc(20px * var(--cv-scale, 1))`,
+              gap: `calc(14px * var(--cv-scale, 1))`,
               backgroundColor: sidebarBgColor,
               color: sbTextPrimary,
               borderColor: sbBorderColor,
@@ -888,11 +919,14 @@ export const CVDocument: React.FC<{
             {settings.showAvatar && personalInfo.avatarUrl && (
               <div
                 className={cn(
-                  "overflow-hidden mx-auto border-2 shadow-sm",
-                  avatarSizeClasses,
+                  "overflow-hidden mx-auto border-2 shadow-sm mb-[calc(12px*var(--cv-scale,1))]",
                   avatarShapeClasses
                 )}
-                style={{ borderColor: sbBorderColor }}
+                style={{
+                  width: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                  height: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                  borderColor: sbBorderColor,
+                }}
               >
                 <img
                   src={personalInfo.avatarUrl}
@@ -903,14 +937,14 @@ export const CVDocument: React.FC<{
             )}
 
             {/* Contacts Sidebar Section with fluid natural text wrapping */}
-            <div className="space-y-2 break-inside-avoid">
+            <div className="space-y-[calc(6px*var(--cv-scale,1))] break-inside-avoid mb-[calc(14px*var(--cv-scale,1))]">
               <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                className="font-bold uppercase tracking-wider pb-[calc(2px*var(--cv-scale,1))] border-b text-[calc(11px*var(--cv-scale,1))]"
                 style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
               >
                 Contatti
               </h3>
-              <div className="space-y-1.5 text-[11px]">
+              <div className="space-y-[calc(4px*var(--cv-scale,1))] text-[calc(10.5px*var(--cv-scale,1))]">
                 {personalInfo.email && (
                   <div className="flex items-start gap-2">
                     <Mail className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
@@ -990,20 +1024,28 @@ export const CVDocument: React.FC<{
             </div>
 
             {/* Dynamic Sidebar Sections */}
-            {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
+            <div className="space-y-[calc(14px*var(--cv-scale,1))]">
+              {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
+            </div>
           </div>
 
           {/* Right Main Column (Strict 67% width) */}
-          <div ref={mainColRef} className="w-[67%] p-6 space-y-4 min-w-0">
-            <div className="border-b border-black/10 pb-3 break-inside-avoid">
+          <div
+            ref={mainColRef}
+            className="w-[67%] min-w-0"
+            style={{
+              padding: `calc(20px * var(--cv-scale, 1))`,
+            }}
+          >
+            <div className="border-b border-black/10 pb-[calc(10px*var(--cv-scale,1))] mb-[calc(14px*var(--cv-scale,1))] break-inside-avoid">
               <h1
-                className="text-2xl font-extrabold tracking-tight break-words leading-tight"
+                className="font-extrabold tracking-tight break-words leading-tight text-[calc(24px*var(--cv-scale,1))]"
                 style={{ color: primaryTextColor }}
               >
                 {personalInfo.fullName || "Tuo Nome"}
               </h1>
               <p
-                className="text-sm font-semibold mt-0.5 break-words"
+                className="font-semibold mt-0.5 break-words text-[calc(13.5px*var(--cv-scale,1))]"
                 style={{ color: accentColor }}
               >
                 {personalInfo.jobTitle || "Titolo Professionale"}
@@ -1011,7 +1053,9 @@ export const CVDocument: React.FC<{
             </div>
 
             {/* Dynamic Main Column Sections */}
-            {mainItems.map((section) => renderSectionByKey(section.key, false))}
+            <div className="space-y-[calc(var(--cv-section-gap,14px)*var(--cv-scale,1))]">
+              {mainItems.map((section) => renderSectionByKey(section.key, false))}
+            </div>
           </div>
         </div>
       </div>
@@ -1039,34 +1083,38 @@ export const CVDocument: React.FC<{
         maxHeight: "297mm",
         backgroundColor: paperBgColor,
         color: primaryTextColor,
+        ...rootCustomProperties,
       }}
     >
-      {/* Scaled Auto-Fit Content Container */}
       <div
         ref={contentRef}
-        className={cn(
-          "p-8 sm:p-10 transition-transform duration-75",
-          fontSizeClasses
-        )}
+        className="w-full h-full box-border"
         style={{
+          padding: `calc(var(--cv-page-pad, 32px) * var(--cv-scale, 1))`,
           transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
-          transformOrigin: "top left",
-          width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+          transformOrigin: "top center",
+          width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(3)}%` : "100%",
         }}
       >
-        <div ref={innerStackRef} className={spacingClasses}>
+        <div
+          ref={innerStackRef}
+          className="w-full space-y-[calc(var(--cv-section-gap,14px)*var(--cv-scale,1))]"
+        >
           {/* Centered Top Header */}
           <div
-            className="text-center pb-3 border-b-2 break-inside-avoid space-y-1"
+            className="text-center pb-[calc(10px*var(--cv-scale,1))] border-b-2 break-inside-avoid space-y-[calc(3px*var(--cv-scale,1))]"
             style={{ borderColor: accentColor }}
           >
             {settings.showAvatar && personalInfo.avatarUrl && (
               <div
                 className={cn(
-                  "overflow-hidden mx-auto mb-1.5 border border-black/15 shadow-2xs",
-                  avatarSizeClasses,
+                  "overflow-hidden mx-auto mb-[calc(8px*var(--cv-scale,1))] border border-black/15 shadow-2xs",
                   avatarShapeClasses
                 )}
+                style={{
+                  width: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                  height: `calc(var(--cv-avatar-size, 96px) * var(--cv-scale, 1))`,
+                }}
               >
                 <img
                   src={personalInfo.avatarUrl}
@@ -1077,19 +1125,19 @@ export const CVDocument: React.FC<{
             )}
 
             <h1
-              className="text-2xl font-serif tracking-tight font-bold break-words leading-tight"
+              className="font-serif tracking-tight font-bold break-words leading-tight text-[calc(24px*var(--cv-scale,1))]"
               style={{ color: primaryTextColor }}
             >
               {personalInfo.fullName || "Tuo Nome"}
             </h1>
             <p
-              className="text-xs font-semibold uppercase tracking-widest break-words"
+              className="font-semibold uppercase tracking-widest break-words text-[calc(12px*var(--cv-scale,1))]"
               style={{ color: accentColor }}
             >
               {personalInfo.jobTitle || "Titolo Professionale"}
             </p>
 
-            <div className="flex flex-wrap justify-center items-center gap-x-3.5 gap-y-0.5 pt-0.5 text-[11px]" style={{ color: secondaryTextColor }}>
+            <div className="flex flex-wrap justify-center items-center gap-x-3.5 gap-y-0.5 pt-0.5 text-[calc(11px*var(--cv-scale,1))]" style={{ color: secondaryTextColor }}>
               {personalInfo.email && (
                 <a href={`mailto:${personalInfo.email}`} className="hover:underline break-all">
                   {personalInfo.email}
