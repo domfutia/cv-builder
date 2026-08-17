@@ -40,12 +40,15 @@ interface SortableCardProps {
   exp: ExperienceItem;
   onUpdate: (data: Partial<ExperienceItem>) => void;
   onRemove: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }
 
 const SortableExperienceCard: React.FC<SortableCardProps> = ({
   exp,
   onUpdate,
   onRemove,
+  t,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [newHighlight, setNewHighlight] = useState("");
@@ -95,19 +98,19 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               type="button"
               {...attributes}
               {...listeners}
-              aria-label="Trascina per riordinare esperienza"
+              aria-label={t.experience.dragToReorder}
               className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
-              title="Trascina per riordinare"
+              title={t.experience.dragToReorder}
             >
               <GripVertical className="w-4 h-4" />
             </button>
             <div className="truncate">
               <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                {exp.position || "Nuovo Ruolo"}
+                {exp.position || t.experience.positionPlaceholder}
                 {exp.company ? ` • ${exp.company}` : ""}
               </h4>
               <p className="text-xs text-neutral-500 truncate">
-                {exp.startDate || "Inizio"} — {exp.isCurrent ? "Attuale" : exp.endDate || "Fine"}
+                {exp.startDate || "Start"} — {exp.isCurrent ? (t.docLabels.present || "Current") : exp.endDate || (t.docLabels.present || "Present")}
               </p>
             </div>
           </div>
@@ -118,8 +121,8 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Comprimi dettagli esperienza" : "Espandi dettagli esperienza"}
-              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -127,9 +130,9 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              aria-label="Elimina esperienza lavorativa"
-              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
-              title="Elimina esperienza"
+              aria-label={t.delete}
+              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+              title={t.delete}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -141,14 +144,14 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Ruolo / Posizione"
-                placeholder="es. Senior Frontend Developer"
+                label={t.experience.position}
+                placeholder={t.experience.positionPlaceholder}
                 value={exp.position}
                 onChange={(val) => onUpdate({ position: val })}
               />
               <Input
-                label="Azienda"
-                placeholder="es. Linear Technologies"
+                label={t.experience.company}
+                placeholder={t.experience.companyPlaceholder}
                 value={exp.company}
                 onChange={(val) => onUpdate({ company: val })}
               />
@@ -156,21 +159,21 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
-                label="Data Inizio"
-                placeholder="es. 2022-03 oppure Mar 2022"
+                label={t.experience.startDate}
+                placeholder={t.experience.startDatePlaceholder}
                 value={exp.startDate}
                 onChange={(val) => onUpdate({ startDate: val })}
               />
               <Input
-                label="Data Fine"
-                placeholder="es. 2024-05"
+                label={t.experience.endDate}
+                placeholder={t.experience.endDatePlaceholder}
                 value={exp.endDate}
                 disabled={exp.isCurrent}
                 onChange={(val) => onUpdate({ endDate: val })}
               />
               <Input
-                label="Località"
-                placeholder="es. Milano / Remoto"
+                label={t.experience.location}
+                placeholder={t.experience.locationPlaceholder}
                 value={exp.location}
                 onChange={(val) => onUpdate({ location: val })}
               />
@@ -188,14 +191,14 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                 htmlFor={`isCurrent-${exp.id}`}
                 className="text-xs text-neutral-700 dark:text-neutral-300 select-none cursor-pointer"
               >
-                Lavoro attualmente in questa posizione
+                {t.experience.isCurrent}
               </label>
             </div>
 
             <Textarea
-              label="Descrizione del Ruolo"
+              label={t.experience.description}
               rows={2}
-              placeholder="Sintesi delle responsabilità e dell'impatto principale..."
+              placeholder={t.experience.descriptionPlaceholder}
               value={exp.description}
               onChange={(val) => onUpdate({ description: val })}
             />
@@ -203,7 +206,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
             {/* Bullet points / Highlights */}
             <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800/60">
               <label className="block text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-400 uppercase">
-                Risultati Chiave & Traguardi (Bullet Points)
+                {t.experience.highlightsTitle}
               </label>
 
               <div className="space-y-2">
@@ -214,13 +217,13 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                       type="text"
                       value={highlight}
                       onChange={(e) => handleUpdateHighlight(hIdx, e.target.value)}
-                      placeholder="es. Ridotto i tempi di caricamento del 35%..."
+                      placeholder={t.experience.highlightPlaceholder}
                       className="flex-1 rounded-md bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/80 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-500"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveHighlight(hIdx)}
-                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 transition-opacity"
+                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 transition-opacity cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -239,7 +242,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                       handleAddHighlight();
                     }
                   }}
-                  placeholder="Aggiungi un risultato (premi Invio)..."
+                  placeholder={t.experience.highlightPlaceholder}
                   className="flex-1 rounded-lg bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/80 px-3 py-1.5 text-xs text-neutral-800 dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
                 />
                 <Button
@@ -248,8 +251,9 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                   onClick={handleAddHighlight}
                   disabled={!newHighlight.trim()}
                   icon={<PlusCircle className="w-3.5 h-3.5" />}
+                  className="cursor-pointer"
                 >
-                  Aggiungi
+                  {t.experience.addHighlightBtn}
                 </Button>
               </div>
             </div>
@@ -269,10 +273,11 @@ export const ExperienceForm: React.FC = () => {
     reorderExperiences,
     updateSectionLabel,
     deleteSection,
+    t,
   } = useCV();
 
   const sectionTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "experience")?.label || "Esperienze Lavorative";
+    cvData.settings.sectionOrder?.find((s) => s.key === "experience")?.label || t.experience.title;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -298,7 +303,7 @@ export const ExperienceForm: React.FC = () => {
     <div className="space-y-6">
       <SectionHeader
         title={sectionTitle}
-        subtitle="Aggiungi e riordina con drag-and-drop i tuoi ruoli lavorativi"
+        subtitle={t.experience.subtitle}
         icon={<Briefcase className="w-5 h-5" />}
         editableTitle={true}
         onTitleChange={(newTitle) => updateSectionLabel("experience", newTitle)}
@@ -310,8 +315,9 @@ export const ExperienceForm: React.FC = () => {
             size="sm"
             onClick={addExperience}
             icon={<Plus className="w-4 h-4" />}
+            className="cursor-pointer"
           >
-            Aggiungi Esperienza
+            {t.experience.addBtn}
           </Button>
         }
       />
@@ -319,13 +325,12 @@ export const ExperienceForm: React.FC = () => {
       {cvData.experiences.length === 0 ? (
         <div className="text-center py-10 px-4 border border-dashed border-neutral-300 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/30">
           <Briefcase className="w-8 h-8 text-neutral-400 dark:text-neutral-600 mx-auto mb-2" />
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Nessuna esperienza inserita</p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-600 mt-1 mb-4">
-            Inizia aggiungendo il tuo ruolo più recente
-          </p>
-          <Button variant="secondary" size="sm" onClick={addExperience} icon={<Plus className="w-4 h-4" />}>
-            Aggiungi prima esperienza
-          </Button>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">{t.experience.emptyState}</p>
+          <div className="mt-4">
+            <Button variant="secondary" size="sm" onClick={addExperience} icon={<Plus className="w-4 h-4" />}>
+              {t.experience.addBtn}
+            </Button>
+          </div>
         </div>
       ) : (
         <DndContext
@@ -343,7 +348,12 @@ export const ExperienceForm: React.FC = () => {
                   key={exp.id}
                   exp={exp}
                   onUpdate={(data) => updateExperience(exp.id, data)}
-                  onRemove={() => removeExperience(exp.id)}
+                  onRemove={() => {
+                    if (confirm(t.experience.deleteConfirm)) {
+                      removeExperience(exp.id);
+                    }
+                  }}
+                  t={t}
                 />
               ))}
             </div>

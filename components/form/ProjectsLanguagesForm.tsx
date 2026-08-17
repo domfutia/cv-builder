@@ -24,16 +24,17 @@ export const ProjectsLanguagesForm: React.FC = () => {
     removeCertification,
     updateSectionLabel,
     deleteSection,
+    t,
   } = useCV();
 
   const [projectTechInputs, setProjectTechInputs] = useState<Record<string, string>>({});
 
   const langTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "languages")?.label || "Lingue Conosciute";
+    cvData.settings.sectionOrder?.find((s) => s.key === "languages")?.label || t.projectsLanguages.languagesTitle;
   const projTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "projects")?.label || "Progetti & Portfolio";
+    cvData.settings.sectionOrder?.find((s) => s.key === "projects")?.label || t.projectsLanguages.projectsTitle;
   const certTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "certifications")?.label || "Certificazioni";
+    cvData.settings.sectionOrder?.find((s) => s.key === "certifications")?.label || t.projectsLanguages.certificationsTitle;
 
   const handleAddProjectTech = (projectId: string) => {
     const text = projectTechInputs[projectId];
@@ -62,7 +63,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
       <div className="space-y-4">
         <SectionHeader
           title={langTitle}
-          subtitle="Aggiungi le lingue parlate e il rispettivo livello di padronanza"
+          subtitle={t.projectsLanguages.subtitle}
           icon={<Languages className="w-5 h-5" />}
           editableTitle={true}
           onTitleChange={(newTitle) => updateSectionLabel("languages", newTitle)}
@@ -74,8 +75,9 @@ export const ProjectsLanguagesForm: React.FC = () => {
               size="sm"
               onClick={addLanguage}
               icon={<Plus className="w-4 h-4" />}
+              className="cursor-pointer"
             >
-              Aggiungi Lingua
+              {t.projectsLanguages.addLanguageBtn}
             </Button>
           }
         />
@@ -86,12 +88,12 @@ export const ProjectsLanguagesForm: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div className="flex-1 space-y-2">
                   <Input
-                    placeholder="es. Italiano, Inglese..."
+                    placeholder={t.projectsLanguages.languageNamePlaceholder}
                     value={lang.language}
                     onChange={(val) => updateLanguage(lang.id, { language: val })}
                   />
                   <Input
-                    placeholder="es. Madrelingua, C1, B2..."
+                    placeholder={t.projectsLanguages.proficiencyFluent}
                     value={lang.proficiency}
                     onChange={(val) => updateLanguage(lang.id, { proficiency: val })}
                   />
@@ -100,7 +102,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeLanguage(lang.id)}
-                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 self-start"
+                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 self-start cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -114,7 +116,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
       <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
         <SectionHeader
           title={projTitle}
-          subtitle="Metti in risalto i progetti open-source, prodotti o portfolio"
+          subtitle={t.projectsLanguages.projectsTitle}
           icon={<FolderGit2 className="w-5 h-5" />}
           editableTitle={true}
           onTitleChange={(newTitle) => updateSectionLabel("projects", newTitle)}
@@ -126,8 +128,9 @@ export const ProjectsLanguagesForm: React.FC = () => {
               size="sm"
               onClick={addProject}
               icon={<Plus className="w-4 h-4" />}
+              className="cursor-pointer"
             >
-              Aggiungi Progetto
+              {t.projectsLanguages.addProjectBtn}
             </Button>
           }
         />
@@ -137,13 +140,13 @@ export const ProjectsLanguagesForm: React.FC = () => {
             <Card key={proj.id} className="space-y-3 bg-white dark:bg-neutral-900/80">
               <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800/60">
                 <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
-                  {proj.name || "Nuovo Progetto"}
+                  {proj.name || t.projectsLanguages.projectNamePlaceholder}
                 </h4>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => removeProject(proj.id)}
-                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
+                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -151,31 +154,31 @@ export const ProjectsLanguagesForm: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
-                  label="Nome Progetto"
-                  placeholder="es. Aura UI"
+                  label={t.projectsLanguages.projectName}
+                  placeholder={t.projectsLanguages.projectNamePlaceholder}
                   value={proj.name}
                   onChange={(val) => updateProject(proj.id, { name: val })}
                 />
                 <Input
-                  label="Ruolo (Opzionale)"
-                  placeholder="es. Creatore & Lead Developer"
+                  label={t.projectsLanguages.projectRole}
+                  placeholder={t.projectsLanguages.projectRolePlaceholder}
                   value={proj.role || ""}
                   onChange={(val) => updateProject(proj.id, { role: val })}
                 />
               </div>
 
               <Input
-                label="Link / Repository"
-                placeholder="es. https://github.com/alex/aura"
+                label={t.projectsLanguages.projectLink}
+                placeholder={t.projectsLanguages.projectLinkPlaceholder}
                 value={proj.link || ""}
                 onChange={(val) => updateProject(proj.id, { link: val })}
                 icon={<Globe className="w-4 h-4" />}
               />
 
               <Textarea
-                label="Descrizione"
+                label={t.projectsLanguages.projectDescription}
                 rows={2}
-                placeholder="Breve descrizione dell'obiettivo e dell'impatto del progetto..."
+                placeholder={t.projectsLanguages.projectDescriptionPlaceholder}
                 value={proj.description}
                 onChange={(val) => updateProject(proj.id, { description: val })}
               />
@@ -183,23 +186,23 @@ export const ProjectsLanguagesForm: React.FC = () => {
               {/* Technologies Badges */}
               <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800/40">
                 <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase">
-                  Tecnologie Usate
+                  {t.projectsLanguages.projectTech}
                 </label>
                 <div className="flex flex-wrap gap-1.5 min-h-[24px]">
-                  {proj.technologies.map((t, idx) => (
+                  {proj.technologies.map((tItem, idx) => (
                     <Badge
                       key={idx}
                       variant="secondary"
-                      onRemove={() => handleRemoveProjectTech(proj.id, t)}
+                      onRemove={() => handleRemoveProjectTech(proj.id, tItem)}
                     >
-                      {t}
+                      {tItem}
                     </Badge>
                   ))}
                 </div>
                 <div className="flex items-center gap-2 pt-1">
                   <input
                     type="text"
-                    placeholder="Aggiungi tech (es. React, Next.js)..."
+                    placeholder={t.projectsLanguages.projectTechPlaceholder}
                     value={projectTechInputs[proj.id] || ""}
                     onChange={(e) =>
                       setProjectTechInputs((prev) => ({
@@ -221,8 +224,9 @@ export const ProjectsLanguagesForm: React.FC = () => {
                     onClick={() => handleAddProjectTech(proj.id)}
                     disabled={!projectTechInputs[proj.id]?.trim()}
                     icon={<PlusCircle className="w-3.5 h-3.5" />}
+                    className="cursor-pointer"
                   >
-                    Aggiungi
+                    {t.add}
                   </Button>
                 </div>
               </div>
@@ -235,7 +239,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
       <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
         <SectionHeader
           title={certTitle}
-          subtitle="Certificati di settore, esami professionali e riconoscimenti"
+          subtitle={t.projectsLanguages.certificationsTitle}
           icon={<Award className="w-5 h-5" />}
           editableTitle={true}
           onTitleChange={(newTitle) => updateSectionLabel("certifications", newTitle)}
@@ -247,8 +251,9 @@ export const ProjectsLanguagesForm: React.FC = () => {
               size="sm"
               onClick={addCertification}
               icon={<Plus className="w-4 h-4" />}
+              className="cursor-pointer"
             >
-              Aggiungi Certificazione
+              {t.projectsLanguages.addCertificationBtn}
             </Button>
           }
         />
@@ -258,34 +263,34 @@ export const ProjectsLanguagesForm: React.FC = () => {
             <Card key={cert.id} className="space-y-3 bg-white dark:bg-neutral-900/80">
               <div className="flex items-center justify-between gap-2 pb-1 border-b border-neutral-200 dark:border-neutral-800/60">
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                  {cert.name || "Nuova Certificazione"}
+                  {cert.name || t.projectsLanguages.certificationNamePlaceholder}
                 </h5>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => removeCertification(cert.id)}
-                  className="p-1 h-7 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
+                  className="p-1 h-7 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
 
               <Input
-                label="Nome Certificazione"
-                placeholder="es. AWS Certified Solutions Architect"
+                label={t.projectsLanguages.certificationName}
+                placeholder={t.projectsLanguages.certificationNamePlaceholder}
                 value={cert.name}
                 onChange={(val) => updateCertification(cert.id, { name: val })}
               />
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  label="Ente Emittente"
-                  placeholder="es. Amazon AWS"
+                  label={t.projectsLanguages.issuer}
+                  placeholder={t.projectsLanguages.issuerPlaceholder}
                   value={cert.issuer}
                   onChange={(val) => updateCertification(cert.id, { issuer: val })}
                 />
                 <Input
-                  label="Anno / Data"
-                  placeholder="es. 2023"
+                  label={t.projectsLanguages.certDate}
+                  placeholder={t.projectsLanguages.certDatePlaceholder}
                   value={cert.date}
                   onChange={(val) => updateCertification(cert.id, { date: val })}
                 />

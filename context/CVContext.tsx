@@ -17,6 +17,7 @@ import {
 } from "@/types/cv";
 import { initialCVData, defaultSectionOrder, themePresets, standardSectionsMeta } from "@/data/initialCV";
 import { demoProfiles } from "@/data/demoProfiles";
+import { Language, translations } from "@/lib/i18n";
 
 const STORAGE_KEY = "once_cv_builder_data_v6";
 
@@ -35,8 +36,16 @@ interface CVContextType {
   addSkillCategory: (name: string) => void;
   updateSkillCategoryName: (id: string, name: string) => void;
   removeSkillCategory: (id: string) => void;
+  reorderSkillCategories: (newOrder: SkillCategory[]) => void;
+  moveSkillCategory: (categoryId: string, direction: "up" | "down") => void;
   addSkill: (categoryId: string, skill: string) => void;
   removeSkill: (categoryId: string, skill: string) => void;
+  reorderSkills: (categoryId: string, newSkills: string[]) => void;
+  moveSkill: (categoryId: string, skillIndex: number, direction: "left" | "right") => void;
+  // Language & i18n
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (typeof translations)["it"];
   addLanguage: () => void;
   updateLanguage: (id: string, data: Partial<LanguageItem>) => void;
   removeLanguage: (id: string) => void;
@@ -99,6 +108,28 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
     return initialCVData;
   });
+
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedLang = localStorage.getItem("civvu_lang");
+        if (savedLang === "en" || savedLang === "it") return savedLang;
+      } catch {}
+    }
+    return "it";
+  });
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("civvu_lang", lang);
+        document.documentElement.lang = lang;
+      } catch {}
+    }
+  }, []);
+
+  const t = useMemo(() => translations[language], [language]);
 
   // Debounced LocalStorage persistence (400ms) to avoid blocking main thread on every keystroke
   useEffect(() => {
@@ -244,6 +275,27 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }));
   }, []);
 
+  const reorderSkillCategories = useCallback((newOrder: SkillCategory[]) => {
+    setCvData((prev) => ({
+      ...prev,
+      skillCategories: newOrder,
+    }));
+  }, []);
+
+  const moveSkillCategory = useCallback((categoryId: string, direction: "up" | "down") => {
+    setCvData((prev) => {
+      const idx = prev.skillCategories.findIndex((c) => c.id === categoryId);
+      if (idx === -1) return prev;
+      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= prev.skillCategories.length) return prev;
+      const updated = [...prev.skillCategories];
+      const temp = updated[idx];
+      updated[idx] = updated[targetIdx];
+      updated[targetIdx] = temp;
+      return { ...prev, skillCategories: updated };
+    });
+  }, []);
+
   const addSkill = useCallback((categoryId: string, skill: string) => {
     const trimmed = skill.trim();
     if (!trimmed) return;
@@ -269,6 +321,37 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ),
     }));
   }, []);
+
+  const reorderSkills = useCallback((categoryId: string, newSkills: string[]) => {
+    setCvData((prev) => ({
+      ...prev,
+      skillCategories: prev.skillCategories.map((cat) =>
+        cat.id === categoryId ? { ...cat, skills: newSkills } : cat
+      ),
+    }));
+  }, []);
+
+  const moveSkill = useCallback(
+    (categoryId: string, skillIndex: number, direction: "left" | "right") => {
+      setCvData((prev) => {
+        const cat = prev.skillCategories.find((c) => c.id === categoryId);
+        if (!cat) return prev;
+        const targetIdx = direction === "left" ? skillIndex - 1 : skillIndex + 1;
+        if (targetIdx < 0 || targetIdx >= cat.skills.length) return prev;
+        const updatedSkills = [...cat.skills];
+        const temp = updatedSkills[skillIndex];
+        updatedSkills[skillIndex] = updatedSkills[targetIdx];
+        updatedSkills[targetIdx] = temp;
+        return {
+          ...prev,
+          skillCategories: prev.skillCategories.map((c) =>
+            c.id === categoryId ? { ...c, skills: updatedSkills } : c
+          ),
+        };
+      });
+    },
+    []
+  );
 
   // Languages
   const addLanguage = useCallback(() => {
@@ -730,8 +813,15 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       addSkillCategory,
       updateSkillCategoryName,
       removeSkillCategory,
+      reorderSkillCategories,
+      moveSkillCategory,
       addSkill,
       removeSkill,
+      reorderSkills,
+      moveSkill,
+      language,
+      setLanguage,
+      t,
       addLanguage,
       updateLanguage,
       removeLanguage,
@@ -778,8 +868,15 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       addSkillCategory,
       updateSkillCategoryName,
       removeSkillCategory,
+      reorderSkillCategories,
+      moveSkillCategory,
       addSkill,
       removeSkill,
+      reorderSkills,
+      moveSkill,
+      language,
+      setLanguage,
+      t,
       addLanguage,
       updateLanguage,
       removeLanguage,

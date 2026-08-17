@@ -56,7 +56,7 @@ function processImageFile(file: File, callback: (base64: string) => void) {
 }
 
 export const PersonalInfoForm: React.FC = () => {
-  const { cvData, updatePersonalInfo, updateSettings } = useCV();
+  const { cvData, updatePersonalInfo, updateSettings, t } = useCV();
   const { personalInfo, settings } = cvData;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -91,22 +91,22 @@ export const PersonalInfoForm: React.FC = () => {
   };
 
   const shapes: { id: AvatarShape; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: "circle", label: "Tondo", icon: Circle },
-    { id: "rounded", label: "Curvo", icon: Square },
-    { id: "square", label: "Squadrato", icon: Square },
+    { id: "circle", label: t.personalInfo.shapeCircle, icon: Circle },
+    { id: "rounded", label: t.personalInfo.shapeRounded, icon: Square },
+    { id: "square", label: t.personalInfo.shapeSquare, icon: Square },
   ];
 
   const sizes: { id: AvatarSize; label: string }[] = [
-    { id: "sm", label: "Piccolo" },
-    { id: "md", label: "Medio" },
-    { id: "lg", label: "Grande" },
+    { id: "sm", label: t.personalInfo.sizeSm },
+    { id: "md", label: t.personalInfo.sizeMd },
+    { id: "lg", label: t.personalInfo.sizeLg },
   ];
 
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Dati Anagrafici & Contatti"
-        subtitle="Inserisci le informazioni di base, la tua foto profilo e i tuoi recapiti"
+        title={t.personalInfo.title}
+        subtitle={t.personalInfo.subtitle}
         icon={<User className="w-5 h-5" />}
       />
 
@@ -116,12 +116,12 @@ export const PersonalInfoForm: React.FC = () => {
           <div className="flex items-center gap-2">
             <ImageIcon className="w-4 h-4 text-neutral-500" />
             <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-              Foto Profilo (Upload Base64)
+              {t.personalInfo.photoTitle}
             </h4>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-500">Mostra nel CV</span>
+            <span className="text-xs text-neutral-500">{t.personalInfo.showAvatarLabel}</span>
             <button
               type="button"
               onClick={() => updateSettings({ showAvatar: !settings.showAvatar })}
@@ -178,7 +178,7 @@ export const PersonalInfoForm: React.FC = () => {
                 >
                   <img
                     src={personalInfo.avatarUrl}
-                    alt="Foto Profilo"
+                    alt={t.personalInfo.photoTitle}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -191,10 +191,10 @@ export const PersonalInfoForm: React.FC = () => {
 
             <div className="text-center sm:text-left flex-1 min-w-0">
               <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                {personalInfo.avatarUrl ? "Foto caricata" : "Carica foto profilo"}
+                {personalInfo.avatarUrl ? t.personalInfo.photoTitle : t.personalInfo.photoUploadBtn}
               </p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5 leading-snug">
-                Trascina un file immagine o clicca per sfogliare (PNG, JPG, WebP)
+                {t.personalInfo.photoHelp}
               </p>
             </div>
           </div>
@@ -211,9 +211,9 @@ export const PersonalInfoForm: React.FC = () => {
                     fileInputRef.current?.click();
                   }}
                   icon={<Upload className="w-3 h-3" />}
-                  className="flex-1 text-[11px]"
+                  className="flex-1 text-[11px] cursor-pointer"
                 >
-                  Cambia
+                  {t.personalInfo.photoUploadBtn}
                 </Button>
                 <Button
                   variant="danger"
@@ -223,18 +223,18 @@ export const PersonalInfoForm: React.FC = () => {
                     handleRemovePhoto();
                   }}
                   icon={<Trash2 className="w-3 h-3" />}
-                  className="text-[11px]"
-                  title="Rimuovi foto"
+                  className="text-[11px] cursor-pointer"
+                  title={t.personalInfo.photoRemoveBtn}
                 >
-                  Rimuovi
+                  {t.personalInfo.photoRemoveBtn}
                 </Button>
               </div>
             )}
 
-            {/* Shape selector with responsive non-overflowing pill buttons */}
+            {/* Shape selector */}
             <div className="space-y-1">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                Forma Foto
+                {t.personalInfo.avatarShape}
               </label>
               <div className="grid grid-cols-3 gap-1">
                 {shapes.map((s) => (
@@ -242,7 +242,7 @@ export const PersonalInfoForm: React.FC = () => {
                     key={s.id}
                     type="button"
                     onClick={() => updateSettings({ avatarShape: s.id })}
-                    title={`Forma ${s.id}`}
+                    title={s.label}
                     className={cn(
                       "py-1.5 px-1 rounded-md border text-[10px] sm:text-[11px] font-medium transition-all text-center cursor-pointer truncate",
                       settings.avatarShape === s.id
@@ -256,10 +256,10 @@ export const PersonalInfoForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Size selector with responsive non-overflowing pill buttons */}
+            {/* Size selector */}
             <div className="space-y-1">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                Dimensione Foto
+                {t.personalInfo.avatarSize}
               </label>
               <div className="grid grid-cols-3 gap-1">
                 {sizes.map((s) => (
@@ -267,7 +267,7 @@ export const PersonalInfoForm: React.FC = () => {
                     key={s.id}
                     type="button"
                     onClick={() => updateSettings({ avatarSize: s.id })}
-                    title={`Dimensione ${s.label}`}
+                    title={s.label}
                     className={cn(
                       "py-1.5 px-1 rounded-md border text-[10px] sm:text-[11px] font-medium transition-all text-center cursor-pointer truncate",
                       settings.avatarSize === s.id
@@ -288,15 +288,15 @@ export const PersonalInfoForm: React.FC = () => {
       <Card className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Nome Completo"
-            placeholder="es. Alex Vender"
+            label={t.personalInfo.fullName}
+            placeholder={t.personalInfo.fullNamePlaceholder}
             value={personalInfo.fullName}
             onChange={(val) => updatePersonalInfo({ fullName: val })}
             icon={<User className="w-4 h-4" />}
           />
           <Input
-            label="Ruolo / Titolo Professionale"
-            placeholder="es. Senior Frontend & Design Engineer"
+            label={t.personalInfo.jobTitle}
+            placeholder={t.personalInfo.jobTitlePlaceholder}
             value={personalInfo.jobTitle}
             onChange={(val) => updatePersonalInfo({ jobTitle: val })}
           />
@@ -304,17 +304,17 @@ export const PersonalInfoForm: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Email"
+            label={t.personalInfo.email}
             type="email"
-            placeholder="es. alex.vender@domain.com"
+            placeholder={t.personalInfo.emailPlaceholder}
             value={personalInfo.email}
             onChange={(val) => updatePersonalInfo({ email: val })}
             icon={<Mail className="w-4 h-4" />}
           />
           <Input
-            label="Telefono"
+            label={t.personalInfo.phone}
             type="tel"
-            placeholder="es. +39 345 678 9012"
+            placeholder={t.personalInfo.phonePlaceholder}
             value={personalInfo.phone}
             onChange={(val) => updatePersonalInfo({ phone: val })}
             icon={<Phone className="w-4 h-4" />}
@@ -323,15 +323,15 @@ export const PersonalInfoForm: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Città / Località"
-            placeholder="es. Milano, Italia"
+            label={t.personalInfo.location}
+            placeholder={t.personalInfo.locationPlaceholder}
             value={personalInfo.location}
             onChange={(val) => updatePersonalInfo({ location: val })}
             icon={<MapPin className="w-4 h-4" />}
           />
           <Input
-            label="Sito Web / Portfolio"
-            placeholder="es. https://vender.design"
+            label={t.personalInfo.website}
+            placeholder={t.personalInfo.websitePlaceholder}
             value={personalInfo.website}
             onChange={(val) => updatePersonalInfo({ website: val })}
             icon={<Globe className="w-4 h-4" />}
@@ -340,15 +340,15 @@ export const PersonalInfoForm: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="LinkedIn"
-            placeholder="es. linkedin.com/in/alexvender"
+            label={t.personalInfo.linkedin}
+            placeholder={t.personalInfo.linkedinPlaceholder}
             value={personalInfo.linkedin}
             onChange={(val) => updatePersonalInfo({ linkedin: val })}
             icon={<LinkedinIcon className="w-4 h-4" />}
           />
           <Input
-            label="GitHub"
-            placeholder="es. github.com/alexvender"
+            label={t.personalInfo.github}
+            placeholder={t.personalInfo.githubPlaceholder}
             value={personalInfo.github}
             onChange={(val) => updatePersonalInfo({ github: val })}
             icon={<GithubIcon className="w-4 h-4" />}

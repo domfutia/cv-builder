@@ -44,7 +44,7 @@ export const CVDocument: React.FC<{
   className?: string;
   onScaleChange?: (scale: number) => void;
 }> = ({ className, onScaleChange }) => {
-  const { cvData } = useCV();
+  const { cvData, t } = useCV();
   const {
     personalInfo,
     summary,
@@ -290,7 +290,7 @@ export const CVDocument: React.FC<{
                       {exp.company && <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>• {exp.company}</span>}
                       {exp.location && <span className="text-xs ml-1.5 opacity-70 break-words" style={{ color: secondaryTextColor }}>({exp.location})</span>}
                     </div>
-                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{exp.startDate} — {exp.isCurrent ? "Presente" : exp.endDate || "Presente"}</span>
+                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{exp.startDate} — {exp.isCurrent ? (t.docLabels.present || "Presente") : exp.endDate || (t.docLabels.present || "Presente")}</span>
                   </div>
                   {exp.description && <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>{exp.description}</p>}
                   {exp.highlights && exp.highlights.length > 0 && (
@@ -317,7 +317,7 @@ export const CVDocument: React.FC<{
                       <span className="font-bold text-[12.5px] break-words" style={{ color: primaryTextColor }}>{edu.degree}</span>
                       {edu.institution && <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>• {edu.institution}</span>}
                     </div>
-                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{edu.startDate} — {edu.isCurrent ? "In corso" : edu.endDate}</span>
+                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{edu.startDate} — {edu.isCurrent ? (t.docLabels.present || "In corso") : edu.endDate}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: secondaryTextColor }}>
                     {edu.fieldOfStudy && <span className="break-words">{edu.fieldOfStudy}</span>}
@@ -532,6 +532,11 @@ export const CVDocument: React.FC<{
               </div>
             </div>
             {sectionOrder.filter((s) => s.isVisible).map((section) => renderSectionByKey(section.key, false))}
+
+            {/* Standard non-editable GDPR Disclaimer */}
+            <div className="pt-3 text-[8.5px] leading-tight text-center opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
+              {t.gdprDisclaimer}
+            </div>
           </div>
         </div>
       </div>
@@ -565,7 +570,7 @@ export const CVDocument: React.FC<{
               </div>
             )}
             <div className="space-y-2 break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>Contatti</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{t.docLabels.contacts || "Contatti"}</h3>
               <div className="space-y-1.5 text-[11px]">
                 {personalInfo.email && <div className="flex items-start gap-2"><Mail className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={`mailto:${personalInfo.email}`} className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.email}</a></div>}
                 {personalInfo.phone && <div className="flex items-start gap-2"><Phone className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.phone}</a></div>}
@@ -584,6 +589,11 @@ export const CVDocument: React.FC<{
               <p className="text-sm font-semibold mt-0.5 break-words" style={{ color: accentColor }}>{personalInfo.jobTitle || "Titolo Professionale"}</p>
             </div>
             {mainItems.map((section) => renderSectionByKey(section.key, false))}
+
+            {/* Standard non-editable GDPR Disclaimer */}
+            <div className="pt-3 text-[8.5px] leading-tight opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
+              {t.gdprDisclaimer}
+            </div>
           </div>
         </div>
       </div>
@@ -624,6 +634,11 @@ export const CVDocument: React.FC<{
             </div>
           </div>
           {sectionOrder.filter((s) => s.isVisible).map((section) => renderSectionByKey(section.key, false))}
+
+          {/* Standard non-editable GDPR Disclaimer */}
+          <div className="pt-3 text-[8.5px] leading-tight text-center opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
+            {t.gdprDisclaimer}
+          </div>
         </div>
       </div>
     </div>

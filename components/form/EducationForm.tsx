@@ -38,12 +38,15 @@ interface SortableEducationCardProps {
   edu: EducationItem;
   onUpdate: (data: Partial<EducationItem>) => void;
   onRemove: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }
 
 const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
   edu,
   onUpdate,
   onRemove,
+  t,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -72,19 +75,19 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
               type="button"
               {...attributes}
               {...listeners}
-              aria-label="Trascina per riordinare titolo di studio"
+              aria-label={t.education.dragToReorder}
               className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
-              title="Trascina per riordinare"
+              title={t.education.dragToReorder}
             >
               <GripVertical className="w-4 h-4" />
             </button>
             <div className="truncate">
               <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                {edu.degree || "Titolo di Studio"}
+                {edu.degree || t.education.degreePlaceholder}
                 {edu.institution ? ` • ${edu.institution}` : ""}
               </h4>
               <p className="text-xs text-neutral-500 truncate">
-                {edu.startDate || "Inizio"} — {edu.isCurrent ? "In corso" : edu.endDate || "Fine"}
+                {edu.startDate || "Start"} — {edu.isCurrent ? (t.docLabels.present || "In progress") : edu.endDate || (t.docLabels.present || "Graduated")}
               </p>
             </div>
           </div>
@@ -95,8 +98,8 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Comprimi dettagli titolo di studio" : "Espandi dettagli titolo di studio"}
-              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -104,9 +107,9 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              aria-label="Elimina titolo di studio"
-              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
-              title="Elimina formazione"
+              aria-label={t.delete}
+              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+              title={t.delete}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -117,14 +120,14 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Istituto / Università"
-                placeholder="es. Politecnico di Milano"
+                label={t.education.institution}
+                placeholder={t.education.institutionPlaceholder}
                 value={edu.institution}
                 onChange={(val) => onUpdate({ institution: val })}
               />
               <Input
-                label="Titolo / Corso di Laurea"
-                placeholder="es. Laurea Magistrale in Interaction Design"
+                label={t.education.degree}
+                placeholder={t.education.degreePlaceholder}
                 value={edu.degree}
                 onChange={(val) => onUpdate({ degree: val })}
               />
@@ -132,20 +135,20 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
-                label="Campo di Studio"
-                placeholder="es. Human-Computer Interaction"
+                label={t.education.fieldOfStudy}
+                placeholder={t.education.fieldOfStudyPlaceholder}
                 value={edu.fieldOfStudy}
                 onChange={(val) => onUpdate({ fieldOfStudy: val })}
               />
               <Input
-                label="Data Inizio"
-                placeholder="es. 2015-10"
+                label={t.education.startDate}
+                placeholder={t.education.startDatePlaceholder}
                 value={edu.startDate}
                 onChange={(val) => onUpdate({ startDate: val })}
               />
               <Input
-                label="Data Fine / Prevista"
-                placeholder="es. 2017-07"
+                label={t.education.endDate}
+                placeholder={t.education.endDatePlaceholder}
                 value={edu.endDate}
                 disabled={edu.isCurrent}
                 onChange={(val) => onUpdate({ endDate: val })}
@@ -154,14 +157,14 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Località"
-                placeholder="es. Milano, Italia"
+                label={t.education.location}
+                placeholder={t.education.locationPlaceholder}
                 value={edu.location}
                 onChange={(val) => onUpdate({ location: val })}
               />
               <Input
-                label="Voto / Valutazione (Opzionale)"
-                placeholder="es. 110/110 con Lode"
+                label={t.education.grade}
+                placeholder={t.education.gradePlaceholder}
                 value={edu.grade || ""}
                 onChange={(val) => onUpdate({ grade: val })}
               />
@@ -179,14 +182,14 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
                 htmlFor={`edu-isCurrent-${edu.id}`}
                 className="text-xs text-neutral-700 dark:text-neutral-300 select-none cursor-pointer"
               >
-                Percorso di studio attualmente in corso
+                {t.education.isCurrent}
               </label>
             </div>
 
             <Textarea
-              label="Dettagli / Tesi (Opzionale)"
+              label={t.education.details}
               rows={2}
-              placeholder="es. Titolo della tesi o esami rilevanti..."
+              placeholder={t.education.detailsPlaceholder}
               value={edu.details || ""}
               onChange={(val) => onUpdate({ details: val })}
             />
@@ -206,10 +209,11 @@ export const EducationForm: React.FC = () => {
     reorderEducations,
     updateSectionLabel,
     deleteSection,
+    t,
   } = useCV();
 
   const sectionTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "education")?.label || "Formazione & Studi";
+    cvData.settings.sectionOrder?.find((s) => s.key === "education")?.label || t.education.title;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -235,7 +239,7 @@ export const EducationForm: React.FC = () => {
     <div className="space-y-6">
       <SectionHeader
         title={sectionTitle}
-        subtitle="Inserisci i titoli accademici, lauree e diplomi di studio"
+        subtitle={t.education.subtitle}
         icon={<GraduationCap className="w-5 h-5" />}
         editableTitle={true}
         onTitleChange={(newTitle) => updateSectionLabel("education", newTitle)}
@@ -247,8 +251,9 @@ export const EducationForm: React.FC = () => {
             size="sm"
             onClick={addEducation}
             icon={<Plus className="w-4 h-4" />}
+            className="cursor-pointer"
           >
-            Aggiungi Formazione
+            {t.education.addBtn}
           </Button>
         }
       />
@@ -256,13 +261,12 @@ export const EducationForm: React.FC = () => {
       {cvData.educations.length === 0 ? (
         <div className="text-center py-10 px-4 border border-dashed border-neutral-300 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/30">
           <GraduationCap className="w-8 h-8 text-neutral-400 dark:text-neutral-600 mx-auto mb-2" />
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Nessuna formazione inserita</p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-600 mt-1 mb-4">
-            Aggiungi università, master o scuole superiori
-          </p>
-          <Button variant="secondary" size="sm" onClick={addEducation} icon={<Plus className="w-4 h-4" />}>
-            Aggiungi primo titolo
-          </Button>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">{t.education.emptyState}</p>
+          <div className="mt-4">
+            <Button variant="secondary" size="sm" onClick={addEducation} icon={<Plus className="w-4 h-4" />}>
+              {t.education.addBtn}
+            </Button>
+          </div>
         </div>
       ) : (
         <DndContext
@@ -280,7 +284,12 @@ export const EducationForm: React.FC = () => {
                   key={edu.id}
                   edu={edu}
                   onUpdate={(data) => updateEducation(edu.id, data)}
-                  onRemove={() => removeEducation(edu.id)}
+                  onRemove={() => {
+                    if (confirm(t.education.deleteConfirm)) {
+                      removeEducation(edu.id);
+                    }
+                  }}
+                  t={t}
                 />
               ))}
             </div>

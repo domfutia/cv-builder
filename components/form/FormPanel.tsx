@@ -34,27 +34,26 @@ type StandardTab =
   | "skills"
   | "projects";
 
-const standardSections: {
-  id: StandardTab;
-  label: string;
-  shortLabel: string;
-  icon: React.ComponentType<{ className?: string }>;
-}[] = [
-  { id: "settings", label: "Layout & Stile", shortLabel: "Stile", icon: Sliders },
-  { id: "personal", label: "Dati Anagrafici", shortLabel: "Anagrafica", icon: User },
-  { id: "summary", label: "Profilo Professionale", shortLabel: "Profilo", icon: FileText },
-  { id: "experience", label: "Esperienze Lavorative", shortLabel: "Esperienze", icon: Briefcase },
-  { id: "education", label: "Formazione & Studi", shortLabel: "Formazione", icon: GraduationCap },
-  { id: "skills", label: "Competenze & Tech", shortLabel: "Competenze", icon: Wrench },
-  { id: "projects", label: "Progetti & Lingue", shortLabel: "Extra", icon: FolderGit2 },
-];
-
 export const FormPanel: React.FC = () => {
-  const { cvData, addCustomSection } = useCV();
+  const { cvData, addCustomSection, t } = useCV();
   const [activeTab, setActiveTab] = useState<string>("settings");
 
+  const standardSections: {
+    id: StandardTab;
+    labelKey: keyof typeof t.tabs;
+    icon: React.ComponentType<{ className?: string }>;
+  }[] = [
+    { id: "settings", labelKey: "settings", icon: Sliders },
+    { id: "personal", labelKey: "personal", icon: User },
+    { id: "summary", labelKey: "summary", icon: FileText },
+    { id: "experience", labelKey: "experience", icon: Briefcase },
+    { id: "education", labelKey: "education", icon: GraduationCap },
+    { id: "skills", labelKey: "skills", icon: Wrench },
+    { id: "projects", labelKey: "projects", icon: FolderGit2 },
+  ];
+
   const handleAddNewSection = () => {
-    const defaultTitle = `Sezione ${cvData.customSections.length + 1}`;
+    const defaultTitle = `${t.tabs.newSectionDefault} ${cvData.customSections.length + 1}`;
     const newId = addCustomSection(defaultTitle);
     setActiveTab(newId);
   };
@@ -82,7 +81,7 @@ export const FormPanel: React.FC = () => {
             const isActive = activeTab === sec.id;
             
             // Dynamic label resolution from sectionOrder
-            let dynamicLabel = sec.label;
+            let dynamicLabel = t.tabs[sec.labelKey] || sec.id;
             if (sec.id !== "settings" && sec.id !== "personal") {
               const foundInOrder = cvData.settings.sectionOrder?.find((s) => s.key === sec.id);
               if (foundInOrder && foundInOrder.label?.trim()) {
@@ -134,10 +133,10 @@ export const FormPanel: React.FC = () => {
             type="button"
             onClick={handleAddNewSection}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/60 dark:hover:bg-neutral-800/60 border border-dashed border-neutral-300 dark:border-neutral-700 transition-colors cursor-pointer shrink-0"
-            title="Aggiungi una nuova sezione personalizzata (es. Pubblicazioni, Volontariato...)"
+            title={t.tabs.newSection}
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Nuova Sezione</span>
+            <span className="hidden md:inline">{t.tabs.newSection}</span>
           </button>
         </div>
       </div>
@@ -164,7 +163,7 @@ export const FormPanel: React.FC = () => {
       <div className="p-3.5 border-t border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 flex items-center justify-between gap-2 transition-colors shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
           <Sparkles className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
-          <span>Salvataggio istantaneo attivo</span>
+          <span>{t.instantSave}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -178,7 +177,7 @@ export const FormPanel: React.FC = () => {
               }}
               className="px-3 py-1 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors cursor-pointer"
             >
-              Indietro
+              {t.back}
             </button>
           )}
 
@@ -192,12 +191,12 @@ export const FormPanel: React.FC = () => {
               }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-neutral-900 text-white dark:bg-neutral-800 dark:text-white hover:bg-neutral-800 dark:hover:bg-neutral-700 border border-neutral-800 dark:border-neutral-700 transition-all cursor-pointer shadow-xs"
             >
-              <span>Continua</span>
+              <span>{t.next}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           ) : (
             <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
-              Tutto pronto!
+              {t.allDone}
             </span>
           )}
         </div>

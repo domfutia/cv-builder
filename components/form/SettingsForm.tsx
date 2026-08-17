@@ -52,6 +52,8 @@ const SortableSectionItem: React.FC<{
   onUpdateLabel: (newLabel: string) => void;
   onMoveColumn?: (newColumn: "main" | "sidebar") => void;
   onDelete: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }> = ({
   section,
   isModernTemplate,
@@ -59,6 +61,7 @@ const SortableSectionItem: React.FC<{
   onUpdateLabel,
   onMoveColumn,
   onDelete,
+  t,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempLabel, setTempLabel] = useState(section.label);
@@ -104,7 +107,7 @@ const SortableSectionItem: React.FC<{
           type="button"
           {...attributes}
           {...listeners}
-          aria-label={`Trascina per riordinare sezione ${section.label}`}
+          aria-label={`Drag ${section.label}`}
           className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
         >
           <GripVertical className="w-4 h-4" />
@@ -139,9 +142,9 @@ const SortableSectionItem: React.FC<{
                 setTempLabel(section.label);
                 setIsEditing(true);
               }}
-              aria-label={`Rinomina titolo della sezione ${section.label}`}
+              aria-label={t.settings.renameSection}
               className="opacity-60 hover:opacity-100 p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-opacity cursor-pointer"
-              title="Rinomina titolo della sezione"
+              title={t.settings.renameSection}
             >
               <Edit2 className="w-3 h-3" />
             </button>
@@ -155,12 +158,12 @@ const SortableSectionItem: React.FC<{
           <button
             type="button"
             onClick={() => onMoveColumn(isSidebar ? "main" : "sidebar")}
-            aria-label={isSidebar ? `Sposta sezione ${section.label} nella Colonna Principale` : `Sposta sezione ${section.label} nella Sidebar Laterale`}
+            aria-label={isSidebar ? t.settings.moveToMain : t.settings.moveToSidebar}
             className="px-2 py-1 rounded text-[10px] font-medium bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors flex items-center gap-1 cursor-pointer"
-            title={isSidebar ? "Sposta nella Colonna Principale" : "Sposta nella Sidebar Laterale"}
+            title={isSidebar ? t.settings.moveToMain : t.settings.moveToSidebar}
           >
             <ArrowRightLeft className="w-2.5 h-2.5" />
-            <span className="hidden sm:inline">{isSidebar ? "In Contenuto" : "In Sidebar"}</span>
+            <span className="hidden sm:inline">{isSidebar ? t.settings.mainColumn : t.settings.sidebarColumn}</span>
           </button>
         )}
 
@@ -168,14 +171,14 @@ const SortableSectionItem: React.FC<{
         <button
           type="button"
           onClick={onToggleVisibility}
-          aria-label={section.isVisible ? `Nascondi sezione ${section.label} nel CV` : `Mostra sezione ${section.label} nel CV`}
+          aria-label={section.isVisible ? t.settings.hideSection : t.settings.showSection}
           className={cn(
             "p-1.5 rounded-md transition-colors cursor-pointer",
             section.isVisible
               ? "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
               : "text-neutral-400 dark:text-neutral-600 hover:text-neutral-700 dark:hover:text-neutral-400"
           )}
-          title={section.isVisible ? "Nascondi sezione nel CV" : "Mostra sezione nel CV"}
+          title={section.isVisible ? t.settings.hideSection : t.settings.showSection}
         >
           {section.isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
@@ -184,13 +187,13 @@ const SortableSectionItem: React.FC<{
         <button
           type="button"
           onClick={() => {
-            if (confirm(`Rimuovere la sezione "${section.label}" dal documento?`)) {
+            if (confirm(`Remove "${section.label}"?`)) {
               onDelete();
             }
           }}
-          aria-label={`Elimina sezione ${section.label} dal CV`}
+          aria-label={t.settings.deleteSection}
           className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
-          title="Elimina questa sezione dal CV"
+          title={t.settings.deleteSection}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -211,6 +214,7 @@ export const SettingsForm: React.FC = () => {
     restoreSection,
     addCustomSection,
     applyThemePreset,
+    t,
   } = useCV();
   const { settings } = cvData;
   const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors">("layout");
@@ -255,7 +259,6 @@ export const SettingsForm: React.FC = () => {
       const newSubIndex = sidebarSections.findIndex((item) => item.id === over.id);
       const reorderedSub = arrayMove(sidebarSections, oldSubIndex, newSubIndex);
 
-      // Reassemble global sectionOrder keeping relative positions
       const newGlobal = sectionsList.map((s) => {
         if (s.column === "sidebar") {
           return reorderedSub.shift() || s;
@@ -273,7 +276,6 @@ export const SettingsForm: React.FC = () => {
       const newSubIndex = mainSections.findIndex((item) => item.id === over.id);
       const reorderedSub = arrayMove(mainSections, oldSubIndex, newSubIndex);
 
-      // Reassemble global sectionOrder keeping relative positions
       const newGlobal = sectionsList.map((s) => {
         if (s.column !== "sidebar") {
           return reorderedSub.shift() || s;
@@ -287,38 +289,38 @@ export const SettingsForm: React.FC = () => {
   const templates: { id: CVTemplate; name: string; desc: string }[] = [
     {
       id: "minimal",
-      name: "CIVVU Minimal",
-      desc: "Tipografia ultra-pulita, contrasti monocromatici, timeline asimmetrica.",
+      name: t.settings.templateMinimal,
+      desc: t.settings.templateMinimalDesc,
     },
     {
       id: "modern",
-      name: "Modern Sidebar",
-      desc: "Due colonne bilanciate: colonna laterale a sinistra e contenuti a destra.",
+      name: t.settings.templateModern,
+      desc: t.settings.templateModernDesc,
     },
     {
       id: "executive",
-      name: "Executive Clean",
-      desc: "Struttura solida e formale, ideale per ruoli senior e posizioni di leadership.",
+      name: t.settings.templateExecutive,
+      desc: t.settings.templateExecutiveDesc,
     },
   ];
 
   const fontSizes: { id: CVFontSize; name: string }[] = [
-    { id: "sm", name: "Compatto (sm)" },
-    { id: "base", name: "Bilanciato (base)" },
-    { id: "lg", name: "Ampio (lg)" },
+    { id: "sm", name: t.settings.fontSizeSm },
+    { id: "base", name: t.settings.fontSizeBase },
+    { id: "lg", name: t.settings.fontSizeLg },
   ];
 
   const spacings: { id: CVSpacing; name: string }[] = [
-    { id: "compact", name: "Compatto" },
-    { id: "normal", name: "Normale" },
-    { id: "relaxed", name: "Ampio" },
+    { id: "compact", name: t.settings.spacingCompact },
+    { id: "normal", name: t.settings.spacingNormal },
+    { id: "relaxed", name: t.settings.spacingRelaxed },
   ];
 
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Personalizzazione & Struttura"
-        subtitle="Scegli template, gestisci i profili di esempio, riordina le sezioni del CV e configura gli stili"
+        title={t.settings.title}
+        subtitle={t.settings.subtitle}
         icon={<Sliders className="w-5 h-5" />}
       />
 
@@ -335,7 +337,7 @@ export const SettingsForm: React.FC = () => {
           )}
         >
           <Layers className="w-3.5 h-3.5" />
-          <span>Layout & Sezioni</span>
+          <span>{t.tabs.settings}</span>
         </button>
         <button
           type="button"
@@ -348,7 +350,7 @@ export const SettingsForm: React.FC = () => {
           )}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Stili Predefiniti</span>
+          <span>{t.settings.colorPresetsTitle}</span>
         </button>
         <button
           type="button"
@@ -361,7 +363,7 @@ export const SettingsForm: React.FC = () => {
           )}
         >
           <Palette className="w-3.5 h-3.5" />
-          <span>Colori Granulari</span>
+          <span>{t.settings.customColorsTitle}</span>
         </button>
       </div>
 
@@ -371,7 +373,7 @@ export const SettingsForm: React.FC = () => {
           {/* Template Selector */}
           <div className="space-y-3">
             <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wide flex items-center gap-2">
-              <Layout className="w-3.5 h-3.5" /> Template del Documento
+              <Layout className="w-3.5 h-3.5" /> {t.settings.templateTitle}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {templates.map((tpl) => (
@@ -404,12 +406,10 @@ export const SettingsForm: React.FC = () => {
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide flex items-center gap-2">
                   <Layers className="w-3.5 h-3.5" />
-                  {isModern ? "Gestione Sezioni per Colonne (Modern Sidebar)" : "Riordino Sezioni & Titoli"}
+                  {t.settings.sectionOrderTitle}
                 </label>
                 <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-                  {isModern
-                    ? "Organizza separatamente le sezioni della Sidebar e del Contenuto principale, o spostale tra le due colonne"
-                    : "Trascina per riordinare, rinomina i titoli con la matita o elimina le sezioni non necessarie"}
+                  {t.settings.sectionOrderHelp}
                 </p>
               </div>
 
@@ -419,7 +419,7 @@ export const SettingsForm: React.FC = () => {
                   onClick={() => updateSectionOrder(defaultSectionOrder)}
                   className="text-[11px] text-neutral-500 hover:text-neutral-900 dark:hover:text-white underline cursor-pointer"
                 >
-                  Reset ordine
+                  Reset
                 </button>
               </div>
             </div>
@@ -432,10 +432,10 @@ export const SettingsForm: React.FC = () => {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-neutral-100" />
-                      Colonna Laterale (Sidebar Sinistra)
+                      {t.settings.sidebarColumn}
                     </span>
                     <span className="text-[10px] text-neutral-400 font-mono">
-                      {sidebarSections.length} sezioni
+                      {sidebarSections.length}
                     </span>
                   </div>
 
@@ -452,7 +452,7 @@ export const SettingsForm: React.FC = () => {
                         <div className="space-y-2">
                           {sidebarSections.length === 0 ? (
                             <p className="text-xs text-neutral-400 text-center py-3 italic">
-                              Nessuna sezione nella sidebar. Usa &quot;In Sidebar&quot; sotto per aggiungerne una.
+                              Empty
                             </p>
                           ) : (
                             sidebarSections.map((section) => (
@@ -464,6 +464,7 @@ export const SettingsForm: React.FC = () => {
                                 onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
                                 onMoveColumn={(col) => moveSectionColumn(section.key, col)}
                                 onDelete={() => deleteSection(section.key)}
+                                t={t}
                               />
                             ))
                           )}
@@ -478,10 +479,10 @@ export const SettingsForm: React.FC = () => {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600" />
-                      Colonna Principale (Contenuto Destra)
+                      {t.settings.mainColumn}
                     </span>
                     <span className="text-[10px] text-neutral-400 font-mono">
-                      {mainSections.length} sezioni
+                      {mainSections.length}
                     </span>
                   </div>
 
@@ -498,7 +499,7 @@ export const SettingsForm: React.FC = () => {
                         <div className="space-y-2">
                           {mainSections.length === 0 ? (
                             <p className="text-xs text-neutral-400 text-center py-3 italic">
-                              Nessuna sezione nel contenuto principale.
+                              Empty
                             </p>
                           ) : (
                             mainSections.map((section) => (
@@ -510,6 +511,7 @@ export const SettingsForm: React.FC = () => {
                                 onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
                                 onMoveColumn={(col) => moveSectionColumn(section.key, col)}
                                 onDelete={() => deleteSection(section.key)}
+                                t={t}
                               />
                             ))
                           )}
@@ -540,6 +542,7 @@ export const SettingsForm: React.FC = () => {
                           onToggleVisibility={() => toggleSectionVisibility(section.key)}
                           onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
                           onDelete={() => deleteSection(section.key)}
+                          t={t}
                         />
                       ))}
                     </div>
@@ -557,13 +560,13 @@ export const SettingsForm: React.FC = () => {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-neutral-300 dark:border-neutral-700 shadow-2xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Aggiungi Sezione al CV</span>
+                  <span>{t.tabs.newSection}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
-                    const title = prompt("Inserisci il titolo della nuova sezione personalizzata:", "Nuova Sezione");
+                    const title = prompt("Title / Titolo:", t.tabs.newSectionDefault);
                     if (title) {
                       addCustomSection(title);
                     }
@@ -571,19 +574,16 @@ export const SettingsForm: React.FC = () => {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Crea Sezione Personalizzata</span>
+                  <span>{t.customSection.defaultTitle}</span>
                 </button>
               </div>
 
               {/* Dropdown for restoring deleted standard sections */}
               {isAddMenuOpen && (
                 <div className="mt-2 p-2 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl space-y-1 z-30 animate-in fade-in zoom-in-95">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 px-2 py-1">
-                    Sezioni Standard Disponibili
-                  </p>
                   {missingStandardSections.length === 0 ? (
                     <p className="text-xs text-neutral-500 px-2 py-1.5">
-                      Tutte le sezioni standard sono attualmente attive nel CV.
+                      All sections active
                     </p>
                   ) : (
                     missingStandardSections.map((meta) => (
@@ -597,7 +597,7 @@ export const SettingsForm: React.FC = () => {
                         className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-left rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 cursor-pointer"
                       >
                         <span className="font-medium">{meta.defaultLabel}</span>
-                        <span className="text-[10px] text-neutral-400">+ Ripristina</span>
+                        <span className="text-[10px] text-neutral-400">+ Restore</span>
                       </button>
                     ))
                   )}
@@ -610,7 +610,7 @@ export const SettingsForm: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wide flex items-center gap-2">
-                <Type className="w-3.5 h-3.5" /> Dimensione Testo
+                <Type className="w-3.5 h-3.5" /> {t.settings.fontSize}
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {fontSizes.map((f) => (
@@ -633,7 +633,7 @@ export const SettingsForm: React.FC = () => {
 
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wide flex items-center gap-2">
-                <MoveVertical className="w-3.5 h-3.5" /> Spaziatura Righe
+                <MoveVertical className="w-3.5 h-3.5" /> {t.settings.spacing}
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {spacings.map((s) => (
@@ -662,10 +662,10 @@ export const SettingsForm: React.FC = () => {
         <div className="space-y-4">
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-              Palette Curate CIVVU
+              {t.settings.colorPresetsTitle}
             </h4>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-              4 stili cromatici sobri, desaturati e istituzionali adatti a contesti professionali
+              4 distinct styles for professional CVs
             </p>
           </div>
 
@@ -726,10 +726,10 @@ export const SettingsForm: React.FC = () => {
         <div className="space-y-4">
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-              Controllo Colori Dettagliato
+              {t.settings.customColorsTitle}
             </h4>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Personalizza ogni elemento cromatico del foglio e della colonna laterale
+              Customize colors granularly
             </p>
           </div>
 
@@ -738,9 +738,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Nome & Titoli Sezione
+                  {t.settings.primaryText}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore del nome in alto e titoli H1/H2</p>
+                <p className="text-[11px] text-neutral-500">H1 / H2</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -762,9 +762,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Sottotitoli, Ruoli & Date
+                  {t.settings.secondaryText}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore dei ruoli aziendali e intervalli temporali</p>
+                <p className="text-[11px] text-neutral-500">Roles, dates</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -786,9 +786,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Testo Corpo & Paragrafi
+                  {t.settings.bodyText}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore delle descrizioni e punti elenco</p>
+                <p className="text-[11px] text-neutral-500">Paragraphs, bullets</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -810,9 +810,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Accento & Linee Divisorie
+                  {t.settings.accentColor}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore di demarcazione, icone e link</p>
+                <p className="text-[11px] text-neutral-500">Dividers, icons, links</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -834,9 +834,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Sfondo Sidebar (Modern Sidebar)
+                  {t.settings.sidebarBgColor}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore di fondo della colonna laterale sinistra</p>
+                <p className="text-[11px] text-neutral-500">Sidebar background</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -858,9 +858,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Sfondo del Foglio CV
+                  {t.settings.paperBgColor}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colore di fondo della carta stampata</p>
+                <p className="text-[11px] text-neutral-500">Paper sheet background</p>
               </div>
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
@@ -882,9 +882,9 @@ export const SettingsForm: React.FC = () => {
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  Pill Competenze (Sfondo & Testo)
+                  {t.settings.tagBgColor} & {t.settings.tagTextColor}
                 </h5>
-                <p className="text-[11px] text-neutral-500">Colori dei badge/tag delle competenze</p>
+                <p className="text-[11px] text-neutral-500">Skills chips colors</p>
               </div>
               <div className="flex items-center gap-2">
                 <label className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer" title="Colore Sfondo Badge">

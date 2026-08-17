@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export const PreviewPanel: React.FC = () => {
-  const { cvData } = useCV();
+  const { cvData, t } = useCV();
   const [zoomLevel, setZoomLevel] = useState<number>(0.85);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,9 +99,9 @@ export const PreviewPanel: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={handleZoomOut}
-            aria-label="Riduci Zoom anteprima"
+            aria-label={t.previewPanel.zoomOut}
             className="p-1 sm:p-1.5 h-7 w-7 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
-            title="Riduci Zoom"
+            title={t.previewPanel.zoomOut}
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </Button>
@@ -114,9 +114,9 @@ export const PreviewPanel: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={handleZoomIn}
-            aria-label="Aumenta Zoom anteprima"
+            aria-label={t.previewPanel.zoomIn}
             className="p-1 sm:p-1.5 h-7 w-7 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
-            title="Aumenta Zoom"
+            title={t.previewPanel.zoomIn}
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
@@ -126,12 +126,12 @@ export const PreviewPanel: React.FC = () => {
           <button
             type="button"
             onClick={handleFitWidth}
-            aria-label="Adatta anteprima alla larghezza dello schermo"
+            aria-label={t.previewPanel.fitWidthTitle}
             className="flex items-center gap-1 text-[11px] font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white px-2 py-1 rounded hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-            title="Adatta alla larghezza dello schermo"
+            title={t.previewPanel.fitWidthTitle}
           >
             <Maximize2 className="w-3 h-3" />
-            <span className="hidden sm:inline">Adatta</span>
+            <span className="hidden sm:inline">{t.previewPanel.fitWidth}</span>
           </button>
         </div>
 
@@ -142,12 +142,12 @@ export const PreviewPanel: React.FC = () => {
             size="sm"
             onClick={handlePrint}
             disabled={isExporting}
-            aria-label="Esporta CV in formato PDF o stampa"
+            aria-label={t.previewPanel.printPdf}
             icon={<Printer className="w-3.5 h-3.5" />}
             className="shadow-sm font-semibold text-xs py-1.5 px-3 cursor-pointer"
           >
-            <span className="hidden sm:inline">{isExporting ? "Generazione..." : "Esporta PDF / Stampa"}</span>
-            <span className="inline sm:hidden">{isExporting ? "..." : "Scarica PDF"}</span>
+            <span className="hidden sm:inline">{isExporting ? t.previewPanel.generating : t.previewPanel.printPdf}</span>
+            <span className="inline sm:hidden">{isExporting ? "..." : t.previewPanel.downloadPdf}</span>
           </Button>
         </div>
       </div>

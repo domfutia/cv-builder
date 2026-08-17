@@ -9,7 +9,7 @@ import { Edit3, Eye, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Home() {
-  const { cvData } = useCV();
+  const { cvData, t } = useCV();
   const [mobileView, setMobileView] = useState<"form" | "preview">("form");
 
   const handlePrint = () => {
@@ -66,7 +66,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setMobileView("form")}
-            aria-label="Passa alla vista modifica modulo"
+            aria-label={t.mobileViewEdit}
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer",
               mobileView === "form"
@@ -75,13 +75,13 @@ export default function Home() {
             )}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Modifica</span>
+            <span>{t.mobileViewEdit}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setMobileView("preview")}
-            aria-label="Passa alla vista anteprima CV"
+            aria-label={t.mobileViewPreview}
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer",
               mobileView === "preview"
@@ -90,7 +90,7 @@ export default function Home() {
             )}
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>Anteprima</span>
+            <span>{t.mobileViewPreview}</span>
           </button>
 
           <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-700 mx-0.5" />
@@ -98,9 +98,9 @@ export default function Home() {
           <button
             type="button"
             onClick={handlePrint}
-            aria-label="Stampa o esporta il documento in formato PDF"
+            aria-label={t.mobilePrintTitle}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-            title="Stampa / Esporta PDF"
+            title={t.mobilePrintTitle}
           >
             <Printer className="w-3.5 h-3.5" />
           </button>

@@ -40,12 +40,15 @@ interface SortableCustomItemProps {
   item: CustomSectionItem;
   onUpdate: (data: Partial<CustomSectionItem>) => void;
   onRemove: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }
 
 const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
   item,
   onUpdate,
   onRemove,
+  t,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [newHighlight, setNewHighlight] = useState("");
@@ -94,15 +97,15 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               type="button"
               {...attributes}
               {...listeners}
-              aria-label="Trascina per riordinare elemento"
+              aria-label={t.customSection.dragToReorder}
               className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
-              title="Trascina per riordinare"
+              title={t.customSection.dragToReorder}
             >
               <GripVertical className="w-4 h-4" />
             </button>
             <div className="truncate">
               <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                {item.title || "Nuovo Elemento"}
+                {item.title || t.customSection.itemTitlePlaceholder}
                 {item.subtitle ? ` • ${item.subtitle}` : ""}
               </h4>
               {item.date && (
@@ -117,8 +120,8 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Comprimi dettagli elemento" : "Espandi dettagli elemento"}
-              className="p-1.5 h-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              className="p-1.5 h-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 cursor-pointer"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -126,9 +129,9 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              aria-label="Elimina elemento"
-              className="p-1.5 h-8 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400"
-              title="Elimina elemento"
+              aria-label={t.delete}
+              className="p-1.5 h-8 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
+              title={t.delete}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -139,14 +142,14 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Titolo Principale"
-                placeholder="es. Titolo Pubblicazione, Progetto o Ruolo"
+                label={t.customSection.itemTitle}
+                placeholder={t.customSection.itemTitlePlaceholder}
                 value={item.title}
                 onChange={(val) => onUpdate({ title: val })}
               />
               <Input
-                label="Sottotitolo / Organizzazione (Opzionale)"
-                placeholder="es. Rivista scientifica, Evento, Associazione"
+                label={t.customSection.itemSubtitle}
+                placeholder={t.customSection.itemSubtitlePlaceholder}
                 value={item.subtitle || ""}
                 onChange={(val) => onUpdate({ subtitle: val })}
               />
@@ -154,17 +157,17 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="Data / Periodo (Opzionale)"
-                placeholder="es. 2023 oppure Mag 2022 - Dic 2023"
+                label={t.customSection.itemDate}
+                placeholder={t.customSection.itemDatePlaceholder}
                 value={item.date || ""}
                 onChange={(val) => onUpdate({ date: val })}
               />
             </div>
 
             <Textarea
-              label="Descrizione (Opzionale)"
+              label={t.customSection.itemDescription}
               rows={2}
-              placeholder="Descrizione dettagliata dell'attività, traguardi o dettagli rilevanti..."
+              placeholder={t.customSection.itemDescriptionPlaceholder}
               value={item.description || ""}
               onChange={(val) => onUpdate({ description: val })}
             />
@@ -172,7 +175,7 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
             {/* Highlights / Punti elenco */}
             <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800/60">
               <label className="block text-xs font-semibold tracking-wide text-neutral-600 dark:text-neutral-400 uppercase">
-                Punti Elenco (Bullet Points opzionali)
+                {t.customSection.highlightsTitle}
               </label>
 
               <div className="space-y-2">
@@ -183,13 +186,13 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
                       type="text"
                       value={highlight}
                       onChange={(e) => handleUpdateHighlight(hIdx, e.target.value)}
-                      placeholder="Dettaglio o risultato chiave..."
+                      placeholder={t.customSection.highlightPlaceholder}
                       className="flex-1 rounded-md bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/80 px-2.5 py-1.5 text-xs text-neutral-900 dark:text-neutral-200 focus:outline-none focus:border-neutral-500"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveHighlight(hIdx)}
-                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 transition-opacity"
+                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 transition-opacity cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -208,7 +211,7 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
                       handleAddHighlight();
                     }
                   }}
-                  placeholder="Aggiungi punto elenco (premi Invio)..."
+                  placeholder={t.customSection.highlightPlaceholder}
                   className="flex-1 rounded-lg bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/80 px-3 py-1.5 text-xs text-neutral-900 dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
                 />
                 <Button
@@ -217,8 +220,9 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
                   onClick={handleAddHighlight}
                   disabled={!newHighlight.trim()}
                   icon={<PlusCircle className="w-3.5 h-3.5" />}
+                  className="cursor-pointer"
                 >
-                  Aggiungi
+                  {t.customSection.addHighlightBtn}
                 </Button>
               </div>
             </div>
@@ -237,6 +241,7 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
     updateCustomSectionItem,
     removeCustomSectionItem,
     reorderCustomSectionItems,
+    t,
   } = useCV();
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -287,8 +292,8 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
                 className="px-2.5 py-1 text-sm font-semibold rounded bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white w-full"
                 autoFocus
               />
-              <Button variant="primary" size="sm" onClick={handleSaveTitle}>
-                Salva
+              <Button variant="primary" size="sm" onClick={handleSaveTitle} className="cursor-pointer">
+                {t.save}
               </Button>
             </div>
           ) : (
@@ -302,7 +307,7 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
                   setTitleInput(section.title);
                   setIsEditingTitle(true);
                 }}
-                className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 p-1 rounded transition-colors"
+                className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 p-1 rounded transition-colors cursor-pointer"
                 title="Modifica nome sezione"
               >
                 <Edit2 className="w-3.5 h-3.5" />
@@ -317,22 +322,24 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
             size="sm"
             onClick={() => addCustomSectionItem(section.id)}
             icon={<Plus className="w-4 h-4" />}
+            className="cursor-pointer"
           >
-            Aggiungi Elemento
+            {t.customSection.addItemBtn}
           </Button>
 
           <Button
             variant="danger"
             size="sm"
             onClick={() => {
-              if (confirm(`Sei sicuro di voler eliminare la sezione "${section.title}"?`)) {
+              if (confirm(`${t.customSection.deleteSectionConfirm} ("${section.title}")`)) {
                 removeCustomSection(section.id);
               }
             }}
             icon={<Trash2 className="w-3.5 h-3.5" />}
-            title="Elimina intera sezione"
+            title={t.customSection.deleteSectionBtn}
+            className="cursor-pointer"
           >
-            Elimina Sezione
+            {t.customSection.deleteSectionBtn}
           </Button>
         </div>
       </div>
@@ -341,19 +348,19 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
         <div className="text-center py-10 px-4 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/30">
           <FolderPlus className="w-8 h-8 text-neutral-400 dark:text-neutral-600 mx-auto mb-2" />
           <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">
-            Nessun elemento in questa sezione
+            {t.customSection.emptyState}
           </p>
-          <p className="text-xs text-neutral-400 dark:text-neutral-600 mt-1 mb-4">
-            Aggiungi pubblicazioni, progetti di volontariato o riconoscimenti
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => addCustomSectionItem(section.id)}
-            icon={<Plus className="w-4 h-4" />}
-          >
-            Aggiungi primo elemento
-          </Button>
+          <div className="mt-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addCustomSectionItem(section.id)}
+              icon={<Plus className="w-4 h-4" />}
+              className="cursor-pointer"
+            >
+              {t.customSection.addItemBtn}
+            </Button>
+          </div>
         </div>
       ) : (
         <DndContext
@@ -372,6 +379,7 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
                   item={item}
                   onUpdate={(data) => updateCustomSectionItem(section.id, item.id, data)}
                   onRemove={() => removeCustomSectionItem(section.id, item.id)}
+                  t={t}
                 />
               ))}
             </div>

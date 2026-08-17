@@ -8,15 +8,15 @@ import { Card } from "@/components/ui/Card";
 import { FileText } from "lucide-react";
 
 export const SummaryForm: React.FC = () => {
-  const { cvData, updateSummary, updateSectionLabel, deleteSection } = useCV();
+  const { cvData, updateSummary, updateSectionLabel, deleteSection, t } = useCV();
   const sectionTitle =
-    cvData.settings.sectionOrder?.find((s) => s.key === "summary")?.label || "Profilo Professionale";
+    cvData.settings.sectionOrder?.find((s) => s.key === "summary")?.label || t.summary.title;
 
   return (
     <div className="space-y-6">
       <SectionHeader
         title={sectionTitle}
-        subtitle="Sintetizza in poche righe chi sei, i tuoi punti di forza e i tuoi obiettivi"
+        subtitle={t.summary.subtitle}
         icon={<FileText className="w-5 h-5" />}
         editableTitle={true}
         onTitleChange={(newTitle) => updateSectionLabel("summary", newTitle)}
@@ -26,12 +26,12 @@ export const SummaryForm: React.FC = () => {
 
       <Card>
         <Textarea
-          label="Sommario / Bio"
+          label={t.summary.title}
           rows={5}
-          placeholder="es. Product-minded Frontend Engineer con esperienza nella progettazione di Design System e applicazioni web ad alte prestazioni..."
+          placeholder={t.summary.placeholder}
           value={cvData.summary}
           onChange={(val) => updateSummary(val)}
-          helperText="Consiglio: scrivi 2-4 frasi di impatto focalizzate su risultati concreti, tecnologie chiave e approccio metodologico."
+          helperText={t.summary.tipBody}
         />
       </Card>
     </div>

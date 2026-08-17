@@ -17,12 +17,25 @@ import {
   Check,
   ChevronDown,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { demoProfiles } from "@/data/demoProfiles";
 import { cn } from "@/lib/utils";
 
 export const Navbar: React.FC = () => {
-  const { cvData, updatePdfFileName, resetToSample, loadDemoProfile, clearAll, exportJSON, importJSON } = useCV();
+  const {
+    cvData,
+    updatePdfFileName,
+    resetToSample,
+    loadDemoProfile,
+    clearAll,
+    exportJSON,
+    importJSON,
+    language,
+    setLanguage,
+    t,
+  } = useCV();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const demoDropdownRef = useRef<HTMLDivElement>(null);
   const { setTheme, resolvedTheme } = useTheme();
@@ -59,7 +72,7 @@ export const Navbar: React.FC = () => {
         const parsed = JSON.parse(event.target?.result as string);
         importJSON(parsed);
       } catch {
-        alert("File JSON non valido o corrotto.");
+        alert(t.jsonImportError);
       }
     };
     reader.readAsText(file);
@@ -89,24 +102,30 @@ export const Navbar: React.FC = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
+  const handleClearAll = () => {
+    if (confirm(t.clearAllConfirm)) {
+      clearAll();
+    }
+  };
+
   const currentFileName =
     cvData.settings.pdfFileName ||
     `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`;
 
   return (
-    <header className="h-14 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 transition-colors">
+    <header className="h-14 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl sticky top-0 z-30 flex items-center justify-between px-2.5 sm:px-6 transition-colors">
       {/* Brand & Logo "CIVVU" */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-7 h-7 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center font-extrabold text-xs tracking-wider shadow-xs transition-colors">
             CV
           </div>
           <span className="font-extrabold text-base tracking-tight text-neutral-900 dark:text-neutral-100">
-            CIVVU
+            {t.appName}
           </span>
         </div>
 
-        {/* Customizable PDF File Name Chip (Top Left next to CIVVU) */}
+        {/* Customizable PDF File Name Chip */}
         <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
           <FileText className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
           {isEditingFileName ? (
@@ -119,7 +138,7 @@ export const Navbar: React.FC = () => {
                   if (e.key === "Enter") handleSaveFileName();
                   if (e.key === "Escape") setIsEditingFileName(false);
                 }}
-                className="px-1.5 py-0.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-white font-mono focus:outline-none max-w-[95px] sm:max-w-[150px]"
+                className="px-1.5 py-0.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-white font-mono focus:outline-none max-w-[85px] sm:max-w-[150px]"
                 autoFocus
               />
               <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
@@ -127,14 +146,14 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={handleSaveFileName}
                 className="p-1 rounded bg-neutral-900 text-white dark:bg-neutral-200 dark:text-neutral-950 hover:opacity-90 transition-opacity cursor-pointer"
-                title="Salva nome file"
+                title={t.savePdfNameTitle}
               >
                 <Check className="w-3 h-3" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <span className="font-mono text-neutral-700 dark:text-neutral-300 max-w-[70px] xs:max-w-[100px] sm:max-w-[140px] truncate text-[11.5px] sm:text-xs" title={currentFileName}>
+              <span className="font-mono text-neutral-700 dark:text-neutral-300 max-w-[65px] xs:max-w-[95px] sm:max-w-[140px] truncate text-[11px] sm:text-xs" title={currentFileName}>
                 {currentFileName}
               </span>
               <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
@@ -145,7 +164,7 @@ export const Navbar: React.FC = () => {
                   setIsEditingFileName(true);
                 }}
                 className="p-0.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded transition-colors cursor-pointer ml-0.5"
-                title="Modifica nome file PDF per il download"
+                title={t.editPdfNameTitle}
               >
                 <Edit2 className="w-3 h-3" />
               </button>
@@ -165,15 +184,51 @@ export const Navbar: React.FC = () => {
           className="hidden"
         />
 
+        {/* Language Switcher IT / EN (Responsive on Mobile and Desktop) */}
+        <div
+          className="flex items-center bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 text-xs shadow-2xs"
+          role="group"
+          aria-label={t.languageToggle}
+        >
+          <button
+            type="button"
+            onClick={() => setLanguage("it")}
+            aria-label="Passa alla lingua Italiana"
+            className={cn(
+              "px-2 py-0.5 rounded font-bold text-[11px] transition-all cursor-pointer select-none",
+              language === "it"
+                ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white shadow-2xs"
+                : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200"
+            )}
+            title="Italiano"
+          >
+            IT
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage("en")}
+            aria-label="Switch to English language"
+            className={cn(
+              "px-2 py-0.5 rounded font-bold text-[11px] transition-all cursor-pointer select-none",
+              language === "en"
+                ? "bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white shadow-2xs"
+                : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200"
+            )}
+            title="English"
+          >
+            EN
+          </button>
+        </div>
+
         {/* Theme Toggle Button */}
         {mounted && (
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            aria-label={`Passa a tema ${resolvedTheme === "dark" ? "chiaro" : "scuro"}`}
+            aria-label={resolvedTheme === "dark" ? t.themeToggleLight : t.themeToggleDark}
             className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white h-8 w-8 cursor-pointer"
-            title={`Passa a tema ${resolvedTheme === "dark" ? "chiaro" : "scuro"}`}
+            title={resolvedTheme === "dark" ? t.themeToggleLight : t.themeToggleDark}
           >
             {resolvedTheme === "dark" ? (
               <Sun className="w-4 h-4 text-amber-400 transition-transform duration-200 hover:rotate-45" />
@@ -183,25 +238,25 @@ export const Navbar: React.FC = () => {
           </Button>
         )}
 
-        {/* Demo Profiles Dropdown (Responsive: Icon on mobile, full label on tablet/desktop) */}
+        {/* Demo Profiles Dropdown */}
         <div className="relative inline-block" ref={demoDropdownRef}>
           <button
             type="button"
             onClick={() => setShowDemoMenu(!showDemoMenu)}
             aria-expanded={showDemoMenu}
-            aria-label="Carica uno dei profili dimostrativi"
+            aria-label={t.demoProfilesTooltip}
             className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-800"
-            title="Carica uno dei 5+ profili di esempio preconfigurati"
+            title={t.demoProfilesTooltip}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="hidden sm:inline">Profili Demo</span>
+            <span className="hidden sm:inline">{t.demoProfilesTitle}</span>
             <ChevronDown className={cn("w-3 h-3 text-neutral-400 transition-transform", showDemoMenu && "rotate-180")} />
           </button>
 
           {showDemoMenu && (
             <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-auto sm:mt-2 w-72 max-w-[calc(100vw-16px)] rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl p-1.5 z-50 space-y-1">
               <div className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
-                Scegli un profilo di esempio
+                {t.demoProfilesSubtitle}
               </div>
 
               {demoProfiles.map((prof) => (
@@ -236,7 +291,7 @@ export const Navbar: React.FC = () => {
                   className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" />
-                  <span>Ripristina Default (Alex Vender)</span>
+                  <span>{t.resetDefault}</span>
                 </button>
               </div>
             </div>
@@ -246,13 +301,13 @@ export const Navbar: React.FC = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={clearAll}
-          aria-label="Svuota tutti i campi del CV"
+          onClick={handleClearAll}
+          aria-label={t.clearAll}
           icon={<Trash2 className="w-3.5 h-3.5" />}
-          className="text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hidden lg:inline-flex text-xs"
-          title="Svuota tutti i campi del CV"
+          className="text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hidden lg:inline-flex text-xs cursor-pointer"
+          title={t.clearAll}
         >
-          Svuota
+          {t.clearAll}
         </Button>
 
         <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-800 hidden md:block" />
@@ -261,35 +316,35 @@ export const Navbar: React.FC = () => {
           variant="secondary"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          aria-label="Importa dati da file JSON"
+          aria-label={t.importJson}
           icon={<Upload className="w-3.5 h-3.5" />}
-          className="text-neutral-700 dark:text-neutral-300 hidden md:inline-flex text-xs"
-          title="Importa file di backup JSON"
+          className="text-neutral-700 dark:text-neutral-300 hidden md:inline-flex text-xs cursor-pointer"
+          title={t.importJson}
         >
-          Importa
+          {t.importJson}
         </Button>
 
         <Button
           variant="secondary"
           size="sm"
           onClick={exportJSON}
-          aria-label="Esporta dati in formato JSON"
+          aria-label={t.saveJson}
           icon={<Download className="w-3.5 h-3.5" />}
-          className="text-neutral-700 dark:text-neutral-300 hidden sm:inline-flex text-xs"
-          title="Esporta dati in formato JSON"
+          className="text-neutral-700 dark:text-neutral-300 hidden sm:inline-flex text-xs cursor-pointer"
+          title={t.saveJson}
         >
-          Salva JSON
+          {t.saveJson}
         </Button>
 
         <Button
           variant="primary"
           size="sm"
           onClick={handlePrint}
-          aria-label="Scarica ed esporta PDF del CV"
+          aria-label={t.downloadPdf}
           icon={<Printer className="w-3.5 h-3.5" />}
-          className="font-semibold shadow-xs text-xs px-2.5 sm:px-3.5 py-1.5"
+          className="font-semibold shadow-xs text-xs px-2.5 sm:px-3.5 py-1.5 cursor-pointer"
         >
-          <span>Scarica PDF</span>
+          <span>{t.downloadPdf}</span>
         </Button>
       </div>
     </header>
