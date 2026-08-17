@@ -16,6 +16,7 @@ import {
   SectionOrderConfig,
 } from "@/types/cv";
 import { initialCVData, defaultSectionOrder, themePresets, standardSectionsMeta } from "@/data/initialCV";
+import { demoProfiles } from "@/data/demoProfiles";
 
 const STORAGE_KEY = "once_cv_builder_data_v6";
 
@@ -65,6 +66,7 @@ interface CVContextType {
   updatePdfFileName: (fileName: string) => void;
   updateSettings: (settings: Partial<CVSettings>) => void;
   resetToSample: () => void;
+  loadDemoProfile: (profileId: string) => void;
   clearAll: () => void;
   exportJSON: () => void;
   importJSON: (data: CVData) => void;
@@ -629,6 +631,13 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setCvData(initialCVData);
   }, []);
 
+  const loadDemoProfile = useCallback((profileId: string) => {
+    const found = demoProfiles.find((p) => p.id === profileId);
+    if (found) {
+      setCvData(JSON.parse(JSON.stringify(found.data)));
+    }
+  }, []);
+
   const clearAll = useCallback(() => {
     setCvData({
       personalInfo: {
@@ -724,6 +733,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updatePdfFileName,
         updateSettings,
         resetToSample,
+        loadDemoProfile,
         clearAll,
         exportJSON,
         importJSON,

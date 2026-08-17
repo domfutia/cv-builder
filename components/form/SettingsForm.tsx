@@ -40,9 +40,11 @@ import {
   Plus,
   PlusCircle,
   FileText,
+  UserCheck,
 } from "lucide-react";
 import { CVTemplate, CVFontSize, CVSpacing, SectionOrderConfig } from "@/types/cv";
 import { themePresets, defaultSectionOrder, standardSectionsMeta } from "@/data/initialCV";
+import { demoProfiles } from "@/data/demoProfiles";
 import { cn } from "@/lib/utils";
 
 // Sortable row component with editable section label, visibility, column mover and delete
@@ -207,10 +209,11 @@ export const SettingsForm: React.FC = () => {
     restoreSection,
     addCustomSection,
     applyThemePreset,
+    loadDemoProfile,
     updatePdfFileName,
   } = useCV();
   const { settings, personalInfo } = cvData;
-  const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors">("layout");
+  const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors" | "demos">("layout");
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
   const isModern = settings.template === "modern";
@@ -324,12 +327,12 @@ export const SettingsForm: React.FC = () => {
       />
 
       {/* Sub-tab navigation */}
-      <div className="flex bg-neutral-100 dark:bg-neutral-900 p-1 rounded-lg border border-neutral-200 dark:border-neutral-800">
+      <div className="grid grid-cols-2 sm:grid-cols-4 bg-neutral-100 dark:bg-neutral-900 p-1 rounded-lg border border-neutral-200 dark:border-neutral-800 gap-1">
         <button
           type="button"
           onClick={() => setActiveSettingsTab("layout")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
+            "flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
             activeSettingsTab === "layout"
               ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-2xs dark:shadow-xs font-semibold"
               : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
@@ -342,7 +345,7 @@ export const SettingsForm: React.FC = () => {
           type="button"
           onClick={() => setActiveSettingsTab("presets")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
+            "flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
             activeSettingsTab === "presets"
               ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-2xs dark:shadow-xs font-semibold"
               : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
@@ -355,7 +358,7 @@ export const SettingsForm: React.FC = () => {
           type="button"
           onClick={() => setActiveSettingsTab("colors")}
           className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
+            "flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
             activeSettingsTab === "colors"
               ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-2xs dark:shadow-xs font-semibold"
               : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
@@ -363,6 +366,19 @@ export const SettingsForm: React.FC = () => {
         >
           <Palette className="w-3.5 h-3.5" />
           <span>Colori Granulari</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSettingsTab("demos")}
+          className={cn(
+            "flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
+            activeSettingsTab === "demos"
+              ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-2xs dark:shadow-xs font-semibold text-amber-600 dark:text-amber-400"
+              : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+          )}
+        >
+          <UserCheck className="w-3.5 h-3.5 text-amber-500" />
+          <span>Profili Demo</span>
         </button>
       </div>
 
@@ -937,6 +953,88 @@ export const SettingsForm: React.FC = () => {
                 </label>
               </div>
             </Card>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: Profili di Esempio Preconfigurati */}
+      {activeSettingsTab === "demos" && (
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              Profili di Esempio Preconfigurati
+            </h4>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Seleziona un profilo specializzato per caricare testi, competenze e stili ottimizzati per rientrare perfettamente in 1 pagina A4
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {demoProfiles.map((prof) => {
+              const tplName =
+                prof.data.settings.template === "minimal"
+                  ? "CIVVU Minimal"
+                  : prof.data.settings.template === "modern"
+                  ? "Modern Sidebar"
+                  : "Executive Clean";
+
+              const themeName =
+                prof.data.settings.themePreset === "obsidian"
+                  ? "Obsidian Minimal"
+                  : prof.data.settings.themePreset === "nordic"
+                  ? "Nordic Slate"
+                  : prof.data.settings.themePreset === "executive"
+                  ? "Warm Executive"
+                  : "Forest Professional";
+
+              return (
+                <Card
+                  key={prof.id}
+                  className="p-4 bg-white dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
+                >
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{prof.emoji}</span>
+                      <div>
+                        <h5 className="font-bold text-xs text-neutral-900 dark:text-neutral-100">
+                          {prof.name}
+                        </h5>
+                        <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                          {prof.role}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap pt-1 text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-medium">
+                        Template: {tplName}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-medium">
+                        Tema: {themeName}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 font-medium">
+                        1 Pagina A4 Ottimizzata
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-neutral-600 dark:text-neutral-400 line-clamp-2 pt-0.5 leading-relaxed">
+                      {prof.data.summary}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      loadDemoProfile(prof.id);
+                    }}
+                    className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-950 hover:opacity-90 transition-opacity cursor-pointer shrink-0 shadow-xs text-center"
+                  >
+                    Carica Profilo
+                  </button>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}

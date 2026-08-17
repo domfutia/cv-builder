@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useSyncExternalStore } from "react";
+import React, { useRef, useState, useEffect, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCV } from "@/context/CVContext";
 import { Button } from "@/components/ui/Button";
@@ -15,16 +15,33 @@ import {
   FileText,
   Edit2,
   Check,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
+import { demoProfiles } from "@/data/demoProfiles";
+import { cn } from "@/lib/utils";
 
 export const Navbar: React.FC = () => {
-  const { cvData, updatePdfFileName, resetToSample, clearAll, exportJSON, importJSON } = useCV();
+  const { cvData, updatePdfFileName, resetToSample, loadDemoProfile, clearAll, exportJSON, importJSON } = useCV();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const demoDropdownRef = useRef<HTMLDivElement>(null);
   const { setTheme, resolvedTheme } = useTheme();
   const [isEditingFileName, setIsEditingFileName] = useState(false);
+  const [showDemoMenu, setShowDemoMenu] = useState(false);
   const [tempFileName, setTempFileName] = useState(
     cvData.settings.pdfFileName || `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`
   );
+
+  // Close demo dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (demoDropdownRef.current && !demoDropdownRef.current.contains(event.target as Node)) {
+        setShowDemoMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -165,16 +182,63 @@ export const Navbar: React.FC = () => {
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={resetToSample}
-          icon={<RotateCcw className="w-3.5 h-3.5" />}
-          className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hidden md:inline-flex text-xs"
-          title="Ripristina dati di esempio completi"
-        >
-          Dati Demo
-        </Button>
+        {/* Demo Profiles Dropdown */}
+        <div className="relative hidden md:inline-block" ref={demoDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setShowDemoMenu(!showDemoMenu)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-800"
+            title="Carica uno dei 5+ profili di esempio preconfigurati"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Profili Demo</span>
+            <ChevronDown className={cn("w-3 h-3 text-neutral-400 transition-transform", showDemoMenu && "rotate-180")} />
+          </button>
+
+          {showDemoMenu && (
+            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl p-1.5 z-50 space-y-1">
+              <div className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
+                Scegli un profilo di esempio
+              </div>
+
+              {demoProfiles.map((prof) => (
+                <button
+                  key={prof.id}
+                  type="button"
+                  onClick={() => {
+                    loadDemoProfile(prof.id);
+                    setShowDemoMenu(false);
+                  }}
+                  className="w-full text-left flex items-start gap-2.5 px-2.5 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                >
+                  <span className="text-base shrink-0 mt-0.5">{prof.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 truncate">
+                      {prof.name}
+                    </div>
+                    <div className="text-[10.5px] text-neutral-500 dark:text-neutral-400 truncate">
+                      {prof.role}
+                    </div>
+                  </div>
+                </button>
+              ))}
+
+              <div className="border-t border-neutral-100 dark:border-neutral-800 pt-1 mt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetToSample();
+                    setShowDemoMenu(false);
+                  }}
+                  className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Ripristina Default (Alex Vender)</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <Button
           variant="ghost"
