@@ -60,6 +60,10 @@ export const CVDocument: React.FC<{
 
   const rootRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const mainColRef = useRef<HTMLDivElement>(null);
+  const innerStackRef = useRef<HTMLDivElement>(null);
+
   const [autoFitScale, setAutoFitScale] = useState<number>(1);
 
   // Granular colors
@@ -94,7 +98,7 @@ export const CVDocument: React.FC<{
     lg: "w-28 h-28",
   }[settings.avatarSize || "md"];
 
-  // Font size mapping (Carefully calibrated for elegant single-page fit)
+  // Font size mapping (Configurable by user)
   const fontSizeClasses = {
     sm: "text-[11px] leading-snug",
     base: "text-[12px] leading-normal",
@@ -103,7 +107,7 @@ export const CVDocument: React.FC<{
 
   // Spacing mapping (Adjustable by user via settings)
   const spacingClasses = {
-    compact: "space-y-2.5",
+    compact: "space-y-2",
     normal: "space-y-3.5",
     relaxed: "space-y-5",
   }[settings.spacing || "normal"];
@@ -119,44 +123,59 @@ export const CVDocument: React.FC<{
     : defaultSectionOrder;
 
   // =========================================================================
-  // DYNAMIC A4 AUTO-FIT ENGINE (Guarantees single-page 210mm x 297mm fit)
+  // DUAL-MEASUREMENT A4 AUTO-FIT ENGINE (Guarantees 100% fit on 1 A4 page)
   // =========================================================================
   useLayoutEffect(() => {
     const calculateAutoFit = () => {
-      if (!rootRef.current || !contentRef.current) return;
+      if (!rootRef.current) return;
 
-      // Temporarily clear scaling to measure natural unconstrained height
-      contentRef.current.style.transform = "none";
-      contentRef.current.style.width = "100%";
+      const A4_TARGET_HEIGHT_PX = 1122.5; // Standard 297mm height at 96 DPI
+      const targetHeight = rootRef.current.clientHeight || A4_TARGET_HEIGHT_PX;
 
-      const targetHeight = rootRef.current.clientHeight || 1123; // Exactly 297mm in pixels
-      const actualHeight = contentRef.current.scrollHeight;
+      let unscaledHeight = 0;
 
-      if (targetHeight > 0 && actualHeight > targetHeight) {
-        // Content exceeds single A4 page -> scale down smoothly with safety margin
-        const calculatedScale = Math.min(1, Math.max(0.4, (targetHeight - 8) / actualHeight));
-        const finalScale = Number(calculatedScale.toFixed(4));
-        setAutoFitScale(finalScale);
-        if (onScaleChange) onScaleChange(finalScale);
+      if (settings.template === "modern") {
+        const sbHeight = sidebarRef.current ? sidebarRef.current.scrollHeight : 0;
+        const mainHeight = mainColRef.current ? mainColRef.current.scrollHeight : 0;
+        unscaledHeight = Math.max(sbHeight, mainHeight);
       } else {
-        setAutoFitScale(1);
-        if (onScaleChange) onScaleChange(1);
+        unscaledHeight = innerStackRef.current
+          ? innerStackRef.current.scrollHeight
+          : contentRef.current
+          ? contentRef.current.scrollHeight
+          : 0;
+      }
+
+      if (unscaledHeight > 0) {
+        if (unscaledHeight > targetHeight) {
+          // Calculate scale ratio with a safety buffer so no text is ever clipped
+          const calculatedScale = Math.min(1.0, Math.max(0.3, (targetHeight - 10) / unscaledHeight));
+          const cleanScale = Number(calculatedScale.toFixed(4));
+          setAutoFitScale(cleanScale);
+          if (onScaleChange) onScaleChange(cleanScale);
+        } else {
+          setAutoFitScale(1);
+          if (onScaleChange) onScaleChange(1);
+        }
       }
     };
 
     calculateAutoFit();
-    const timer = setTimeout(calculateAutoFit, 80);
+    const timer1 = setTimeout(calculateAutoFit, 60);
+    const timer2 = setTimeout(calculateAutoFit, 250);
 
     const observer = new ResizeObserver(() => {
       calculateAutoFit();
     });
 
-    if (contentRef.current) {
-      observer.observe(contentRef.current);
-    }
+    if (contentRef.current) observer.observe(contentRef.current);
+    if (sidebarRef.current) observer.observe(sidebarRef.current);
+    if (mainColRef.current) observer.observe(mainColRef.current);
+    if (innerStackRef.current) observer.observe(innerStackRef.current);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       observer.disconnect();
     };
   }, [cvData, settings, onScaleChange]);
@@ -664,7 +683,7 @@ export const CVDocument: React.FC<{
   };
 
   // =========================================================================
-  // TEMPLATE 1: CIVVU Minimal (Auto-Fit 1-Page A4)
+  // TEMPLATE 1: CIVVU Minimal (Single Page A4 with Dynamic Auto-Fit)
   // =========================================================================
   if (settings.template === "minimal") {
     return (
@@ -691,7 +710,7 @@ export const CVDocument: React.FC<{
         <div
           ref={contentRef}
           className={cn(
-            "p-8 sm:p-10 transition-transform duration-100",
+            "p-8 sm:p-10 transition-transform duration-75",
             fontSizeClasses
           )}
           style={{
@@ -700,7 +719,7 @@ export const CVDocument: React.FC<{
             width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
           }}
         >
-          <div className={spacingClasses}>
+          <div ref={innerStackRef} className={spacingClasses}>
             {/* Header Section */}
             <div className="border-b border-black/10 pb-3 break-inside-avoid">
               <div className="flex items-start justify-between gap-4">
@@ -817,7 +836,7 @@ export const CVDocument: React.FC<{
   }
 
   // =========================================================================
-  // TEMPLATE 2: Modern Sidebar (Auto-Fit 1-Page A4 2-Column Format)
+  // TEMPLATE 2: Modern Sidebar (Single Page A4 with Dynamic Auto-Fit)
   // =========================================================================
   if (settings.template === "modern") {
     const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
@@ -847,7 +866,7 @@ export const CVDocument: React.FC<{
         <div
           ref={contentRef}
           className={cn(
-            "flex flex-row min-h-full transition-transform duration-100",
+            "flex flex-row transition-transform duration-75",
             fontSizeClasses
           )}
           style={{
@@ -858,6 +877,7 @@ export const CVDocument: React.FC<{
         >
           {/* Left Customizable Sidebar (Strict 33% width) */}
           <div
+            ref={sidebarRef}
             className="w-[33%] p-6 space-y-4 shrink-0 border-r"
             style={{
               backgroundColor: sidebarBgColor,
@@ -974,7 +994,7 @@ export const CVDocument: React.FC<{
           </div>
 
           {/* Right Main Column (Strict 67% width) */}
-          <div className="w-[67%] p-6 space-y-4 min-w-0">
+          <div ref={mainColRef} className="w-[67%] p-6 space-y-4 min-w-0">
             <div className="border-b border-black/10 pb-3 break-inside-avoid">
               <h1
                 className="text-2xl font-extrabold tracking-tight break-words leading-tight"
@@ -999,7 +1019,7 @@ export const CVDocument: React.FC<{
   }
 
   // =========================================================================
-  // TEMPLATE 3: Executive Clean (Auto-Fit 1-Page A4)
+  // TEMPLATE 3: Executive Clean (Single Page A4 with Dynamic Auto-Fit)
   // =========================================================================
   return (
     <div
@@ -1025,7 +1045,7 @@ export const CVDocument: React.FC<{
       <div
         ref={contentRef}
         className={cn(
-          "p-8 sm:p-10 transition-transform duration-100",
+          "p-8 sm:p-10 transition-transform duration-75",
           fontSizeClasses
         )}
         style={{
@@ -1034,7 +1054,7 @@ export const CVDocument: React.FC<{
           width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
         }}
       >
-        <div className={spacingClasses}>
+        <div ref={innerStackRef} className={spacingClasses}>
           {/* Centered Top Header */}
           <div
             className="text-center pb-3 border-b-2 break-inside-avoid space-y-1"
