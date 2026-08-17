@@ -38,12 +38,12 @@ export default function Home() {
       <Navbar />
 
       {/* Main Split Screen Layout */}
-      <main className="flex-1 flex flex-col lg:flex-row h-[calc(100dvh-3.5rem)] overflow-hidden split-layout relative">
+      <main className="flex-1 min-h-0 flex flex-col lg:flex-row h-[calc(100dvh-3.5rem)] overflow-hidden split-layout relative">
         {/* Left Column: Form Panel */}
         <section
           id="form-panel-section"
           className={cn(
-            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full flex-col",
+            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full min-h-0 flex-col",
             mobileView === "form" ? "flex" : "hidden lg:flex"
           )}
         >
@@ -54,7 +54,7 @@ export default function Home() {
         <section
           id="preview-panel-section"
           className={cn(
-            "flex-1 h-full flex-col",
+            "flex-1 h-full min-h-0 flex-col",
             mobileView === "preview" ? "flex" : "hidden lg:flex"
           )}
         >

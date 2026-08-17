@@ -89,10 +89,10 @@ export const PreviewPanel: React.FC = () => {
   return (
     <div
       id="preview-panel-root"
-      className="preview-root-container flex flex-col h-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors"
+      className="preview-root-container flex flex-col h-full min-h-0 w-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors"
     >
       {/* Top Toolbar */}
-      <div className="no-print p-2 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 transition-colors">
+      <div className="no-print p-2 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 shrink-0 transition-colors">
         {/* Zoom Controls */}
         <div className="flex items-center gap-0.5 sm:gap-1 bg-neutral-100 dark:bg-neutral-900/80 p-0.5 sm:p-1 rounded-lg border border-neutral-200 dark:border-neutral-800">
           <Button
@@ -151,7 +151,7 @@ export const PreviewPanel: React.FC = () => {
       {/* Canvas Area: Full 2D Native Pan & Scrollable */}
       <div
         ref={containerRef}
-        className="cv-canvas-container flex-1 overflow-x-auto overflow-y-auto p-2 sm:p-8 relative overscroll-contain"
+        className="cv-canvas-container flex-1 min-h-0 w-full overflow-x-auto overflow-y-auto p-3 sm:p-8 relative"
         style={{
           WebkitOverflowScrolling: "touch",
           backgroundImage: `
@@ -163,18 +163,19 @@ export const PreviewPanel: React.FC = () => {
       >
         {/* Exact Visual Sizing Container to allow natural scrolling & centering in all directions */}
         <div
-          className="cv-sheet-scale-wrapper mx-auto my-0 pb-28 sm:pb-12"
+          className="cv-sheet-scale-wrapper mx-auto my-2"
           style={{
             width: `${visualWidth}px`,
             height: `${visualHeight}px`,
             minWidth: `${visualWidth}px`,
             minHeight: `${visualHeight}px`,
             position: "relative",
+            marginBottom: "90px",
           }}
         >
           {/* Scaled A4 Document */}
           <div
-            className="cv-shadow-wrapper rounded-sm shadow-[0_15px_45px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden"
+            className="cv-shadow-wrapper rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden bg-white"
             style={{
               width: "210mm",
               height: "297mm",

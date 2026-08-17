@@ -72,7 +72,7 @@ export const FormPanel: React.FC = () => {
   const hasNext = currentIndex < allTabs.length - 1;
 
   return (
-    <div className="flex flex-col h-full bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
+    <div className="flex flex-col h-full min-h-0 bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
       {/* Section Navigation Tabs */}
       <div className="p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
