@@ -12,12 +12,14 @@ import {
   FileText,
   Edit2,
   Check,
+  Sparkles,
 } from "lucide-react";
 
 export const PreviewPanel: React.FC = () => {
   const { cvData, updatePdfFileName } = useCV();
   const [zoomLevel, setZoomLevel] = useState<number>(0.85);
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [autoFitScale, setAutoFitScale] = useState<number>(1);
   const [isEditingFileName, setIsEditingFileName] = useState<boolean>(false);
   const [tempFileName, setTempFileName] = useState<string>(
     cvData.settings.pdfFileName ||
@@ -179,11 +181,18 @@ export const PreviewPanel: React.FC = () => {
           )}
         </div>
 
-        {/* Live Status Badge & Print Action */}
+        {/* Dynamic Auto-Fit Indicator & Print Action */}
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Live Sync</span>
+          <div
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-mono"
+            title="Adattamento automatico continuo per mantenere tutto il CV esattamente in 1 pagina A4"
+          >
+            <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
+            <span>
+              {autoFitScale < 1
+                ? `Auto-Fit: ${Math.round(autoFitScale * 100)}% (A4 Pagina Singola)`
+                : "Auto-Fit: 100% (A4 Pagina Singola)"}
+            </span>
           </div>
 
           <Button
@@ -212,7 +221,7 @@ export const PreviewPanel: React.FC = () => {
           backgroundSize: "100% 100%, 24px 24px",
         }}
       >
-        {/* Scaled Sheet with smooth transform */}
+        {/* Scaled Sheet Container */}
         <div
           className="transition-transform duration-200 origin-top flex justify-center pb-28 pt-2 w-[210mm] shrink-0"
           style={{
@@ -220,8 +229,8 @@ export const PreviewPanel: React.FC = () => {
             width: "210mm",
           }}
         >
-          <div className="w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)]">
-            <CVDocument />
+          <div className="w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden">
+            <CVDocument onScaleChange={setAutoFitScale} />
           </div>
         </div>
       </div>

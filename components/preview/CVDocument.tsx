@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import { useCV } from "@/context/CVContext";
 import {
   Mail,
@@ -40,7 +40,10 @@ function isDarkColor(hex: string): boolean {
   return true;
 }
 
-export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
+export const CVDocument: React.FC<{
+  className?: string;
+  onScaleChange?: (scale: number) => void;
+}> = ({ className, onScaleChange }) => {
   const { cvData } = useCV();
   const {
     personalInfo,
@@ -54,6 +57,10 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
     customSections = [],
     settings,
   } = cvData;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [autoFitScale, setAutoFitScale] = useState<number>(1);
 
   // Granular colors
   const primaryTextColor = settings.primaryTextColor || "#09090b";
@@ -74,7 +81,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   const sbTagBg = isSidebarDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.07)";
   const sbTagText = isSidebarDark ? "#ffffff" : "#18181b";
 
-  // Avatar styles with enhanced larger dimensions
+  // Avatar styles
   const avatarShapeClasses = {
     circle: "rounded-full",
     rounded: "rounded-2xl",
@@ -82,34 +89,77 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   }[settings.avatarShape || "circle"];
 
   const avatarSizeClasses = {
-    sm: "w-24 h-24",
-    md: "w-[120px] h-[120px]",
-    lg: "w-[144px] h-[144px]",
+    sm: "w-20 h-20",
+    md: "w-24 h-24",
+    lg: "w-28 h-28",
   }[settings.avatarSize || "md"];
 
   // Font size mapping (Carefully calibrated for elegant single-page fit)
   const fontSizeClasses = {
-    sm: "text-[11.5px] leading-snug",
-    base: "text-[12.5px] leading-normal",
-    lg: "text-[13.5px] leading-relaxed",
+    sm: "text-[11px] leading-snug",
+    base: "text-[12px] leading-normal",
+    lg: "text-[13px] leading-relaxed",
   }[settings.fontSize || "base"];
 
-  // Spacing mapping (Adjustable by user via settings for perfect fit)
+  // Spacing mapping (Adjustable by user via settings)
   const spacingClasses = {
-    compact: "space-y-3",
-    normal: "space-y-4",
-    relaxed: "space-y-6",
+    compact: "space-y-2.5",
+    normal: "space-y-3.5",
+    relaxed: "space-y-5",
   }[settings.spacing || "normal"];
 
   const itemSpacingClasses = {
-    compact: "space-y-1.5",
-    normal: "space-y-2.5",
-    relaxed: "space-y-3.5",
+    compact: "space-y-1",
+    normal: "space-y-2",
+    relaxed: "space-y-3",
   }[settings.spacing || "normal"];
 
   const sectionOrder = settings.sectionOrder && settings.sectionOrder.length > 0
     ? settings.sectionOrder
     : defaultSectionOrder;
+
+  // =========================================================================
+  // DYNAMIC A4 AUTO-FIT ENGINE (Guarantees single-page 210mm x 297mm fit)
+  // =========================================================================
+  useLayoutEffect(() => {
+    const calculateAutoFit = () => {
+      if (!rootRef.current || !contentRef.current) return;
+
+      // Temporarily clear scaling to measure natural unconstrained height
+      contentRef.current.style.transform = "none";
+      contentRef.current.style.width = "100%";
+
+      const targetHeight = rootRef.current.clientHeight || 1123; // Exactly 297mm in pixels
+      const actualHeight = contentRef.current.scrollHeight;
+
+      if (targetHeight > 0 && actualHeight > targetHeight) {
+        // Content exceeds single A4 page -> scale down smoothly with safety margin
+        const calculatedScale = Math.min(1, Math.max(0.4, (targetHeight - 8) / actualHeight));
+        const finalScale = Number(calculatedScale.toFixed(4));
+        setAutoFitScale(finalScale);
+        if (onScaleChange) onScaleChange(finalScale);
+      } else {
+        setAutoFitScale(1);
+        if (onScaleChange) onScaleChange(1);
+      }
+    };
+
+    calculateAutoFit();
+    const timer = setTimeout(calculateAutoFit, 80);
+
+    const observer = new ResizeObserver(() => {
+      calculateAutoFit();
+    });
+
+    if (contentRef.current) {
+      observer.observe(contentRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [cvData, settings, onScaleChange]);
 
   // Dynamic Section Labels Helper
   const getSectionTitle = (key: string, defaultTitle: string) => {
@@ -175,7 +225,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                 <div className="flex items-baseline justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <span
-                      className="font-bold text-[13px] break-words"
+                      className="font-bold text-[12.5px] break-words"
                       style={{ color: primaryTextColor }}
                     >
                       {item.title}
@@ -267,7 +317,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                   <div className="flex items-baseline justify-between gap-4 flex-wrap">
                     <div className="min-w-0">
                       <span
-                        className="font-bold text-[13px] break-words"
+                        className="font-bold text-[12.5px] break-words"
                         style={{ color: primaryTextColor }}
                       >
                         {exp.position}
@@ -329,7 +379,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                   <div className="flex items-baseline justify-between gap-4 flex-wrap">
                     <div className="min-w-0">
                       <span
-                        className="font-bold text-[13px] break-words"
+                        className="font-bold text-[12.5px] break-words"
                         style={{ color: primaryTextColor }}
                       >
                         {edu.degree}
@@ -369,7 +419,6 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
       case "skills":
         if (skillCategories.length === 0) return null;
         if (isSidebar) {
-          // Sidebar custom styling with adaptive luminance
           return (
             <div key="sec-skills-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
               <h3
@@ -391,7 +440,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                       {cat.skills.map((s, idx) => (
                         <span
                           key={idx}
-                          className="px-1.5 py-0.5 rounded text-[10.5px] font-medium break-words whitespace-normal"
+                          className="px-1.5 py-0.5 rounded text-[10px] font-medium break-words whitespace-normal"
                           style={{
                             backgroundColor: sbTagBg,
                             color: sbTagText,
@@ -427,7 +476,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                     {cat.skills.map((s, sIdx) => (
                       <span
                         key={sIdx}
-                        className="px-1.5 py-0.5 rounded text-[10.5px] font-medium break-words"
+                        className="px-1.5 py-0.5 rounded text-[10px] font-medium break-words"
                         style={{
                           backgroundColor: tagBgColor,
                           color: tagTextColor,
@@ -476,7 +525,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             </h3>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: bodyTextColor }}>
               {languages.map((l) => (
-                <div key={l.id} className="inline-flex items-center gap-1 text-[11.5px]">
+                <div key={l.id} className="inline-flex items-center gap-1 text-[11px]">
                   <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{l.language}:</span>
                   <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>{l.proficiency}</span>
                 </div>
@@ -499,10 +548,10 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               <div className="space-y-1 text-xs">
                 {certifications.map((c) => (
                   <div key={c.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11.5px]" style={{ color: sbTextPrimary }}>
+                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>
                       {c.name}
                     </div>
-                    <div className="text-[10.5px] break-words" style={{ color: sbTextMuted }}>
+                    <div className="text-[10px] break-words" style={{ color: sbTextMuted }}>
                       {c.issuer} {c.date ? `(${c.date})` : ""}
                     </div>
                   </div>
@@ -518,7 +567,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             </h3>
             <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
               {certifications.map((c) => (
-                <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11.5px]">
+                <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
                   <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{c.name}</span>
                   <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>
                     {c.issuer} ({c.date})
@@ -543,11 +592,11 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               <div className="space-y-1.5 text-xs">
                 {projects.map((p) => (
                   <div key={p.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11.5px]" style={{ color: sbTextPrimary }}>
+                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>
                       {p.name} {p.role ? `(${p.role})` : ""}
                     </div>
                     {p.description && (
-                      <p className="text-[10.5px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                      <p className="text-[10px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
                         {p.description}
                       </p>
                     )}
@@ -565,11 +614,11 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             >
               {getSectionTitle("projects", "Progetti di Rilievo")}
             </h2>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-1.5">
               {projects.map((p) => (
                 <div key={p.id} className="text-xs space-y-0.5">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <span className="font-bold break-words text-[12.5px]" style={{ color: primaryTextColor }}>
+                    <span className="font-bold break-words text-[12px]" style={{ color: primaryTextColor }}>
                       {p.name} {p.role ? `(${p.role})` : ""}
                     </span>
                     {p.link && (
@@ -577,7 +626,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                         href={formatUrl(p.link)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all"
+                        className="text-[10.5px] font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all"
                         style={{ color: secondaryTextColor }}
                       >
                         <span>{p.link.replace(/^https?:\/\//, "")}</span>
@@ -595,7 +644,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                       {p.technologies.map((t, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-1.5 py-0.5 rounded text-[10px] break-words"
+                          className="px-1.5 py-0.5 rounded text-[9.5px] break-words"
                           style={{ backgroundColor: tagBgColor, color: tagTextColor }}
                         >
                           {t}
@@ -615,129 +664,452 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   // =========================================================================
-  // TEMPLATE 1: CIVVU Minimal (A4 proportions 210mm with min-height 297mm)
+  // TEMPLATE 1: CIVVU Minimal (Auto-Fit 1-Page A4)
   // =========================================================================
   if (settings.template === "minimal") {
     return (
       <div
+        ref={rootRef}
         id="cv-print-root"
         className={cn(
-          "box-border relative font-sans transition-colors duration-200 select-text",
-          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] p-8 sm:p-10",
-          fontSizeClasses,
+          "box-border relative font-sans transition-colors duration-200 select-text overflow-hidden",
+          "w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm]",
           className
         )}
         style={{
           width: "210mm",
+          height: "297mm",
           minWidth: "210mm",
           maxWidth: "210mm",
           minHeight: "297mm",
+          maxHeight: "297mm",
           backgroundColor: paperBgColor,
           color: primaryTextColor,
         }}
       >
-        <div className={spacingClasses}>
-          {/* Header Section */}
-          <div className="border-b border-black/10 pb-3 break-inside-avoid">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1 flex-1 min-w-0">
-                <h1
-                  className="text-2xl font-extrabold tracking-tight break-words leading-tight"
-                  style={{ color: primaryTextColor }}
-                >
-                  {personalInfo.fullName || "Tuo Nome"}
-                </h1>
-                <p
-                  className="text-sm font-semibold tracking-tight break-words"
-                  style={{ color: accentColor }}
-                >
-                  {personalInfo.jobTitle || "Titolo Professionale"}
-                </p>
+        {/* Scaled Auto-Fit Content Container */}
+        <div
+          ref={contentRef}
+          className={cn(
+            "p-8 sm:p-10 transition-transform duration-100",
+            fontSizeClasses
+          )}
+          style={{
+            transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
+            transformOrigin: "top left",
+            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+          }}
+        >
+          <div className={spacingClasses}>
+            {/* Header Section */}
+            <div className="border-b border-black/10 pb-3 break-inside-avoid">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <h1
+                    className="text-2xl font-extrabold tracking-tight break-words leading-tight"
+                    style={{ color: primaryTextColor }}
+                  >
+                    {personalInfo.fullName || "Tuo Nome"}
+                  </h1>
+                  <p
+                    className="text-sm font-semibold tracking-tight break-words"
+                    style={{ color: accentColor }}
+                  >
+                    {personalInfo.jobTitle || "Titolo Professionale"}
+                  </p>
 
-                {/* Contact Pills with Clickable Links */}
-                <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1.5 text-[11.5px]" style={{ color: secondaryTextColor }}>
-                  {personalInfo.email && (
+                  {/* Contact Pills with Clickable Links */}
+                  <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1.5 text-[11px]" style={{ color: secondaryTextColor }}>
+                    {personalInfo.email && (
+                      <a
+                        href={`mailto:${personalInfo.email}`}
+                        className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
+                        style={{ color: secondaryTextColor }}
+                        title="Invia email"
+                      >
+                        <Mail className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.email}</span>
+                      </a>
+                    )}
+                    {personalInfo.phone && (
+                      <a
+                        href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`}
+                        className="inline-flex items-center gap-1 hover:underline transition-colors"
+                        style={{ color: secondaryTextColor }}
+                        title="Chiama"
+                      >
+                        <Phone className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.phone}</span>
+                      </a>
+                    )}
+                    {personalInfo.location && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.location}</span>
+                      </span>
+                    )}
+                    {personalInfo.website && (
+                      <a
+                        href={formatUrl(personalInfo.website)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
+                        style={{ color: secondaryTextColor }}
+                      >
+                        <Globe className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.website.replace(/^https?:\/\//, "")}</span>
+                      </a>
+                    )}
+                    {personalInfo.linkedin && (
+                      <a
+                        href={formatUrl(personalInfo.linkedin)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
+                        style={{ color: secondaryTextColor }}
+                      >
+                        <LinkedinIcon className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</span>
+                      </a>
+                    )}
+                    {personalInfo.github && (
+                      <a
+                        href={formatUrl(personalInfo.github)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
+                        style={{ color: secondaryTextColor }}
+                      >
+                        <GithubIcon className="w-3 h-3 opacity-70 shrink-0" />
+                        <span>{personalInfo.github.replace(/^https?:\/\//, "")}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Avatar with Shape and Size Controls */}
+                {settings.showAvatar && personalInfo.avatarUrl && (
+                  <div
+                    className={cn(
+                      "overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-2xs",
+                      avatarSizeClasses,
+                      avatarShapeClasses
+                    )}
+                  >
+                    <img
+                      src={personalInfo.avatarUrl}
+                      alt={personalInfo.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Dynamic Reordered Sections */}
+            {sectionOrder
+              .filter((s) => s.isVisible)
+              .map((section) => renderSectionByKey(section.key, false))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TEMPLATE 2: Modern Sidebar (Auto-Fit 1-Page A4 2-Column Format)
+  // =========================================================================
+  if (settings.template === "modern") {
+    const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
+    const mainItems = sectionOrder.filter((s) => s.isVisible && s.column !== "sidebar");
+
+    return (
+      <div
+        ref={rootRef}
+        id="cv-print-root"
+        className={cn(
+          "box-border relative font-sans transition-colors duration-200 select-text overflow-hidden",
+          "w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm]",
+          className
+        )}
+        style={{
+          width: "210mm",
+          height: "297mm",
+          minWidth: "210mm",
+          maxWidth: "210mm",
+          minHeight: "297mm",
+          maxHeight: "297mm",
+          background: `linear-gradient(to right, ${sidebarBgColor} 33%, ${paperBgColor} 33%)`,
+          color: primaryTextColor,
+        }}
+      >
+        {/* Scaled Auto-Fit Content Container */}
+        <div
+          ref={contentRef}
+          className={cn(
+            "flex flex-row min-h-full transition-transform duration-100",
+            fontSizeClasses
+          )}
+          style={{
+            transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
+            transformOrigin: "top left",
+            width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+          }}
+        >
+          {/* Left Customizable Sidebar (Strict 33% width) */}
+          <div
+            className="w-[33%] p-6 space-y-4 shrink-0 border-r"
+            style={{
+              backgroundColor: sidebarBgColor,
+              color: sbTextPrimary,
+              borderColor: sbBorderColor,
+            }}
+          >
+            {settings.showAvatar && personalInfo.avatarUrl && (
+              <div
+                className={cn(
+                  "overflow-hidden mx-auto border-2 shadow-sm",
+                  avatarSizeClasses,
+                  avatarShapeClasses
+                )}
+                style={{ borderColor: sbBorderColor }}
+              >
+                <img
+                  src={personalInfo.avatarUrl}
+                  alt={personalInfo.fullName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Contacts Sidebar Section with fluid natural text wrapping */}
+            <div className="space-y-2 break-inside-avoid">
+              <h3
+                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
+              >
+                Contatti
+              </h3>
+              <div className="space-y-1.5 text-[11px]">
+                {personalInfo.email && (
+                  <div className="flex items-start gap-2">
+                    <Mail className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
                     <a
                       href={`mailto:${personalInfo.email}`}
-                      className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
-                      style={{ color: secondaryTextColor }}
-                      title="Invia email"
+                      className="break-words whitespace-normal hover:underline leading-tight"
+                      style={{ color: sbTextSecondary }}
+                      title={personalInfo.email}
                     >
-                      <Mail className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.email}</span>
+                      {personalInfo.email}
                     </a>
-                  )}
-                  {personalInfo.phone && (
+                  </div>
+                )}
+                {personalInfo.phone && (
+                  <div className="flex items-start gap-2">
+                    <Phone className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
                     <a
                       href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`}
-                      className="inline-flex items-center gap-1 hover:underline transition-colors"
-                      style={{ color: secondaryTextColor }}
-                      title="Chiama"
+                      className="break-words whitespace-normal hover:underline leading-tight"
+                      style={{ color: sbTextSecondary }}
                     >
-                      <Phone className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.phone}</span>
+                      {personalInfo.phone}
                     </a>
-                  )}
-                  {personalInfo.location && (
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.location}</span>
+                  </div>
+                )}
+                {personalInfo.location && (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
+                    <span className="break-words whitespace-normal leading-tight" style={{ color: sbTextSecondary }}>
+                      {personalInfo.location}
                     </span>
-                  )}
-                  {personalInfo.website && (
+                  </div>
+                )}
+                {personalInfo.website && (
+                  <div className="flex items-start gap-2">
+                    <Globe className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
                     <a
                       href={formatUrl(personalInfo.website)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
-                      style={{ color: secondaryTextColor }}
+                      className="break-words whitespace-normal hover:underline leading-tight"
+                      style={{ color: sbTextSecondary }}
                     >
-                      <Globe className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.website.replace(/^https?:\/\//, "")}</span>
+                      {personalInfo.website.replace(/^https?:\/\//, "")}
                     </a>
-                  )}
-                  {personalInfo.linkedin && (
+                  </div>
+                )}
+                {personalInfo.linkedin && (
+                  <div className="flex items-start gap-2">
+                    <LinkedinIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
                     <a
                       href={formatUrl(personalInfo.linkedin)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
-                      style={{ color: secondaryTextColor }}
+                      className="break-words whitespace-normal hover:underline leading-tight"
+                      style={{ color: sbTextSecondary }}
                     >
-                      <LinkedinIcon className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</span>
+                      {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
                     </a>
-                  )}
-                  {personalInfo.github && (
+                  </div>
+                )}
+                {personalInfo.github && (
+                  <div className="flex items-start gap-2">
+                    <GithubIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
                     <a
                       href={formatUrl(personalInfo.github)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:underline transition-colors break-all"
-                      style={{ color: secondaryTextColor }}
+                      className="break-words whitespace-normal hover:underline leading-tight"
+                      style={{ color: sbTextSecondary }}
                     >
-                      <GithubIcon className="w-3 h-3 opacity-70 shrink-0" />
-                      <span>{personalInfo.github.replace(/^https?:\/\//, "")}</span>
+                      {personalInfo.github.replace(/^https?:\/\//, "")}
                     </a>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
+            </div>
 
-              {/* Avatar with Shape and Size Controls */}
-              {settings.showAvatar && personalInfo.avatarUrl && (
-                <div
-                  className={cn(
-                    "overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-2xs",
-                    avatarSizeClasses,
-                    avatarShapeClasses
-                  )}
+            {/* Dynamic Sidebar Sections */}
+            {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
+          </div>
+
+          {/* Right Main Column (Strict 67% width) */}
+          <div className="w-[67%] p-6 space-y-4 min-w-0">
+            <div className="border-b border-black/10 pb-3 break-inside-avoid">
+              <h1
+                className="text-2xl font-extrabold tracking-tight break-words leading-tight"
+                style={{ color: primaryTextColor }}
+              >
+                {personalInfo.fullName || "Tuo Nome"}
+              </h1>
+              <p
+                className="text-sm font-semibold mt-0.5 break-words"
+                style={{ color: accentColor }}
+              >
+                {personalInfo.jobTitle || "Titolo Professionale"}
+              </p>
+            </div>
+
+            {/* Dynamic Main Column Sections */}
+            {mainItems.map((section) => renderSectionByKey(section.key, false))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TEMPLATE 3: Executive Clean (Auto-Fit 1-Page A4)
+  // =========================================================================
+  return (
+    <div
+      ref={rootRef}
+      id="cv-print-root"
+      className={cn(
+        "box-border relative font-sans transition-colors duration-200 select-text overflow-hidden",
+        "w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm]",
+        className
+      )}
+      style={{
+        width: "210mm",
+        height: "297mm",
+        minWidth: "210mm",
+        maxWidth: "210mm",
+        minHeight: "297mm",
+        maxHeight: "297mm",
+        backgroundColor: paperBgColor,
+        color: primaryTextColor,
+      }}
+    >
+      {/* Scaled Auto-Fit Content Container */}
+      <div
+        ref={contentRef}
+        className={cn(
+          "p-8 sm:p-10 transition-transform duration-100",
+          fontSizeClasses
+        )}
+        style={{
+          transform: autoFitScale < 1 ? `scale(${autoFitScale})` : "none",
+          transformOrigin: "top left",
+          width: autoFitScale < 1 ? `${(100 / autoFitScale).toFixed(4)}%` : "100%",
+        }}
+      >
+        <div className={spacingClasses}>
+          {/* Centered Top Header */}
+          <div
+            className="text-center pb-3 border-b-2 break-inside-avoid space-y-1"
+            style={{ borderColor: accentColor }}
+          >
+            {settings.showAvatar && personalInfo.avatarUrl && (
+              <div
+                className={cn(
+                  "overflow-hidden mx-auto mb-1.5 border border-black/15 shadow-2xs",
+                  avatarSizeClasses,
+                  avatarShapeClasses
+                )}
+              >
+                <img
+                  src={personalInfo.avatarUrl}
+                  alt={personalInfo.fullName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <h1
+              className="text-2xl font-serif tracking-tight font-bold break-words leading-tight"
+              style={{ color: primaryTextColor }}
+            >
+              {personalInfo.fullName || "Tuo Nome"}
+            </h1>
+            <p
+              className="text-xs font-semibold uppercase tracking-widest break-words"
+              style={{ color: accentColor }}
+            >
+              {personalInfo.jobTitle || "Titolo Professionale"}
+            </p>
+
+            <div className="flex flex-wrap justify-center items-center gap-x-3.5 gap-y-0.5 pt-0.5 text-[11px]" style={{ color: secondaryTextColor }}>
+              {personalInfo.email && (
+                <a href={`mailto:${personalInfo.email}`} className="hover:underline break-all">
+                  {personalInfo.email}
+                </a>
+              )}
+              {personalInfo.phone && (
+                <a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="hover:underline">
+                  • {personalInfo.phone}
+                </a>
+              )}
+              {personalInfo.location && <span>• {personalInfo.location}</span>}
+              {personalInfo.website && (
+                <a
+                  href={formatUrl(personalInfo.website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline break-all"
                 >
-                  <img
-                    src={personalInfo.avatarUrl}
-                    alt={personalInfo.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                  • {personalInfo.website.replace(/^https?:\/\//, "")}
+                </a>
+              )}
+              {personalInfo.linkedin && (
+                <a
+                  href={formatUrl(personalInfo.linkedin)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline break-all"
+                >
+                  • {personalInfo.linkedin.replace(/^https?:\/\//, "")}
+                </a>
+              )}
+              {personalInfo.github && (
+                <a
+                  href={formatUrl(personalInfo.github)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline break-all"
+                >
+                  • {personalInfo.github.replace(/^https?:\/\//, "")}
+                </a>
               )}
             </div>
           </div>
@@ -747,281 +1119,6 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             .filter((s) => s.isVisible)
             .map((section) => renderSectionByKey(section.key, false))}
         </div>
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // TEMPLATE 2: Modern Sidebar (A4 proportions 210mm with min-height 297mm 2-Column)
-  // =========================================================================
-  if (settings.template === "modern") {
-    const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
-    const mainItems = sectionOrder.filter((s) => s.isVisible && s.column !== "sidebar");
-
-    return (
-      <div
-        id="cv-print-root"
-        className={cn(
-          "box-border relative font-sans transition-colors duration-200 select-text flex flex-row",
-          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm]",
-          fontSizeClasses,
-          className
-        )}
-        style={{
-          width: "210mm",
-          minWidth: "210mm",
-          maxWidth: "210mm",
-          minHeight: "297mm",
-          backgroundColor: paperBgColor,
-          color: primaryTextColor,
-        }}
-      >
-        {/* Left Customizable Sidebar with Intelligent Contrast (Strict 33% width) */}
-        <div
-          className="w-[33%] p-6 space-y-4 shrink-0 border-r"
-          style={{
-            backgroundColor: sidebarBgColor,
-            color: sbTextPrimary,
-            borderColor: sbBorderColor,
-          }}
-        >
-          {settings.showAvatar && personalInfo.avatarUrl && (
-            <div
-              className={cn(
-                "overflow-hidden mx-auto border-2 shadow-sm",
-                avatarSizeClasses,
-                avatarShapeClasses
-              )}
-              style={{ borderColor: sbBorderColor }}
-            >
-              <img
-                src={personalInfo.avatarUrl}
-                alt={personalInfo.fullName}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* Contacts Sidebar Section with fluid natural text wrapping */}
-          <div className="space-y-2 break-inside-avoid">
-            <h3
-              className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
-              style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
-            >
-              Contatti
-            </h3>
-            <div className="space-y-1.5 text-[11.5px]">
-              {personalInfo.email && (
-                <div className="flex items-start gap-2">
-                  <Mail className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <a
-                    href={`mailto:${personalInfo.email}`}
-                    className="break-words whitespace-normal hover:underline leading-tight"
-                    style={{ color: sbTextSecondary }}
-                    title={personalInfo.email}
-                  >
-                    {personalInfo.email}
-                  </a>
-                </div>
-              )}
-              {personalInfo.phone && (
-                <div className="flex items-start gap-2">
-                  <Phone className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <a
-                    href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`}
-                    className="break-words whitespace-normal hover:underline leading-tight"
-                    style={{ color: sbTextSecondary }}
-                  >
-                    {personalInfo.phone}
-                  </a>
-                </div>
-              )}
-              {personalInfo.location && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <span className="break-words whitespace-normal leading-tight" style={{ color: sbTextSecondary }}>
-                    {personalInfo.location}
-                  </span>
-                </div>
-              )}
-              {personalInfo.website && (
-                <div className="flex items-start gap-2">
-                  <Globe className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <a
-                    href={formatUrl(personalInfo.website)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-words whitespace-normal hover:underline leading-tight"
-                    style={{ color: sbTextSecondary }}
-                  >
-                    {personalInfo.website.replace(/^https?:\/\//, "")}
-                  </a>
-                </div>
-              )}
-              {personalInfo.linkedin && (
-                <div className="flex items-start gap-2">
-                  <LinkedinIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <a
-                    href={formatUrl(personalInfo.linkedin)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-words whitespace-normal hover:underline leading-tight"
-                    style={{ color: sbTextSecondary }}
-                  >
-                    {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
-                  </a>
-                </div>
-              )}
-              {personalInfo.github && (
-                <div className="flex items-start gap-2">
-                  <GithubIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} />
-                  <a
-                    href={formatUrl(personalInfo.github)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-words whitespace-normal hover:underline leading-tight"
-                    style={{ color: sbTextSecondary }}
-                  >
-                    {personalInfo.github.replace(/^https?:\/\//, "")}
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Dynamic Sidebar Sections */}
-          {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
-        </div>
-
-        {/* Right Main Column (Strict 67% width) */}
-        <div className="w-[67%] p-6 space-y-4 min-w-0">
-          <div className="border-b border-black/10 pb-3 break-inside-avoid">
-            <h1
-              className="text-2xl font-extrabold tracking-tight break-words leading-tight"
-              style={{ color: primaryTextColor }}
-            >
-              {personalInfo.fullName || "Tuo Nome"}
-            </h1>
-            <p
-              className="text-sm font-semibold mt-0.5 break-words"
-              style={{ color: accentColor }}
-            >
-              {personalInfo.jobTitle || "Titolo Professionale"}
-            </p>
-          </div>
-
-          {/* Dynamic Main Column Sections */}
-          {mainItems.map((section) => renderSectionByKey(section.key, false))}
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // TEMPLATE 3: Executive Clean (A4 proportions 210mm with min-height 297mm)
-  // =========================================================================
-  return (
-    <div
-      id="cv-print-root"
-      className={cn(
-        "box-border relative font-sans transition-colors duration-200 select-text",
-        "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] p-8 sm:p-10",
-        fontSizeClasses,
-        className
-      )}
-      style={{
-        width: "210mm",
-        minWidth: "210mm",
-        maxWidth: "210mm",
-        minHeight: "297mm",
-        backgroundColor: paperBgColor,
-        color: primaryTextColor,
-      }}
-    >
-      <div className={spacingClasses}>
-        {/* Centered Top Header */}
-        <div
-          className="text-center pb-3 border-b-2 break-inside-avoid space-y-1"
-          style={{ borderColor: accentColor }}
-        >
-          {settings.showAvatar && personalInfo.avatarUrl && (
-            <div
-              className={cn(
-                "overflow-hidden mx-auto mb-1.5 border border-black/15 shadow-2xs",
-                avatarSizeClasses,
-                avatarShapeClasses
-              )}
-            >
-              <img
-                src={personalInfo.avatarUrl}
-                alt={personalInfo.fullName}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          <h1
-            className="text-2xl font-serif tracking-tight font-bold break-words leading-tight"
-            style={{ color: primaryTextColor }}
-          >
-            {personalInfo.fullName || "Tuo Nome"}
-          </h1>
-          <p
-            className="text-xs font-semibold uppercase tracking-widest break-words"
-            style={{ color: accentColor }}
-          >
-            {personalInfo.jobTitle || "Titolo Professionale"}
-          </p>
-
-          <div className="flex flex-wrap justify-center items-center gap-x-3.5 gap-y-0.5 pt-0.5 text-[11px]" style={{ color: secondaryTextColor }}>
-            {personalInfo.email && (
-              <a href={`mailto:${personalInfo.email}`} className="hover:underline break-all">
-                {personalInfo.email}
-              </a>
-            )}
-            {personalInfo.phone && (
-              <a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="hover:underline">
-                • {personalInfo.phone}
-              </a>
-            )}
-            {personalInfo.location && <span>• {personalInfo.location}</span>}
-            {personalInfo.website && (
-              <a
-                href={formatUrl(personalInfo.website)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline break-all"
-              >
-                • {personalInfo.website.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-            {personalInfo.linkedin && (
-              <a
-                href={formatUrl(personalInfo.linkedin)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline break-all"
-              >
-                • {personalInfo.linkedin.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-            {personalInfo.github && (
-              <a
-                href={formatUrl(personalInfo.github)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline break-all"
-              >
-                • {personalInfo.github.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Dynamic Reordered Sections */}
-        {sectionOrder
-          .filter((s) => s.isVisible)
-          .map((section) => renderSectionByKey(section.key, false))}
       </div>
     </div>
   );
