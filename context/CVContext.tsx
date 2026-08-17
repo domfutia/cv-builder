@@ -17,7 +17,7 @@ import {
 } from "@/types/cv";
 import { initialCVData, defaultSectionOrder, themePresets } from "@/data/initialCV";
 
-const STORAGE_KEY = "once_cv_builder_data_v3";
+const STORAGE_KEY = "once_cv_builder_data_v4";
 
 interface CVContextType {
   cvData: CVData;
@@ -53,8 +53,9 @@ interface CVContextType {
   updateCustomSectionItem: (sectionId: string, itemId: string, data: Partial<CustomSectionItem>) => void;
   removeCustomSectionItem: (sectionId: string, itemId: string) => void;
   reorderCustomSectionItems: (sectionId: string, newOrder: CustomSectionItem[]) => void;
-  // Layout Reorder & Themes
+  // Layout Reorder, Labels & Themes
   updateSectionOrder: (newOrder: SectionOrderConfig[]) => void;
+  updateSectionLabel: (key: string, label: string) => void;
   toggleSectionVisibility: (key: string) => void;
   applyThemePreset: (presetId: string) => void;
   // Settings & Storage
@@ -448,7 +449,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     []
   );
 
-  // Section Reordering & Visibility
+  // Section Reordering, Label Customization & Visibility
   const updateSectionOrder = useCallback((newOrder: SectionOrderConfig[]) => {
     setCvData((prev) => ({
       ...prev,
@@ -457,6 +458,22 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         sectionOrder: newOrder,
       },
     }));
+  }, []);
+
+  const updateSectionLabel = useCallback((key: string, label: string) => {
+    setCvData((prev) => {
+      const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
+      const updated = currentOrder.map((s) =>
+        s.key === key ? { ...s, label: label.trim() || s.label } : s
+      );
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          sectionOrder: updated,
+        },
+      };
+    });
   }, []);
 
   const toggleSectionVisibility = useCallback((key: string) => {
@@ -585,6 +602,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         removeCustomSectionItem,
         reorderCustomSectionItems,
         updateSectionOrder,
+        updateSectionLabel,
         toggleSectionVisibility,
         applyThemePreset,
         updateSettings,

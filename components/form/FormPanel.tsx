@@ -26,13 +26,13 @@ import {
 import { cn } from "@/lib/utils";
 
 type StandardTab =
+  | "settings"
   | "personal"
   | "summary"
   | "experience"
   | "education"
   | "skills"
-  | "projects"
-  | "settings";
+  | "projects";
 
 const standardSections: {
   id: StandardTab;
@@ -40,18 +40,18 @@ const standardSections: {
   shortLabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
+  { id: "settings", label: "Layout & Stile", shortLabel: "Stile", icon: Sliders },
   { id: "personal", label: "Dati Anagrafici", shortLabel: "Anagrafica", icon: User },
   { id: "summary", label: "Profilo Professionale", shortLabel: "Profilo", icon: FileText },
   { id: "experience", label: "Esperienze Lavorative", shortLabel: "Esperienze", icon: Briefcase },
   { id: "education", label: "Formazione & Studi", shortLabel: "Formazione", icon: GraduationCap },
   { id: "skills", label: "Competenze & Tech", shortLabel: "Competenze", icon: Wrench },
   { id: "projects", label: "Progetti & Lingue", shortLabel: "Extra", icon: FolderGit2 },
-  { id: "settings", label: "Layout & Stile", shortLabel: "Stile", icon: Sliders },
 ];
 
 export const FormPanel: React.FC = () => {
   const { cvData, addCustomSection } = useCV();
-  const [activeTab, setActiveTab] = useState<string>("personal");
+  const [activeTab, setActiveTab] = useState<string>("settings");
 
   const handleAddNewSection = () => {
     const defaultTitle = `Sezione ${cvData.customSections.length + 1}`;
@@ -62,6 +62,14 @@ export const FormPanel: React.FC = () => {
   const activeCustomSection = cvData.customSections.find(
     (sec) => sec.id === activeTab
   );
+
+  const allTabs = [
+    ...standardSections.map((s) => s.id),
+    ...cvData.customSections.map((c) => c.id),
+  ];
+  const currentIndex = allTabs.indexOf(activeTab);
+  const hasPrevious = currentIndex > 0;
+  const hasNext = currentIndex < allTabs.length - 1;
 
   return (
     <div className="flex flex-col h-full bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
@@ -127,13 +135,13 @@ export const FormPanel: React.FC = () => {
 
       {/* Form Content Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+        {activeTab === "settings" && <SettingsForm />}
         {activeTab === "personal" && <PersonalInfoForm />}
         {activeTab === "summary" && <SummaryForm />}
         {activeTab === "experience" && <ExperienceForm />}
         {activeTab === "education" && <EducationForm />}
         {activeTab === "skills" && <SkillsForm />}
         {activeTab === "projects" && <ProjectsLanguagesForm />}
-        {activeTab === "settings" && <SettingsForm />}
         {activeCustomSection && (
           <CustomSectionForm key={activeCustomSection.id} section={activeCustomSection} />
         )}
@@ -147,15 +155,10 @@ export const FormPanel: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {activeTab !== "personal" && (
+          {hasPrevious && (
             <button
               type="button"
               onClick={() => {
-                const allTabs = [
-                  ...standardSections.map((s) => s.id),
-                  ...cvData.customSections.map((c) => c.id),
-                ];
-                const currentIndex = allTabs.indexOf(activeTab);
                 if (currentIndex > 0) {
                   setActiveTab(allTabs[currentIndex - 1]);
                 }
@@ -166,15 +169,10 @@ export const FormPanel: React.FC = () => {
             </button>
           )}
 
-          {activeTab !== "settings" ? (
+          {hasNext ? (
             <button
               type="button"
               onClick={() => {
-                const allTabs = [
-                  ...standardSections.map((s) => s.id),
-                  ...cvData.customSections.map((c) => c.id),
-                ];
-                const currentIndex = allTabs.indexOf(activeTab);
                 if (currentIndex < allTabs.length - 1) {
                   setActiveTab(allTabs[currentIndex + 1]);
                 }

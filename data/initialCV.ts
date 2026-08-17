@@ -1,5 +1,8 @@
 import { CVData, SectionOrderConfig, ThemeColors } from "@/types/cv";
 
+// Elegant minimalist silhouette placeholder avatar (Base64 SVG)
+export const defaultAvatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiMxODE4MWIiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjcwIiBmaWxsPSIjZjRmNGY1Ii8+PHBhdGggZD0iTTcwIDM1MCBDNzAgMjUwLCAxNDAgMjMwLCAyMDAgMjMwIEMyNjAgMjMwLCAzMzAgMjUwLCAzMzAgMzUwIFoiIGZpbGw9IiNmNGY0ZjUiLz48L3N2Zz4=";
+
 export const defaultSectionOrder: SectionOrderConfig[] = [
   { id: "sec-summary", key: "summary", label: "Profilo Professionale", isVisible: true },
   { id: "sec-experience", key: "experience", label: "Esperienze Lavorative", isVisible: true },
@@ -122,7 +125,7 @@ export const initialCVData: CVData = {
     website: "https://vender.design",
     linkedin: "https://linkedin.com/in/alexvender",
     github: "https://github.com/alexvender",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
+    avatarUrl: defaultAvatarBase64,
   },
   summary:
     "Product-minded Frontend Engineer con oltre 7 anni di esperienza nella progettazione e sviluppo di Design System scalabili e applicazioni web ad alte prestazioni con React, Next.js e TypeScript. Fortemente orientato all'eccellenza tipografica, micro-interazioni fluide, accessibilità WCAG e architetture modulari.",
@@ -284,7 +287,7 @@ export const initialCVData: CVData = {
     fontFamily: "inter",
     fontSize: "base",
     spacing: "normal",
-    showAvatar: false,
+    showAvatar: true,
     avatarShape: "circle",
     avatarSize: "md",
     sectionOrder: defaultSectionOrder,

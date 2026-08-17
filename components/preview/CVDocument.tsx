@@ -83,8 +83,14 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
     ? settings.sectionOrder
     : defaultSectionOrder;
 
+  // Dynamic Section Labels Helper
+  const getSectionTitle = (key: string, defaultTitle: string) => {
+    const found = sectionOrder.find((s) => s.key === key);
+    return found?.label?.trim() || defaultTitle;
+  };
+
   // Render individual sections dynamically by key
-  const renderSectionByKey = (key: string) => {
+  const renderSectionByKey = (key: string, isSidebar: boolean = false) => {
     switch (key) {
       case "summary":
         if (!summary) return null;
@@ -94,7 +100,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              Profilo Professionale
+              {getSectionTitle("summary", "Profilo Professionale")}
             </h2>
             <p className="leading-relaxed font-normal text-justify" style={{ color: bodyTextColor }}>
               {summary}
@@ -110,7 +116,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              Esperienza Lavorativa
+              {getSectionTitle("experience", "Esperienza Lavorativa")}
             </h2>
 
             <div className={itemSpacingClasses}>
@@ -172,7 +178,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              Formazione & Istruzione
+              {getSectionTitle("education", "Formazione & Istruzione")}
             </h2>
 
             <div className={itemSpacingClasses}>
@@ -284,13 +290,42 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
 
       case "skills":
         if (skillCategories.length === 0) return null;
+        if (isSidebar) {
+          // Sidebar high-contrast layout
+          return (
+            <div key="sec-skills-sb" className="space-y-3 break-inside-avoid page-break-inside-avoid">
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-white/20 text-white">
+                {getSectionTitle("skills", "Competenze")}
+              </h3>
+              <div className="space-y-3">
+                {skillCategories.map((cat) => (
+                  <div key={cat.id} className="space-y-1.5">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-tight text-neutral-200">
+                      {cat.name}
+                    </h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.skills.map((s, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 rounded text-[11px] font-medium bg-white/10 text-neutral-100 border border-white/10 break-words"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
         return (
           <div key="sec-skills" className="space-y-2 break-inside-avoid page-break-inside-avoid">
             <h2
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              Competenze & Tecnologie
+              {getSectionTitle("skills", "Competenze & Tecnologie")}
             </h2>
 
             <div className="grid grid-cols-1 gap-2 pt-1">
@@ -321,10 +356,27 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
 
       case "languages":
         if (languages.length === 0) return null;
+        if (isSidebar) {
+          return (
+            <div key="sec-languages-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-white/20 text-white">
+                {getSectionTitle("languages", "Lingue")}
+              </h3>
+              <div className="space-y-1.5 text-xs text-neutral-200">
+                {languages.map((l) => (
+                  <div key={l.id} className="flex justify-between gap-2">
+                    <span className="font-semibold text-white">{l.language}</span>
+                    <span className="text-neutral-300 opacity-90">{l.proficiency}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
         return (
           <div key="sec-languages" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
             <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: accentColor }}>
-              Lingue
+              {getSectionTitle("languages", "Lingue")}
             </h3>
             <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
               {languages.map((l) => (
@@ -339,10 +391,27 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
 
       case "certifications":
         if (certifications.length === 0) return null;
+        if (isSidebar) {
+          return (
+            <div key="sec-certifications-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-white/20 text-white">
+                {getSectionTitle("certifications", "Certificazioni")}
+              </h3>
+              <div className="space-y-1.5 text-xs text-neutral-200">
+                {certifications.map((c) => (
+                  <div key={c.id} className="space-y-0.5">
+                    <div className="font-semibold text-white break-words">{c.name}</div>
+                    <div className="text-[11px] text-neutral-400">{c.issuer} {c.date ? `(${c.date})` : ""}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
         return (
           <div key="sec-certifications" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
             <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: accentColor }}>
-              Certificazioni
+              {getSectionTitle("certifications", "Certificazioni")}
             </h3>
             <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
               {certifications.map((c) => (
@@ -363,7 +432,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              Progetti di Rilievo
+              {getSectionTitle("projects", "Progetti di Rilievo")}
             </h2>
             <div className="grid grid-cols-1 gap-2">
               {projects.map((p) => (
@@ -546,7 +615,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   }
 
   // =========================================================================
-  // TEMPLATE 2: Modern Sidebar
+  // TEMPLATE 2: Modern Sidebar (High-Contrast & Robust Overflow Protection)
   // =========================================================================
   if (settings.template === "modern") {
     return (
@@ -565,12 +634,12 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
           color: primaryTextColor,
         }}
       >
-        {/* Left Sidebar */}
-        <div className="w-full md:w-[35%] print:w-[35%] bg-black/[0.02] border-r border-black/10 p-6 sm:p-8 space-y-6 shrink-0">
+        {/* Left Dark Sidebar with High Contrast */}
+        <div className="w-full md:w-[35%] print:w-[35%] bg-[#111113] text-neutral-100 p-6 sm:p-7 space-y-6 shrink-0 border-r border-neutral-800">
           {settings.showAvatar && personalInfo.avatarUrl && (
             <div
               className={cn(
-                "overflow-hidden mx-auto border-2 border-black/10 shadow-2xs",
+                "overflow-hidden mx-auto border-2 border-white/20 shadow-sm",
                 avatarSizeClasses,
                 avatarShapeClasses
               )}
@@ -583,57 +652,76 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             </div>
           )}
 
-          {/* Contacts */}
+          {/* Contacts Sidebar Section with guaranteed high contrast */}
           <div className="space-y-3 break-inside-avoid">
-            <h3
-              className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-black/10"
-              style={{ color: accentColor }}
-            >
+            <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-white/20 text-white">
               Contatti
             </h3>
-            <div className="space-y-2 text-xs" style={{ color: secondaryTextColor }}>
+            <div className="space-y-2.5 text-xs text-neutral-200">
               {personalInfo.email && (
-                <div className="flex items-start gap-2">
-                  <Mail className="w-3.5 h-3.5 opacity-70 shrink-0 mt-0.5" />
-                  <a href={`mailto:${personalInfo.email}`} className="break-all hover:underline">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Mail className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <a
+                    href={`mailto:${personalInfo.email}`}
+                    className="truncate hover:text-white transition-colors"
+                    title={personalInfo.email}
+                  >
                     {personalInfo.email}
                   </a>
                 </div>
               )}
               {personalInfo.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                  <a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="hover:underline">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <a
+                    href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`}
+                    className="truncate hover:text-white transition-colors"
+                  >
                     {personalInfo.phone}
                   </a>
                 </div>
               )}
               {personalInfo.location && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                  <span>{personalInfo.location}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <span className="truncate">{personalInfo.location}</span>
                 </div>
               )}
               {personalInfo.website && (
-                <div className="flex items-center gap-2">
-                  <Globe className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                  <a href={formatUrl(personalInfo.website)} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Globe className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <a
+                    href={formatUrl(personalInfo.website)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate hover:text-white transition-colors"
+                  >
                     {personalInfo.website.replace(/^https?:\/\//, "")}
                   </a>
                 </div>
               )}
               {personalInfo.linkedin && (
-                <div className="flex items-center gap-2">
-                  <LinkedinIcon className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                  <a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <LinkedinIcon className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <a
+                    href={formatUrl(personalInfo.linkedin)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate hover:text-white transition-colors"
+                  >
                     {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
                   </a>
                 </div>
               )}
               {personalInfo.github && (
-                <div className="flex items-center gap-2">
-                  <GithubIcon className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                  <a href={formatUrl(personalInfo.github)} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <GithubIcon className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <a
+                    href={formatUrl(personalInfo.github)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate hover:text-white transition-colors"
+                  >
                     {personalInfo.github.replace(/^https?:\/\/(www\.)?github\.com\//, "")}
                   </a>
                 </div>
@@ -641,45 +729,14 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             </div>
           </div>
 
-          {/* Sidebar Skills */}
-          {skillCategories.length > 0 && (
-            <div className="space-y-3 break-inside-avoid page-break-inside-avoid">
-              <h3
-                className="text-xs font-bold uppercase tracking-wider pb-1 border-b border-black/10"
-                style={{ color: accentColor }}
-              >
-                Competenze
-              </h3>
-              <div className="space-y-3">
-                {skillCategories.map((cat) => (
-                  <div key={cat.id} className="space-y-1.5">
-                    <h4 className="text-[11px] font-semibold uppercase tracking-tight" style={{ color: primaryTextColor }}>
-                      {cat.name}
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {cat.skills.map((s, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-0.5 rounded text-[11px] font-medium"
-                          style={{ backgroundColor: tagBgColor, color: tagTextColor }}
-                        >
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Sidebar Languages & Certs */}
-          {languages.length > 0 && renderSectionByKey("languages")}
-          {certifications.length > 0 && renderSectionByKey("certifications")}
+          {/* Sidebar Skills, Languages & Certifications */}
+          {skillCategories.length > 0 && renderSectionByKey("skills", true)}
+          {languages.length > 0 && renderSectionByKey("languages", true)}
+          {certifications.length > 0 && renderSectionByKey("certifications", true)}
         </div>
 
         {/* Right Main Column */}
-        <div className="w-full md:w-[65%] print:w-[65%] p-6 sm:p-8 space-y-6">
+        <div className="w-full md:w-[65%] print:w-[65%] p-6 sm:p-8 space-y-6 min-w-0">
           <div className="border-b border-black/10 pb-4 break-inside-avoid">
             <h1
               className="text-2xl sm:text-3xl font-extrabold tracking-tight"
@@ -698,7 +755,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
           {/* Main column dynamic sections (excluding sidebar elements) */}
           {sectionOrder
             .filter((s) => s.isVisible && s.key !== "skills" && s.key !== "languages" && s.key !== "certifications")
-            .map((section) => renderSectionByKey(section.key))}
+            .map((section) => renderSectionByKey(section.key, false))}
         </div>
       </div>
     );
@@ -796,7 +853,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
         {/* Dynamic Reordered Sections */}
         {sectionOrder
           .filter((s) => s.isVisible)
-          .map((section) => renderSectionByKey(section.key))}
+          .map((section) => renderSectionByKey(section.key, false))}
       </div>
     </div>
   );
