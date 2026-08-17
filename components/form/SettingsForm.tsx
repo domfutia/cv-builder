@@ -191,7 +191,7 @@ export const SettingsForm: React.FC = () => {
     {
       id: "modern",
       name: "Modern Sidebar",
-      desc: "Due colonne bilanciate con profilo & competenze a sinistra ed esperienze a destra.",
+      desc: "Due colonne bilanciate con colonna laterale personalizzabile ed esperienze a destra.",
     },
     {
       id: "executive",
@@ -392,15 +392,15 @@ export const SettingsForm: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: Stili Predefiniti (Theme Presets) */}
+      {/* TAB 2: Stili Predefiniti (4 Temi Professionali Once UI) */}
       {activeSettingsTab === "presets" && (
         <div className="space-y-4">
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-              Temi Curati Once UI
+              Palette Curate Once UI
             </h4>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Applica con 1-click una palette cromatica professionale perfettamente bilanciata
+              4 stili cromatici sobri, desaturati e istituzionali adatti a contesti professionali
             </p>
           </div>
 
@@ -464,7 +464,7 @@ export const SettingsForm: React.FC = () => {
               Controllo Colori Dettagliato
             </h4>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Personalizza ogni elemento cromatico del documento A4
+              Personalizza ogni elemento cromatico del foglio e della colonna laterale
             </p>
           </div>
 
@@ -528,12 +528,12 @@ export const SettingsForm: React.FC = () => {
               <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
                 <span
                   className="w-4 h-4 rounded-full border border-black/20 shrink-0"
-                  style={{ backgroundColor: settings.bodyTextColor || "#3f3f46" }}
+                  style={{ backgroundColor: settings.bodyTextColor || "#27272a" }}
                 />
-                <span className="text-xs font-mono">{settings.bodyTextColor || "#3f3f46"}</span>
+                <span className="text-xs font-mono">{settings.bodyTextColor || "#27272a"}</span>
                 <input
                   type="color"
-                  value={settings.bodyTextColor || "#3f3f46"}
+                  value={settings.bodyTextColor || "#27272a"}
                   onChange={(e) => updateSettings({ bodyTextColor: e.target.value, themePreset: "custom" })}
                   className="w-0 h-0 opacity-0 pointer-events-none absolute"
                 />
@@ -565,7 +565,31 @@ export const SettingsForm: React.FC = () => {
               </label>
             </Card>
 
-            {/* 5. Sfondo del Foglio A4 */}
+            {/* 5. Sfondo Colonna Laterale (Modern Sidebar) */}
+            <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
+              <div>
+                <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                  Sfondo Sidebar (Modern Sidebar)
+                </h5>
+                <p className="text-[11px] text-neutral-500">Colore di fondo della colonna laterale sinistra</p>
+              </div>
+              <label className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 cursor-pointer">
+                <span
+                  className="w-4 h-4 rounded-full border border-black/20 shrink-0"
+                  style={{ backgroundColor: settings.sidebarBgColor || "#18181b" }}
+                />
+                <span className="text-xs font-mono">{settings.sidebarBgColor || "#18181b"}</span>
+                <input
+                  type="color"
+                  value={settings.sidebarBgColor || "#18181b"}
+                  onChange={(e) => updateSettings({ sidebarBgColor: e.target.value, themePreset: "custom" })}
+                  className="w-0 h-0 opacity-0 pointer-events-none absolute"
+                />
+                <Pipette className="w-3 h-3 text-neutral-400" />
+              </label>
+            </Card>
+
+            {/* 6. Sfondo del Foglio A4 */}
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
@@ -589,7 +613,7 @@ export const SettingsForm: React.FC = () => {
               </label>
             </Card>
 
-            {/* 6. Badge Competenze Sfondo e Testo */}
+            {/* 7. Badge Competenze Sfondo e Testo */}
             <Card className="p-3 bg-white dark:bg-neutral-900/80 flex items-center justify-between gap-3">
               <div>
                 <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">

@@ -17,7 +17,7 @@ import {
 } from "@/types/cv";
 import { initialCVData, defaultSectionOrder, themePresets } from "@/data/initialCV";
 
-const STORAGE_KEY = "once_cv_builder_data_v4";
+const STORAGE_KEY = "once_cv_builder_data_v5";
 
 interface CVContextType {
   cvData: CVData;
@@ -83,6 +83,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           if (!parsed.settings.tagBgColor) parsed.settings.tagBgColor = "#f4f4f5";
           if (!parsed.settings.tagTextColor) parsed.settings.tagTextColor = "#18181b";
           if (!parsed.settings.paperBgColor) parsed.settings.paperBgColor = "#ffffff";
+          if (!parsed.settings.sidebarBgColor) parsed.settings.sidebarBgColor = "#18181b";
           return parsed;
         }
       } catch (err) {
@@ -562,6 +563,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!data.customSections) data.customSections = [];
       if (!data.settings) data.settings = initialCVData.settings;
       if (!data.settings.sectionOrder) data.settings.sectionOrder = defaultSectionOrder;
+      if (!data.settings.sidebarBgColor) data.settings.sidebarBgColor = "#18181b";
       setCvData(data);
     }
   }, []);

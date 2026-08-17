@@ -1,15 +1,3 @@
-export interface PersonalInfo {
-  fullName: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
-  location: string;
-  website: string;
-  linkedin: string;
-  github: string;
-  avatarUrl: string;
-}
-
 export interface ExperienceItem {
   id: string;
   company: string;
@@ -44,7 +32,7 @@ export interface SkillCategory {
 export interface LanguageItem {
   id: string;
   language: string;
-  proficiency: string;
+  proficiency: string; // Madrelingua, Fluente (C2), Avanzato (C1), Intermedio (B2), etc.
 }
 
 export interface ProjectItem {
@@ -79,12 +67,23 @@ export interface CustomSection {
   items: CustomSectionItem[];
 }
 
-export type CVTemplate = 'minimal' | 'modern' | 'executive';
-export type CVFontFamily = 'inter' | 'sans' | 'serif' | 'mono';
-export type CVFontSize = 'sm' | 'base' | 'lg';
-export type CVSpacing = 'compact' | 'normal' | 'relaxed';
-export type AvatarShape = 'circle' | 'rounded' | 'square';
-export type AvatarSize = 'sm' | 'md' | 'lg';
+export interface PersonalInfo {
+  fullName: string;
+  jobTitle: string;
+  email: string;
+  phone: string;
+  location: string;
+  website: string;
+  linkedin: string;
+  github: string;
+  avatarUrl?: string;
+}
+
+export type CVTemplate = "minimal" | "modern" | "executive";
+export type CVFontSize = "sm" | "base" | "lg";
+export type CVSpacing = "compact" | "normal" | "relaxed";
+export type AvatarShape = "circle" | "rounded" | "square";
+export type AvatarSize = "sm" | "md" | "lg";
 
 export interface SectionOrderConfig {
   id: string;
@@ -94,19 +93,20 @@ export interface SectionOrderConfig {
 }
 
 export interface ThemeColors {
-  primaryTextColor: string;
-  secondaryTextColor: string;
-  bodyTextColor: string;
-  accentColorHex: string;
-  tagBgColor: string;
-  tagTextColor: string;
-  paperBgColor: string;
+  primaryTextColor: string;    // Titoli principali, nome
+  secondaryTextColor: string;  // Sottotitoli, ruoli, date
+  bodyTextColor: string;       // Paragrafi, bullet points
+  accentColorHex: string;      // Linee divisorie, accenti, icone
+  tagBgColor: string;          // Sfondo pill competenze
+  tagTextColor: string;        // Testo pill competenze
+  paperBgColor: string;        // Sfondo del foglio CV stampato
+  sidebarBgColor?: string;     // Sfondo personalizzato della sidebar (Modern Sidebar)
 }
 
 export interface CVSettings extends ThemeColors {
   template: CVTemplate;
-  themePreset: string;
-  fontFamily: CVFontFamily;
+  themePreset?: string;        // obsidian, nordic, executive, forest, custom
+  fontFamily: "inter" | "serif" | "mono";
   fontSize: CVFontSize;
   spacing: CVSpacing;
   showAvatar: boolean;
