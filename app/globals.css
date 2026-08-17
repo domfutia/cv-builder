@@ -62,11 +62,11 @@ body {
 }
 
 /* =========================================================================
-   STRICT SINGLE-PAGE A4 PRINT OPTIMIZATIONS (@media print)
+   A4 PRINT OPTIMIZATIONS (@media print)
    ========================================================================= */
 @media print {
   @page {
-    size: 210mm 297mm;
+    size: A4 portrait;
     margin: 0 !important;
   }
 
@@ -86,13 +86,6 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
-    page-break-inside: avoid !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -115,30 +108,21 @@ body {
   .split-layout {
     display: block !important;
     width: 210mm !important;
-    height: 297mm !important;
-    max-height: 297mm !important;
-    overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  /* CV Strict A4 Sheet (210mm x 297mm) */
+  /* CV A4 Sheet (210mm wide, natural A4 flow) */
   #cv-print-root {
     display: flex !important;
     width: 210mm !important;
     min-width: 210mm !important;
     max-width: 210mm !important;
-    height: 297mm !important;
     min-height: 297mm !important;
-    max-height: 297mm !important;
     margin: 0 auto !important;
     box-shadow: none !important;
     border: none !important;
     transform: none !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

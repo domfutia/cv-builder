@@ -87,14 +87,14 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
     lg: "w-[144px] h-[144px]",
   }[settings.avatarSize || "md"];
 
-  // Font size mapping (Calibrated for strict A4 fit)
+  // Font size mapping (Carefully calibrated for elegant single-page fit)
   const fontSizeClasses = {
     sm: "text-[11.5px] leading-snug",
     base: "text-[12.5px] leading-normal",
     lg: "text-[13.5px] leading-relaxed",
   }[settings.fontSize || "base"];
 
-  // Spacing mapping (Calibrated for strict A4 fit)
+  // Spacing mapping (Adjustable by user via settings for perfect fit)
   const spacingClasses = {
     compact: "space-y-3",
     normal: "space-y-4",
@@ -615,7 +615,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   // =========================================================================
-  // TEMPLATE 1: CIVVU Minimal (Strict A4 210mm x 297mm)
+  // TEMPLATE 1: CIVVU Minimal (A4 proportions 210mm with min-height 297mm)
   // =========================================================================
   if (settings.template === "minimal") {
     return (
@@ -623,17 +623,15 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
         id="cv-print-root"
         className={cn(
           "box-border relative font-sans transition-colors duration-200 select-text",
-          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] h-[297mm] max-h-[297mm] overflow-hidden p-8",
+          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] p-8 sm:p-10",
           fontSizeClasses,
           className
         )}
         style={{
           width: "210mm",
-          height: "297mm",
           minWidth: "210mm",
           maxWidth: "210mm",
           minHeight: "297mm",
-          maxHeight: "297mm",
           backgroundColor: paperBgColor,
           color: primaryTextColor,
         }}
@@ -754,7 +752,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   }
 
   // =========================================================================
-  // TEMPLATE 2: Modern Sidebar (Strict A4 210mm x 297mm 2-Column Format)
+  // TEMPLATE 2: Modern Sidebar (A4 proportions 210mm with min-height 297mm 2-Column)
   // =========================================================================
   if (settings.template === "modern") {
     const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
@@ -765,17 +763,15 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
         id="cv-print-root"
         className={cn(
           "box-border relative font-sans transition-colors duration-200 select-text flex flex-row",
-          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] h-[297mm] max-h-[297mm] overflow-hidden",
+          "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm]",
           fontSizeClasses,
           className
         )}
         style={{
           width: "210mm",
-          height: "297mm",
           minWidth: "210mm",
           maxWidth: "210mm",
           minHeight: "297mm",
-          maxHeight: "297mm",
           backgroundColor: paperBgColor,
           color: primaryTextColor,
         }}
@@ -922,24 +918,22 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   }
 
   // =========================================================================
-  // TEMPLATE 3: Executive Clean (Strict A4 210mm x 297mm)
+  // TEMPLATE 3: Executive Clean (A4 proportions 210mm with min-height 297mm)
   // =========================================================================
   return (
     <div
       id="cv-print-root"
       className={cn(
         "box-border relative font-sans transition-colors duration-200 select-text",
-        "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] h-[297mm] max-h-[297mm] overflow-hidden p-8",
+        "w-[210mm] min-w-[210mm] max-w-[210mm] min-h-[297mm] p-8 sm:p-10",
         fontSizeClasses,
         className
       )}
       style={{
         width: "210mm",
-        height: "297mm",
         minWidth: "210mm",
         maxWidth: "210mm",
         minHeight: "297mm",
-        maxHeight: "297mm",
         backgroundColor: paperBgColor,
         color: primaryTextColor,
       }}
