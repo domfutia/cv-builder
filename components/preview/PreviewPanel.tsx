@@ -9,22 +9,14 @@ import {
   ZoomOut,
   Printer,
   Maximize2,
-  FileText,
-  Edit2,
-  Check,
   Sparkles,
 } from "lucide-react";
 
 export const PreviewPanel: React.FC = () => {
-  const { cvData, updatePdfFileName } = useCV();
+  const { cvData } = useCV();
   const [zoomLevel, setZoomLevel] = useState<number>(0.85);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [autoFitScale, setAutoFitScale] = useState<number>(1);
-  const [isEditingFileName, setIsEditingFileName] = useState<boolean>(false);
-  const [tempFileName, setTempFileName] = useState<string>(
-    cvData.settings.pdfFileName ||
-      `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`
-  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   const calculateFitZoom = useCallback(() => {
@@ -62,14 +54,6 @@ export const PreviewPanel: React.FC = () => {
     setZoomLevel(calculateFitZoom());
   };
 
-  const handleSaveFileName = () => {
-    const clean = tempFileName.trim().replace(/[/\\?%*:|"<>]/g, "");
-    if (clean) {
-      updatePdfFileName(clean);
-    }
-    setIsEditingFileName(false);
-  };
-
   const handleScaleChange = useCallback((scale: number) => {
     setAutoFitScale(scale);
   }, []);
@@ -91,14 +75,10 @@ export const PreviewPanel: React.FC = () => {
     }, 150);
   };
 
-  const currentFileName =
-    cvData.settings.pdfFileName ||
-    `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`;
-
   return (
-    <div className="flex flex-col h-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors">
+    <div id="preview-panel-root" className="preview-root-container flex flex-col h-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors">
       {/* Top Toolbar */}
-      <div className="p-2 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 transition-colors">
+      <div className="no-print p-2 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 transition-colors">
         {/* Zoom Controls */}
         <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-900/80 p-0.5 sm:p-1 rounded-lg border border-neutral-200 dark:border-neutral-800">
           <Button
@@ -138,53 +118,6 @@ export const PreviewPanel: React.FC = () => {
           </button>
         </div>
 
-        {/* PDF File Name Modifier Toolbar Input (Desktop) */}
-        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
-          <FileText className="w-3.5 h-3.5 text-neutral-400" />
-          <span className="text-[10px] uppercase font-semibold text-neutral-400">PDF:</span>
-          {isEditingFileName ? (
-            <div className="flex items-center gap-1">
-              <input
-                type="text"
-                value={tempFileName}
-                onChange={(e) => setTempFileName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveFileName();
-                  if (e.key === "Escape") setIsEditingFileName(false);
-                }}
-                className="px-1.5 py-0.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-white font-mono focus:outline-none max-w-[130px]"
-                autoFocus
-              />
-              <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
-              <button
-                type="button"
-                onClick={handleSaveFileName}
-                className="p-1 rounded bg-neutral-900 text-white dark:bg-neutral-200 dark:text-neutral-950 hover:opacity-90 cursor-pointer"
-              >
-                <Check className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <span className="font-mono text-neutral-700 dark:text-neutral-300 max-w-[120px] truncate" title={currentFileName}>
-                {currentFileName}
-              </span>
-              <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setTempFileName(currentFileName);
-                  setIsEditingFileName(true);
-                }}
-                className="p-0.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 rounded transition-colors cursor-pointer"
-                title="Modifica nome file"
-              >
-                <Edit2 className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* Dynamic Auto-Fit Indicator & Print Action */}
         <div className="flex items-center gap-2">
           <div
@@ -213,10 +146,10 @@ export const PreviewPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Canvas Area (Smooth touch scrollable & centered A4 Sheet) */}
+      {/* Canvas Area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-x-auto overflow-y-auto p-2 sm:p-6 flex items-start justify-center relative select-none touch-pan-x touch-pan-y"
+        className="cv-canvas-container flex-1 overflow-x-auto overflow-y-auto p-2 sm:p-6 flex items-start justify-center relative select-none touch-pan-x touch-pan-y"
         style={{
           backgroundImage: `
             radial-gradient(circle at top, rgba(0, 0, 0, 0.03) 0%, transparent 70%),
@@ -227,13 +160,13 @@ export const PreviewPanel: React.FC = () => {
       >
         {/* Scaled Sheet Container */}
         <div
-          className="transition-transform duration-200 origin-top flex justify-center pb-28 pt-2 w-[210mm] shrink-0"
+          className="cv-sheet-scale-wrapper transition-transform duration-200 origin-top flex justify-center pb-28 pt-2 w-[210mm] shrink-0"
           style={{
             transform: `scale(${zoomLevel})`,
             width: "210mm",
           }}
         >
-          <div className="w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden">
+          <div className="cv-shadow-wrapper w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden">
             <CVDocument onScaleChange={handleScaleChange} />
           </div>
         </div>

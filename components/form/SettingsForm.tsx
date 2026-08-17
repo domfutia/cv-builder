@@ -39,7 +39,6 @@ import {
   ArrowRightLeft,
   Plus,
   PlusCircle,
-  FileText,
   UserCheck,
 } from "lucide-react";
 import { CVTemplate, CVFontSize, CVSpacing, SectionOrderConfig } from "@/types/cv";
@@ -210,9 +209,8 @@ export const SettingsForm: React.FC = () => {
     addCustomSection,
     applyThemePreset,
     loadDemoProfile,
-    updatePdfFileName,
   } = useCV();
-  const { settings, personalInfo } = cvData;
+  const { settings } = cvData;
   const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors" | "demos">("layout");
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
@@ -314,15 +312,11 @@ export const SettingsForm: React.FC = () => {
     { id: "relaxed", name: "Ampio" },
   ];
 
-  const currentFileName =
-    settings.pdfFileName ||
-    `${personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`;
-
   return (
     <div className="space-y-6">
       <SectionHeader
         title="Personalizzazione & Struttura"
-        subtitle="Scegli template, gestisci nome file PDF, riordina le sezioni del CV e configura gli stili"
+        subtitle="Scegli template, gestisci i profili di esempio, riordina le sezioni del CV e configura gli stili"
         icon={<Sliders className="w-5 h-5" />}
       />
 
@@ -385,29 +379,6 @@ export const SettingsForm: React.FC = () => {
       {/* TAB 1: Layout, Template & Riordino Sezioni */}
       {activeSettingsTab === "layout" && (
         <div className="space-y-6">
-          {/* Nome File PDF per Download */}
-          <Card className="p-3.5 bg-white dark:bg-neutral-900/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-neutral-500" />
-                <span>Nome File PDF per il Download</span>
-              </label>
-              <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={currentFileName}
-                onChange={(e) => updatePdfFileName(e.target.value)}
-                placeholder="es. Mario_Rossi_CV"
-                className="flex-1 px-3 py-1.5 text-xs font-mono rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-neutral-400"
-              />
-            </div>
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-snug">
-              Questo nome verrà usato automaticamente quando salvi o stampi il PDF dal browser.
-            </p>
-          </Card>
-
           {/* Template Selector */}
           <div className="space-y-3">
             <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wide flex items-center gap-2">
@@ -1005,6 +976,12 @@ export const SettingsForm: React.FC = () => {
                         </p>
                       </div>
                     </div>
+
+                    {prof.tagline && (
+                      <p className="text-[11px] font-medium text-neutral-700 dark:text-neutral-300 pt-0.5">
+                        {prof.tagline}
+                      </p>
+                    )}
 
                     <div className="flex items-center gap-2 flex-wrap pt-1 text-[10px]">
                       <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-medium">

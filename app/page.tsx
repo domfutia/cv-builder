@@ -33,8 +33,9 @@ export default function Home() {
       <main className="flex-1 flex flex-col lg:flex-row h-[calc(100dvh-3.5rem)] overflow-hidden split-layout relative">
         {/* Left Column: Form Panel */}
         <section
+          id="form-panel-section"
           className={cn(
-            "w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col pb-20 lg:pb-0",
+            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col pb-20 lg:pb-0",
             mobileView === "form" ? "flex" : "hidden lg:flex"
           )}
         >
@@ -43,6 +44,7 @@ export default function Home() {
 
         {/* Right Column: Live Preview Panel */}
         <section
+          id="preview-panel-section"
           className={cn(
             "flex-1 h-full flex flex-col pb-20 lg:pb-0",
             mobileView === "preview" ? "flex" : "hidden lg:flex"
@@ -52,7 +54,7 @@ export default function Home() {
         </section>
 
         {/* Mobile Floating Action Bar (Pill on bottom) */}
-        <div className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl p-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 shadow-2xl shadow-black/30 flex items-center gap-1.5">
+        <div className="no-print lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl p-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 shadow-2xl shadow-black/30 flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setMobileView("form")}

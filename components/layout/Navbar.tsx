@@ -106,8 +106,8 @@ export const Navbar: React.FC = () => {
           </span>
         </div>
 
-        {/* Customizable PDF File Name Chip (Desktop / Tablet) */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
+        {/* Customizable PDF File Name Chip (Top Left next to CIVVU) */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
           <FileText className="w-3.5 h-3.5 text-neutral-400" />
           {isEditingFileName ? (
             <div className="flex items-center gap-1">
