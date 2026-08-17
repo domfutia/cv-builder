@@ -91,8 +91,8 @@ export const PersonalInfoForm: React.FC = () => {
   };
 
   const shapes: { id: AvatarShape; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: "circle", label: "Circolare", icon: Circle },
-    { id: "rounded", label: "Arrotondato", icon: Square },
+    { id: "circle", label: "Tondo", icon: Circle },
+    { id: "rounded", label: "Curvo", icon: Square },
     { id: "square", label: "Squadrato", icon: Square },
   ];
 
@@ -231,7 +231,7 @@ export const PersonalInfoForm: React.FC = () => {
               </div>
             )}
 
-            {/* Shape selector */}
+            {/* Shape selector with responsive non-overflowing pill buttons */}
             <div className="space-y-1">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
                 Forma Foto
@@ -242,8 +242,9 @@ export const PersonalInfoForm: React.FC = () => {
                     key={s.id}
                     type="button"
                     onClick={() => updateSettings({ avatarShape: s.id })}
+                    title={`Forma ${s.id}`}
                     className={cn(
-                      "py-1 px-1.5 rounded-md border text-[11px] font-medium transition-all text-center cursor-pointer",
+                      "py-1.5 px-1 rounded-md border text-[10px] sm:text-[11px] font-medium transition-all text-center cursor-pointer truncate",
                       settings.avatarShape === s.id
                         ? "bg-neutral-900 text-white dark:bg-neutral-200 dark:text-neutral-950 border-neutral-900 dark:border-neutral-300 font-semibold"
                         : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
@@ -255,7 +256,7 @@ export const PersonalInfoForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Size selector */}
+            {/* Size selector with responsive non-overflowing pill buttons */}
             <div className="space-y-1">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
                 Dimensione Foto
@@ -266,8 +267,9 @@ export const PersonalInfoForm: React.FC = () => {
                     key={s.id}
                     type="button"
                     onClick={() => updateSettings({ avatarSize: s.id })}
+                    title={`Dimensione ${s.label}`}
                     className={cn(
-                      "py-1 px-1.5 rounded-md border text-[11px] font-medium transition-all text-center cursor-pointer",
+                      "py-1.5 px-1 rounded-md border text-[10px] sm:text-[11px] font-medium transition-all text-center cursor-pointer truncate",
                       settings.avatarSize === s.id
                         ? "bg-neutral-900 text-white dark:bg-neutral-200 dark:text-neutral-950 border-neutral-900 dark:border-neutral-300 font-semibold"
                         : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"

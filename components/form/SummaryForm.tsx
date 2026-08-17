@@ -8,14 +8,20 @@ import { Card } from "@/components/ui/Card";
 import { FileText } from "lucide-react";
 
 export const SummaryForm: React.FC = () => {
-  const { cvData, updateSummary } = useCV();
+  const { cvData, updateSummary, updateSectionLabel, deleteSection } = useCV();
+  const sectionTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "summary")?.label || "Profilo Professionale";
 
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Profilo Professionale"
+        title={sectionTitle}
         subtitle="Sintetizza in poche righe chi sei, i tuoi punti di forza e i tuoi obiettivi"
         icon={<FileText className="w-5 h-5" />}
+        editableTitle={true}
+        onTitleChange={(newTitle) => updateSectionLabel("summary", newTitle)}
+        canDelete={true}
+        onDelete={() => deleteSection("summary")}
       />
 
       <Card>

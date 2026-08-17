@@ -65,20 +65,20 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
 
   return (
     <div ref={setNodeRef} style={style} className="touch-none">
-      <Card className="transition-all duration-200 border-neutral-800 hover:border-neutral-700 bg-neutral-900/80">
-        <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-800/60">
+      <Card className="transition-all duration-200 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 bg-white dark:bg-neutral-900/80">
+        <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200 dark:border-neutral-800/60">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
               type="button"
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 text-neutral-500 hover:text-neutral-200 rounded hover:bg-neutral-800 transition-colors"
+              className="cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               title="Trascina per riordinare"
             >
               <GripVertical className="w-4 h-4" />
             </button>
             <div className="truncate">
-              <h4 className="text-sm font-semibold text-neutral-200 truncate">
+              <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
                 {edu.degree || "Titolo di Studio"}
                 {edu.institution ? ` • ${edu.institution}` : ""}
               </h4>
@@ -93,7 +93,7 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-200"
+              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -101,7 +101,7 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="p-1.5 h-8 text-neutral-500 hover:text-red-400 hover:bg-red-950/30"
+              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
               title="Elimina formazione"
             >
               <Trash2 className="w-4 h-4" />
@@ -169,11 +169,11 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
                 id={`edu-isCurrent-${edu.id}`}
                 checked={edu.isCurrent}
                 onChange={(e) => onUpdate({ isCurrent: e.target.checked })}
-                className="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-neutral-200 focus:ring-neutral-500 cursor-pointer"
+                className="w-4 h-4 rounded bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-200 focus:ring-neutral-500 cursor-pointer"
               />
               <label
                 htmlFor={`edu-isCurrent-${edu.id}`}
-                className="text-xs text-neutral-300 select-none cursor-pointer"
+                className="text-xs text-neutral-700 dark:text-neutral-300 select-none cursor-pointer"
               >
                 Percorso di studio attualmente in corso
               </label>
@@ -194,8 +194,18 @@ const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
 };
 
 export const EducationForm: React.FC = () => {
-  const { cvData, addEducation, updateEducation, removeEducation, reorderEducations } =
-    useCV();
+  const {
+    cvData,
+    addEducation,
+    updateEducation,
+    removeEducation,
+    reorderEducations,
+    updateSectionLabel,
+    deleteSection,
+  } = useCV();
+
+  const sectionTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "education")?.label || "Formazione & Studi";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -220,9 +230,13 @@ export const EducationForm: React.FC = () => {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Formazione & Istruzione"
-        subtitle="Inserisci i titoli accademici, certificazioni universitarie e corsi"
+        title={sectionTitle}
+        subtitle="Inserisci i titoli accademici, lauree e diplomi di studio"
         icon={<GraduationCap className="w-5 h-5" />}
+        editableTitle={true}
+        onTitleChange={(newTitle) => updateSectionLabel("education", newTitle)}
+        canDelete={true}
+        onDelete={() => deleteSection("education")}
         action={
           <Button
             variant="primary"
@@ -236,10 +250,10 @@ export const EducationForm: React.FC = () => {
       />
 
       {cvData.educations.length === 0 ? (
-        <div className="text-center py-10 px-4 border border-dashed border-neutral-800 rounded-xl bg-neutral-900/30">
-          <GraduationCap className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-          <p className="text-sm text-neutral-400 font-medium">Nessuna formazione inserita</p>
-          <p className="text-xs text-neutral-600 mt-1 mb-4">
+        <div className="text-center py-10 px-4 border border-dashed border-neutral-300 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/30">
+          <GraduationCap className="w-8 h-8 text-neutral-400 dark:text-neutral-600 mx-auto mb-2" />
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Nessuna formazione inserita</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-600 mt-1 mb-4">
             Aggiungi università, master o scuole superiori
           </p>
           <Button variant="secondary" size="sm" onClick={addEducation} icon={<Plus className="w-4 h-4" />}>

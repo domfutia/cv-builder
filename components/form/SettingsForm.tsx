@@ -35,17 +35,31 @@ import {
   Sparkles,
   Layers,
   Edit2,
+  Trash2,
+  ArrowRightLeft,
+  Plus,
+  PlusCircle,
 } from "lucide-react";
 import { CVTemplate, CVFontSize, CVSpacing, SectionOrderConfig } from "@/types/cv";
-import { themePresets, defaultSectionOrder } from "@/data/initialCV";
+import { themePresets, defaultSectionOrder, standardSectionsMeta } from "@/data/initialCV";
 import { cn } from "@/lib/utils";
 
-// Sortable row component with editable section label
+// Sortable row component with editable section label, visibility, column mover and delete
 const SortableSectionItem: React.FC<{
   section: SectionOrderConfig;
+  isModernTemplate: boolean;
   onToggleVisibility: () => void;
   onUpdateLabel: (newLabel: string) => void;
-}> = ({ section, onToggleVisibility, onUpdateLabel }) => {
+  onMoveColumn?: (newColumn: "main" | "sidebar") => void;
+  onDelete: () => void;
+}> = ({
+  section,
+  isModernTemplate,
+  onToggleVisibility,
+  onUpdateLabel,
+  onMoveColumn,
+  onDelete,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempLabel, setTempLabel] = useState(section.label);
 
@@ -71,6 +85,8 @@ const SortableSectionItem: React.FC<{
     }
     setIsEditing(false);
   };
+
+  const isSidebar = section.column === "sidebar";
 
   return (
     <div
@@ -131,19 +147,49 @@ const SortableSectionItem: React.FC<{
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={onToggleVisibility}
-        className={cn(
-          "p-1.5 rounded-md transition-colors cursor-pointer shrink-0",
-          section.isVisible
-            ? "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
-            : "text-neutral-400 dark:text-neutral-600 hover:text-neutral-700 dark:hover:text-neutral-400"
+      <div className="flex items-center gap-1 shrink-0">
+        {/* Modern Sidebar Column Switcher */}
+        {isModernTemplate && onMoveColumn && (
+          <button
+            type="button"
+            onClick={() => onMoveColumn(isSidebar ? "main" : "sidebar")}
+            className="px-2 py-1 rounded text-[10px] font-medium bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title={isSidebar ? "Sposta nella Colonna Principale" : "Sposta nella Sidebar Laterale"}
+          >
+            <ArrowRightLeft className="w-2.5 h-2.5" />
+            <span className="hidden sm:inline">{isSidebar ? "In Contenuto" : "In Sidebar"}</span>
+          </button>
         )}
-        title={section.isVisible ? "Nascondi sezione nel CV" : "Mostra sezione nel CV"}
-      >
-        {section.isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-      </button>
+
+        {/* Visibility toggle */}
+        <button
+          type="button"
+          onClick={onToggleVisibility}
+          className={cn(
+            "p-1.5 rounded-md transition-colors cursor-pointer",
+            section.isVisible
+              ? "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              : "text-neutral-400 dark:text-neutral-600 hover:text-neutral-700 dark:hover:text-neutral-400"
+          )}
+          title={section.isVisible ? "Nascondi sezione nel CV" : "Mostra sezione nel CV"}
+        >
+          {section.isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        </button>
+
+        {/* Delete section button */}
+        <button
+          type="button"
+          onClick={() => {
+            if (confirm(`Rimuovere la sezione "${section.label}" dal documento?`)) {
+              onDelete();
+            }
+          }}
+          className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+          title="Elimina questa sezione dal CV"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -154,15 +200,30 @@ export const SettingsForm: React.FC = () => {
     updateSettings,
     updateSectionOrder,
     updateSectionLabel,
+    moveSectionColumn,
     toggleSectionVisibility,
+    deleteSection,
+    restoreSection,
+    addCustomSection,
     applyThemePreset,
   } = useCV();
   const { settings } = cvData;
   const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors">("layout");
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+  const isModern = settings.template === "modern";
 
   const sectionsList = settings.sectionOrder && settings.sectionOrder.length > 0
     ? settings.sectionOrder
     : defaultSectionOrder;
+
+  const sidebarSections = sectionsList.filter((s) => s.column === "sidebar");
+  const mainSections = sectionsList.filter((s) => s.column !== "sidebar");
+
+  // Determine missing standard sections that user can restore
+  const missingStandardSections = standardSectionsMeta.filter(
+    (meta) => !sectionsList.some((s) => s.key === meta.key)
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -173,12 +234,48 @@ export const SettingsForm: React.FC = () => {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEndGeneral = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const oldIndex = sectionsList.findIndex((item) => item.id === active.id);
       const newIndex = sectionsList.findIndex((item) => item.id === over.id);
       updateSectionOrder(arrayMove(sectionsList, oldIndex, newIndex));
+    }
+  };
+
+  const handleDragEndSidebar = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldSubIndex = sidebarSections.findIndex((item) => item.id === active.id);
+      const newSubIndex = sidebarSections.findIndex((item) => item.id === over.id);
+      const reorderedSub = arrayMove(sidebarSections, oldSubIndex, newSubIndex);
+
+      // Reassemble global sectionOrder keeping relative positions
+      const newGlobal = sectionsList.map((s) => {
+        if (s.column === "sidebar") {
+          return reorderedSub.shift() || s;
+        }
+        return s;
+      });
+      updateSectionOrder(newGlobal);
+    }
+  };
+
+  const handleDragEndMain = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldSubIndex = mainSections.findIndex((item) => item.id === active.id);
+      const newSubIndex = mainSections.findIndex((item) => item.id === over.id);
+      const reorderedSub = arrayMove(mainSections, oldSubIndex, newSubIndex);
+
+      // Reassemble global sectionOrder keeping relative positions
+      const newGlobal = sectionsList.map((s) => {
+        if (s.column !== "sidebar") {
+          return reorderedSub.shift() || s;
+        }
+        return s;
+      });
+      updateSectionOrder(newGlobal);
     }
   };
 
@@ -191,7 +288,7 @@ export const SettingsForm: React.FC = () => {
     {
       id: "modern",
       name: "Modern Sidebar",
-      desc: "Due colonne bilanciate con colonna laterale personalizzabile ed esperienze a destra.",
+      desc: "Due colonne bilanciate: colonna laterale a sinistra e contenuti a destra.",
     },
     {
       id: "executive",
@@ -296,49 +393,212 @@ export const SettingsForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Riordino Sezioni del CV con Drag & Drop e Rinominazione Titoli */}
-          <div className="space-y-3 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
-            <div className="flex items-center justify-between">
+          {/* Riordino Sezioni del CV */}
+          <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide flex items-center gap-2">
-                  <Layers className="w-3.5 h-3.5" /> Riordino Sezioni & Titoli Personalizzati
+                  <Layers className="w-3.5 h-3.5" />
+                  {isModern ? "Gestione Sezioni per Colonne (Modern Sidebar)" : "Riordino Sezioni & Titoli"}
                 </label>
                 <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-                  Trascina le sezioni, clicca sull&apos;icona matita per personalizzare il titolo o usa l&apos;occhio per nasconderle
+                  {isModern
+                    ? "Organizza separatamente le sezioni della Sidebar e del Contenuto principale, o spostale tra le due colonne"
+                    : "Trascina per riordinare, rinomina i titoli con la matita o elimina le sezioni non necessarie"}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => updateSectionOrder(defaultSectionOrder)}
-                className="text-[11px] text-neutral-500 hover:text-neutral-900 dark:hover:text-white underline cursor-pointer"
-              >
-                Reset ordine
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateSectionOrder(defaultSectionOrder)}
+                  className="text-[11px] text-neutral-500 hover:text-neutral-900 dark:hover:text-white underline cursor-pointer"
+                >
+                  Reset ordine
+                </button>
+              </div>
             </div>
 
-            <Card className="p-3 bg-neutral-50/50 dark:bg-neutral-950/40">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sectionsList.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2">
-                    {sectionsList.map((section) => (
-                      <SortableSectionItem
-                        key={section.id}
-                        section={section}
-                        onToggleVisibility={() => toggleSectionVisibility(section.key)}
-                        onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
-                      />
-                    ))}
+            {/* If Modern Sidebar is Active: 2 Distinct Vertical Columns */}
+            {isModern ? (
+              <div className="space-y-4">
+                {/* 1. Colonna Laterale (Sidebar) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-neutral-100" />
+                      Colonna Laterale (Sidebar Sinistra)
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {sidebarSections.length} sezioni
+                    </span>
                   </div>
-                </SortableContext>
-              </DndContext>
-            </Card>
+
+                  <Card className="p-2.5 bg-neutral-50/70 dark:bg-neutral-950/60 border-neutral-300 dark:border-neutral-800">
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEndSidebar}
+                    >
+                      <SortableContext
+                        items={sidebarSections.map((s) => s.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2">
+                          {sidebarSections.length === 0 ? (
+                            <p className="text-xs text-neutral-400 text-center py-3 italic">
+                              Nessuna sezione nella sidebar. Usa &quot;In Sidebar&quot; sotto per aggiungerne una.
+                            </p>
+                          ) : (
+                            sidebarSections.map((section) => (
+                              <SortableSectionItem
+                                key={section.id}
+                                section={section}
+                                isModernTemplate={true}
+                                onToggleVisibility={() => toggleSectionVisibility(section.key)}
+                                onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
+                                onMoveColumn={(col) => moveSectionColumn(section.key, col)}
+                                onDelete={() => deleteSection(section.key)}
+                              />
+                            ))
+                          )}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </Card>
+                </div>
+
+                {/* 2. Colonna Principale (Contenuto) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600" />
+                      Colonna Principale (Contenuto Destra)
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {mainSections.length} sezioni
+                    </span>
+                  </div>
+
+                  <Card className="p-2.5 bg-neutral-50/70 dark:bg-neutral-950/60 border-neutral-300 dark:border-neutral-800">
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEndMain}
+                    >
+                      <SortableContext
+                        items={mainSections.map((s) => s.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2">
+                          {mainSections.length === 0 ? (
+                            <p className="text-xs text-neutral-400 text-center py-3 italic">
+                              Nessuna sezione nel contenuto principale.
+                            </p>
+                          ) : (
+                            mainSections.map((section) => (
+                              <SortableSectionItem
+                                key={section.id}
+                                section={section}
+                                isModernTemplate={true}
+                                onToggleVisibility={() => toggleSectionVisibility(section.key)}
+                                onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
+                                onMoveColumn={(col) => moveSectionColumn(section.key, col)}
+                                onDelete={() => deleteSection(section.key)}
+                              />
+                            ))
+                          )}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </Card>
+                </div>
+              </div>
+            ) : (
+              /* Single list DND for Minimal & Executive Templates */
+              <Card className="p-3 bg-neutral-50/50 dark:bg-neutral-950/40">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEndGeneral}
+                >
+                  <SortableContext
+                    items={sectionsList.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {sectionsList.map((section) => (
+                        <SortableSectionItem
+                          key={section.id}
+                          section={section}
+                          isModernTemplate={false}
+                          onToggleVisibility={() => toggleSectionVisibility(section.key)}
+                          onUpdateLabel={(newLabel) => updateSectionLabel(section.key, newLabel)}
+                          onDelete={() => deleteSection(section.key)}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </Card>
+            )}
+
+            {/* Aggiungi / Ripristina Sezioni */}
+            <div className="relative pt-1">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-neutral-300 dark:border-neutral-700 shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Aggiungi Sezione al CV</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const title = prompt("Inserisci il titolo della nuova sezione personalizzata:", "Nuova Sezione");
+                    if (title) {
+                      addCustomSection(title);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Crea Sezione Personalizzata</span>
+                </button>
+              </div>
+
+              {/* Dropdown for restoring deleted standard sections */}
+              {isAddMenuOpen && (
+                <div className="mt-2 p-2 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl space-y-1 z-30 animate-in fade-in zoom-in-95">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 px-2 py-1">
+                    Sezioni Standard Disponibili
+                  </p>
+                  {missingStandardSections.length === 0 ? (
+                    <p className="text-xs text-neutral-500 px-2 py-1.5">
+                      Tutte le sezioni standard sono attualmente attive nel CV.
+                    </p>
+                  ) : (
+                    missingStandardSections.map((meta) => (
+                      <button
+                        key={meta.key}
+                        type="button"
+                        onClick={() => {
+                          restoreSection(meta.key);
+                          setIsAddMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-left rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <span className="font-medium">{meta.defaultLabel}</span>
+                        <span className="text-[10px] text-neutral-400">+ Ripristina</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Dimensione Carattere e Spaziatura */}

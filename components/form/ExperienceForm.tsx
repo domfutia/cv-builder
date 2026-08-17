@@ -87,21 +87,21 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
 
   return (
     <div ref={setNodeRef} style={style} className="touch-none">
-      <Card className="transition-all duration-200 border-neutral-800 hover:border-neutral-700 bg-neutral-900/80">
+      <Card className="transition-all duration-200 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 bg-white dark:bg-neutral-900/80">
         {/* Header with drag handle and collapse */}
-        <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-800/60">
+        <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200 dark:border-neutral-800/60">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
               type="button"
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 text-neutral-500 hover:text-neutral-200 rounded hover:bg-neutral-800 transition-colors"
+              className="cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               title="Trascina per riordinare"
             >
               <GripVertical className="w-4 h-4" />
             </button>
             <div className="truncate">
-              <h4 className="text-sm font-semibold text-neutral-200 truncate">
+              <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
                 {exp.position || "Nuovo Ruolo"}
                 {exp.company ? ` • ${exp.company}` : ""}
               </h4>
@@ -116,7 +116,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-200"
+              className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -124,7 +124,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="p-1.5 h-8 text-neutral-500 hover:text-red-400 hover:bg-red-950/30"
+              className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
               title="Elimina esperienza"
             >
               <Trash2 className="w-4 h-4" />
@@ -178,11 +178,11 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                 id={`isCurrent-${exp.id}`}
                 checked={exp.isCurrent}
                 onChange={(e) => onUpdate({ isCurrent: e.target.checked })}
-                className="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-neutral-200 focus:ring-neutral-500 cursor-pointer"
+                className="w-4 h-4 rounded bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-200 focus:ring-neutral-500 cursor-pointer"
               />
               <label
                 htmlFor={`isCurrent-${exp.id}`}
-                className="text-xs text-neutral-300 select-none cursor-pointer"
+                className="text-xs text-neutral-700 dark:text-neutral-300 select-none cursor-pointer"
               >
                 Lavoro attualmente in questa posizione
               </label>
@@ -197,26 +197,26 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
             />
 
             {/* Bullet points / Highlights */}
-            <div className="space-y-2 pt-2 border-t border-neutral-800/60">
-              <label className="block text-xs font-medium tracking-wide text-neutral-400 uppercase">
+            <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800/60">
+              <label className="block text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-400 uppercase">
                 Risultati Chiave & Traguardi (Bullet Points)
               </label>
 
               <div className="space-y-2">
                 {(exp.highlights || []).map((highlight, hIdx) => (
                   <div key={hIdx} className="flex items-start gap-2 group">
-                    <span className="text-neutral-500 mt-2 text-xs select-none">•</span>
+                    <span className="text-neutral-400 mt-2 text-xs select-none">•</span>
                     <input
                       type="text"
                       value={highlight}
                       onChange={(e) => handleUpdateHighlight(hIdx, e.target.value)}
                       placeholder="es. Ridotto i tempi di caricamento del 35%..."
-                      className="flex-1 rounded-md bg-neutral-900/60 border border-neutral-800/80 px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-neutral-500"
+                      className="flex-1 rounded-md bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/80 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-500"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveHighlight(hIdx)}
-                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-500 hover:text-red-400 transition-opacity"
+                      className="opacity-60 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 transition-opacity"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -236,7 +236,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
                     }
                   }}
                   placeholder="Aggiungi un risultato (premi Invio)..."
-                  className="flex-1 rounded-lg bg-neutral-900/40 border border-neutral-800/80 px-3 py-1.5 text-xs text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
+                  className="flex-1 rounded-lg bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/80 px-3 py-1.5 text-xs text-neutral-800 dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
                 />
                 <Button
                   variant="secondary"
@@ -257,8 +257,18 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
 };
 
 export const ExperienceForm: React.FC = () => {
-  const { cvData, addExperience, updateExperience, removeExperience, reorderExperiences } =
-    useCV();
+  const {
+    cvData,
+    addExperience,
+    updateExperience,
+    removeExperience,
+    reorderExperiences,
+    updateSectionLabel,
+    deleteSection,
+  } = useCV();
+
+  const sectionTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "experience")?.label || "Esperienze Lavorative";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -283,9 +293,13 @@ export const ExperienceForm: React.FC = () => {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Esperienze Lavorative"
+        title={sectionTitle}
         subtitle="Aggiungi e riordina con drag-and-drop i tuoi ruoli lavorativi"
         icon={<Briefcase className="w-5 h-5" />}
+        editableTitle={true}
+        onTitleChange={(newTitle) => updateSectionLabel("experience", newTitle)}
+        canDelete={true}
+        onDelete={() => deleteSection("experience")}
         action={
           <Button
             variant="primary"
@@ -299,10 +313,10 @@ export const ExperienceForm: React.FC = () => {
       />
 
       {cvData.experiences.length === 0 ? (
-        <div className="text-center py-10 px-4 border border-dashed border-neutral-800 rounded-xl bg-neutral-900/30">
-          <Briefcase className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-          <p className="text-sm text-neutral-400 font-medium">Nessuna esperienza inserita</p>
-          <p className="text-xs text-neutral-600 mt-1 mb-4">
+        <div className="text-center py-10 px-4 border border-dashed border-neutral-300 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/30">
+          <Briefcase className="w-8 h-8 text-neutral-400 dark:text-neutral-600 mx-auto mb-2" />
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Nessuna esperienza inserita</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-600 mt-1 mb-4">
             Inizia aggiungendo il tuo ruolo più recente
           </p>
           <Button variant="secondary" size="sm" onClick={addExperience} icon={<Plus className="w-4 h-4" />}>

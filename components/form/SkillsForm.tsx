@@ -17,7 +17,12 @@ export const SkillsForm: React.FC = () => {
     removeSkillCategory,
     addSkill,
     removeSkill,
+    updateSectionLabel,
+    deleteSection,
   } = useCV();
+
+  const sectionTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "skills")?.label || "Competenze & Tecnologie";
 
   const [newCategoryName, setNewCategoryName] = useState("");
   const [skillInputs, setSkillInputs] = useState<Record<string, string>>({});
@@ -38,13 +43,17 @@ export const SkillsForm: React.FC = () => {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Competenze & Tecnologie"
+        title={sectionTitle}
         subtitle="Organizza le tue competenze tecniche, metodologie e strumenti in categorie"
         icon={<Wrench className="w-5 h-5" />}
+        editableTitle={true}
+        onTitleChange={(newTitle) => updateSectionLabel("skills", newTitle)}
+        canDelete={true}
+        onDelete={() => deleteSection("skills")}
       />
 
       {/* Add new category */}
-      <Card className="bg-neutral-900/40 border-dashed border-neutral-800">
+      <Card className="bg-neutral-50 dark:bg-neutral-900/40 border-dashed border-neutral-300 dark:border-neutral-800">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Input
             placeholder="es. Frontend & Framework, Cloud & DevOps, Soft Skills..."
@@ -69,20 +78,20 @@ export const SkillsForm: React.FC = () => {
       {/* Category List */}
       <div className="space-y-4">
         {cvData.skillCategories.map((cat) => (
-          <Card key={cat.id} className="space-y-4 bg-neutral-900/80">
-            <div className="flex items-center justify-between gap-3 pb-3 border-b border-neutral-800/60">
+          <Card key={cat.id} className="space-y-4 bg-white dark:bg-neutral-900/80">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-neutral-200 dark:border-neutral-800/60">
               <input
                 type="text"
                 value={cat.name}
                 onChange={(e) => updateSkillCategoryName(cat.id, e.target.value)}
                 placeholder="Nome categoria..."
-                className="bg-transparent font-medium text-sm text-neutral-200 focus:outline-none focus:border-b focus:border-neutral-500 w-full"
+                className="bg-transparent font-semibold text-sm text-neutral-900 dark:text-neutral-200 focus:outline-none focus:border-b focus:border-neutral-500 w-full"
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeSkillCategory(cat.id)}
-                className="p-1.5 h-8 text-neutral-500 hover:text-red-400"
+                className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
                 title="Elimina categoria"
               >
                 <Trash2 className="w-4 h-4" />
@@ -92,7 +101,7 @@ export const SkillsForm: React.FC = () => {
             {/* Badges list */}
             <div className="flex flex-wrap gap-2 min-h-[32px] items-center">
               {cat.skills.length === 0 ? (
-                <span className="text-xs text-neutral-600 italic">
+                <span className="text-xs text-neutral-400 italic">
                   Nessuna competenza aggiunta in questa categoria.
                 </span>
               ) : (
@@ -109,7 +118,7 @@ export const SkillsForm: React.FC = () => {
             </div>
 
             {/* Add skill chip input */}
-            <div className="flex items-center gap-2 pt-2 border-t border-neutral-800/40">
+            <div className="flex items-center gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800/40">
               <input
                 type="text"
                 placeholder="Aggiungi una competenza (es. React, TypeScript...) e premi Invio"
@@ -123,7 +132,7 @@ export const SkillsForm: React.FC = () => {
                     handleAddSkillToCat(cat.id);
                   }
                 }}
-                className="flex-1 rounded-lg bg-neutral-900/60 border border-neutral-800 px-3 py-1.5 text-xs text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
+                className="flex-1 rounded-lg bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 px-3 py-1.5 text-xs text-neutral-900 dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:border-neutral-500"
               />
               <Button
                 variant="secondary"

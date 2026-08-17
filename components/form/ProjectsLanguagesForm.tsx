@@ -22,9 +22,18 @@ export const ProjectsLanguagesForm: React.FC = () => {
     addCertification,
     updateCertification,
     removeCertification,
+    updateSectionLabel,
+    deleteSection,
   } = useCV();
 
   const [projectTechInputs, setProjectTechInputs] = useState<Record<string, string>>({});
+
+  const langTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "languages")?.label || "Lingue Conosciute";
+  const projTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "projects")?.label || "Progetti & Portfolio";
+  const certTitle =
+    cvData.settings.sectionOrder?.find((s) => s.key === "certifications")?.label || "Certificazioni";
 
   const handleAddProjectTech = (projectId: string) => {
     const text = projectTechInputs[projectId];
@@ -52,9 +61,13 @@ export const ProjectsLanguagesForm: React.FC = () => {
       {/* Lingue */}
       <div className="space-y-4">
         <SectionHeader
-          title="Lingue Conosciute"
+          title={langTitle}
           subtitle="Aggiungi le lingue parlate e il rispettivo livello di padronanza"
           icon={<Languages className="w-5 h-5" />}
+          editableTitle={true}
+          onTitleChange={(newTitle) => updateSectionLabel("languages", newTitle)}
+          canDelete={true}
+          onDelete={() => deleteSection("languages")}
           action={
             <Button
               variant="secondary"
@@ -69,7 +82,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {cvData.languages.map((lang) => (
-            <Card key={lang.id} className="p-3 bg-neutral-900/80">
+            <Card key={lang.id} className="p-3 bg-white dark:bg-neutral-900/80">
               <div className="flex items-center gap-2">
                 <div className="flex-1 space-y-2">
                   <Input
@@ -87,7 +100,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeLanguage(lang.id)}
-                  className="p-1.5 h-8 text-neutral-500 hover:text-red-400 self-start"
+                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 self-start"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -98,11 +111,15 @@ export const ProjectsLanguagesForm: React.FC = () => {
       </div>
 
       {/* Progetti */}
-      <div className="space-y-4 pt-4 border-t border-neutral-800/80">
+      <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
         <SectionHeader
-          title="Progetti & Portfolio"
-          subtitle="Metti in risalto i progetti open-source, prodotti o lavori rilevanti"
+          title={projTitle}
+          subtitle="Metti in risalto i progetti open-source, prodotti o portfolio"
           icon={<FolderGit2 className="w-5 h-5" />}
+          editableTitle={true}
+          onTitleChange={(newTitle) => updateSectionLabel("projects", newTitle)}
+          canDelete={true}
+          onDelete={() => deleteSection("projects")}
           action={
             <Button
               variant="secondary"
@@ -117,16 +134,16 @@ export const ProjectsLanguagesForm: React.FC = () => {
 
         <div className="space-y-4">
           {cvData.projects.map((proj) => (
-            <Card key={proj.id} className="space-y-3 bg-neutral-900/80">
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-800/60">
-                <h4 className="text-sm font-semibold text-neutral-200">
+            <Card key={proj.id} className="space-y-3 bg-white dark:bg-neutral-900/80">
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800/60">
+                <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
                   {proj.name || "Nuovo Progetto"}
                 </h4>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => removeProject(proj.id)}
-                  className="p-1.5 h-8 text-neutral-500 hover:text-red-400"
+                  className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -164,8 +181,8 @@ export const ProjectsLanguagesForm: React.FC = () => {
               />
 
               {/* Technologies Badges */}
-              <div className="space-y-2 pt-2 border-t border-neutral-800/40">
-                <label className="block text-xs font-medium text-neutral-400 uppercase">
+              <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800/40">
+                <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase">
                   Tecnologie Usate
                 </label>
                 <div className="flex flex-wrap gap-1.5 min-h-[24px]">
@@ -196,7 +213,7 @@ export const ProjectsLanguagesForm: React.FC = () => {
                         handleAddProjectTech(proj.id);
                       }
                     }}
-                    className="flex-1 rounded-md bg-neutral-900/60 border border-neutral-800 px-2.5 py-1 text-xs text-neutral-200 focus:outline-none focus:border-neutral-500"
+                    className="flex-1 rounded-md bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 px-2.5 py-1 text-xs text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-500"
                   />
                   <Button
                     variant="secondary"
@@ -215,11 +232,15 @@ export const ProjectsLanguagesForm: React.FC = () => {
       </div>
 
       {/* Certificazioni */}
-      <div className="space-y-4 pt-4 border-t border-neutral-800/80">
+      <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800/80">
         <SectionHeader
-          title="Certificazioni"
+          title={certTitle}
           subtitle="Certificati di settore, esami professionali e riconoscimenti"
           icon={<Award className="w-5 h-5" />}
+          editableTitle={true}
+          onTitleChange={(newTitle) => updateSectionLabel("certifications", newTitle)}
+          canDelete={true}
+          onDelete={() => deleteSection("certifications")}
           action={
             <Button
               variant="secondary"
@@ -234,16 +255,16 @@ export const ProjectsLanguagesForm: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {cvData.certifications.map((cert) => (
-            <Card key={cert.id} className="space-y-3 bg-neutral-900/80">
-              <div className="flex items-center justify-between gap-2 pb-1 border-b border-neutral-800/60">
-                <h5 className="text-xs font-semibold text-neutral-200 truncate">
+            <Card key={cert.id} className="space-y-3 bg-white dark:bg-neutral-900/80">
+              <div className="flex items-center justify-between gap-2 pb-1 border-b border-neutral-200 dark:border-neutral-800/60">
+                <h5 className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">
                   {cert.name || "Nuova Certificazione"}
                 </h5>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => removeCertification(cert.id)}
-                  className="p-1 h-7 text-neutral-500 hover:text-red-400"
+                  className="p-1 h-7 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>

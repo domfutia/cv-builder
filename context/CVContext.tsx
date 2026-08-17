@@ -15,9 +15,9 @@ import {
   CVSettings,
   SectionOrderConfig,
 } from "@/types/cv";
-import { initialCVData, defaultSectionOrder, themePresets } from "@/data/initialCV";
+import { initialCVData, defaultSectionOrder, themePresets, standardSectionsMeta } from "@/data/initialCV";
 
-const STORAGE_KEY = "once_cv_builder_data_v5";
+const STORAGE_KEY = "once_cv_builder_data_v6";
 
 interface CVContextType {
   cvData: CVData;
@@ -53,10 +53,13 @@ interface CVContextType {
   updateCustomSectionItem: (sectionId: string, itemId: string, data: Partial<CustomSectionItem>) => void;
   removeCustomSectionItem: (sectionId: string, itemId: string) => void;
   reorderCustomSectionItems: (sectionId: string, newOrder: CustomSectionItem[]) => void;
-  // Layout Reorder, Labels & Themes
+  // Layout Reorder, Labels, Columns & Deletion
   updateSectionOrder: (newOrder: SectionOrderConfig[]) => void;
   updateSectionLabel: (key: string, label: string) => void;
+  moveSectionColumn: (key: string, column: "main" | "sidebar") => void;
   toggleSectionVisibility: (key: string) => void;
+  deleteSection: (key: string) => void;
+  restoreSection: (key: string) => void;
   applyThemePreset: (presetId: string) => void;
   // Settings & Storage
   updateSettings: (settings: Partial<CVSettings>) => void;
@@ -350,12 +353,13 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }));
   }, []);
 
-  // Custom Sections
+  // Custom Sections with Automatic SectionOrder Synchronization
   const addCustomSection = useCallback((title: string = "Nuova Sezione") => {
-    const newId = `custom-sec-${Date.now()}`;
+    const newId = `cust-${Date.now()}`;
+    const cleanTitle = title.trim() || "Nuova Sezione";
     const newSection: CustomSection = {
       id: newId,
-      title: title.trim() || "Nuova Sezione",
+      title: cleanTitle,
       items: [
         {
           id: `item-${Date.now()}`,
@@ -367,19 +371,38 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         },
       ],
     };
+    const newOrderConfig: SectionOrderConfig = {
+      id: `sec-${newId}`,
+      key: newId,
+      label: cleanTitle,
+      isVisible: true,
+      column: "main",
+    };
+
     setCvData((prev) => ({
       ...prev,
       customSections: [...(prev.customSections || []), newSection],
+      settings: {
+        ...prev.settings,
+        sectionOrder: [...(prev.settings.sectionOrder || defaultSectionOrder), newOrderConfig],
+      },
     }));
     return newId;
   }, []);
 
   const updateCustomSectionTitle = useCallback((id: string, title: string) => {
+    const cleanTitle = title.trim();
     setCvData((prev) => ({
       ...prev,
       customSections: (prev.customSections || []).map((sec) =>
-        sec.id === id ? { ...sec, title } : sec
+        sec.id === id ? { ...sec, title: cleanTitle || sec.title } : sec
       ),
+      settings: {
+        ...prev.settings,
+        sectionOrder: (prev.settings.sectionOrder || defaultSectionOrder).map((s) =>
+          s.key === id || s.id === `sec-${id}` ? { ...s, label: cleanTitle || s.label } : s
+        ),
+      },
     }));
   }, []);
 
@@ -387,6 +410,12 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setCvData((prev) => ({
       ...prev,
       customSections: (prev.customSections || []).filter((sec) => sec.id !== id),
+      settings: {
+        ...prev.settings,
+        sectionOrder: (prev.settings.sectionOrder || defaultSectionOrder).filter(
+          (s) => s.key !== id && s.id !== `sec-${id}`
+        ),
+      },
     }));
   }, []);
 
@@ -450,7 +479,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     []
   );
 
-  // Section Reordering, Label Customization & Visibility
+  // Section Reordering, Label Customization, Column Placement & Deletion
   const updateSectionOrder = useCallback((newOrder: SectionOrderConfig[]) => {
     setCvData((prev) => ({
       ...prev,
@@ -462,10 +491,32 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   const updateSectionLabel = useCallback((key: string, label: string) => {
+    const cleanLabel = label.trim();
+    if (!cleanLabel) return;
+    setCvData((prev) => {
+      const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
+      const updatedOrder = currentOrder.map((s) =>
+        s.key === key ? { ...s, label: cleanLabel } : s
+      );
+      const updatedCustom = (prev.customSections || []).map((sec) =>
+        sec.id === key ? { ...sec, title: cleanLabel } : sec
+      );
+      return {
+        ...prev,
+        customSections: updatedCustom,
+        settings: {
+          ...prev.settings,
+          sectionOrder: updatedOrder,
+        },
+      };
+    });
+  }, []);
+
+  const moveSectionColumn = useCallback((key: string, column: "main" | "sidebar") => {
     setCvData((prev) => {
       const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
       const updated = currentOrder.map((s) =>
-        s.key === key ? { ...s, label: label.trim() || s.label } : s
+        s.key === key ? { ...s, column } : s
       );
       return {
         ...prev,
@@ -488,6 +539,51 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         settings: {
           ...prev.settings,
           sectionOrder: updated,
+        },
+      };
+    });
+  }, []);
+
+  const deleteSection = useCallback((key: string) => {
+    setCvData((prev) => {
+      const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
+      const filteredOrder = currentOrder.filter((s) => s.key !== key);
+      const isCustom = (prev.customSections || []).some((sec) => sec.id === key);
+
+      return {
+        ...prev,
+        customSections: isCustom
+          ? prev.customSections.filter((sec) => sec.id !== key)
+          : prev.customSections,
+        settings: {
+          ...prev.settings,
+          sectionOrder: filteredOrder,
+        },
+      };
+    });
+  }, []);
+
+  const restoreSection = useCallback((key: string) => {
+    const meta = standardSectionsMeta.find((s) => s.key === key);
+    if (!meta) return;
+
+    setCvData((prev) => {
+      const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
+      if (currentOrder.some((s) => s.key === key)) return prev;
+
+      const restoredItem: SectionOrderConfig = {
+        id: `sec-${key}`,
+        key,
+        label: meta.defaultLabel,
+        isVisible: true,
+        column: meta.defaultColumn,
+      };
+
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          sectionOrder: [...currentOrder, restoredItem],
         },
       };
     });
@@ -605,7 +701,10 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         reorderCustomSectionItems,
         updateSectionOrder,
         updateSectionLabel,
+        moveSectionColumn,
         toggleSectionVisibility,
+        deleteSection,
+        restoreSection,
         applyThemePreset,
         updateSettings,
         resetToSample,

@@ -32,7 +32,7 @@ export interface SkillCategory {
 export interface LanguageItem {
   id: string;
   language: string;
-  proficiency: string; // Madrelingua, Fluente (C2), Avanzato (C1), Intermedio (B2), etc.
+  proficiency: string;
 }
 
 export interface ProjectItem {
@@ -87,9 +87,10 @@ export type AvatarSize = "sm" | "md" | "lg";
 
 export interface SectionOrderConfig {
   id: string;
-  key: string;
+  key: string;              // "summary", "experience", "education", "skills", "languages", "certifications", "projects", or custom section id
   label: string;
   isVisible: boolean;
+  column?: "main" | "sidebar"; // For Modern Sidebar column placement
 }
 
 export interface ThemeColors {
@@ -105,7 +106,7 @@ export interface ThemeColors {
 
 export interface CVSettings extends ThemeColors {
   template: CVTemplate;
-  themePreset?: string;        // obsidian, nordic, executive, forest, custom
+  themePreset?: string;
   fontFamily: "inter" | "serif" | "mono";
   fontSize: CVFontSize;
   spacing: CVSpacing;

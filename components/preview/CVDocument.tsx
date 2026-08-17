@@ -119,9 +119,120 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
 
   // Render individual sections dynamically by key
   const renderSectionByKey = (key: string, isSidebar: boolean = false) => {
+    // Check if key corresponds to a custom section
+    const matchingCustom = customSections.find((c) => c.id === key);
+    if (matchingCustom) {
+      if (!matchingCustom.items || matchingCustom.items.length === 0) return null;
+      const title = getSectionTitle(key, matchingCustom.title);
+
+      if (isSidebar) {
+        return (
+          <div key={`sec-custom-${matchingCustom.id}-sb`} className="space-y-2.5 break-inside-avoid page-break-inside-avoid">
+            <h3
+              className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+              style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
+            >
+              {title}
+            </h3>
+            <div className="space-y-2 text-xs">
+              {matchingCustom.items.map((item) => (
+                <div key={item.id} className="space-y-0.5">
+                  <div className="font-semibold break-words leading-snug" style={{ color: sbTextPrimary }}>
+                    {item.title}
+                  </div>
+                  {item.subtitle && (
+                    <div className="text-[11px] break-words" style={{ color: sbTextMuted }}>
+                      {item.subtitle} {item.date ? `(${item.date})` : ""}
+                    </div>
+                  )}
+                  {item.description && (
+                    <p className="text-[11px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div key={`sec-custom-${matchingCustom.id}`} className="space-y-3">
+          <h2
+            className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
+            style={{ color: accentColor }}
+          >
+            {title}
+          </h2>
+
+          <div className={itemSpacingClasses}>
+            {matchingCustom.items.map((item) => (
+              <div
+                key={item.id}
+                className="break-inside-avoid page-break-inside-avoid space-y-1"
+              >
+                <div className="flex items-baseline justify-between gap-4 flex-wrap">
+                  <div className="min-w-0">
+                    <span
+                      className="font-bold text-[13.5px] break-words"
+                      style={{ color: primaryTextColor }}
+                    >
+                      {item.title}
+                    </span>
+                    {item.subtitle && (
+                      <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>
+                        • {item.subtitle}
+                      </span>
+                    )}
+                  </div>
+                  {item.date && (
+                    <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>
+                      {item.date}
+                    </span>
+                  )}
+                </div>
+
+                {item.description && (
+                  <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>
+                    {item.description}
+                  </p>
+                )}
+
+                {item.highlights && item.highlights.length > 0 && (
+                  <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
+                    {item.highlights.map((h, i) => (
+                      <li key={i} className="leading-snug break-words whitespace-normal">
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     switch (key) {
       case "summary":
         if (!summary) return null;
+        if (isSidebar) {
+          return (
+            <div key="sec-summary-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
+              <h3
+                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
+              >
+                {getSectionTitle("summary", "Profilo")}
+              </h3>
+              <p className="leading-relaxed font-normal text-xs break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                {summary}
+              </p>
+            </div>
+          );
+        }
         return (
           <div key="sec-summary" className="break-inside-avoid page-break-inside-avoid space-y-1.5">
             <h2
@@ -144,7 +255,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              {getSectionTitle("experience", "Esperienza Lavorativa")}
+              {getSectionTitle("experience", "Esperienze Lavorative")}
             </h2>
 
             <div className={itemSpacingClasses}>
@@ -206,7 +317,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
               style={{ color: accentColor }}
             >
-              {getSectionTitle("education", "Formazione & Istruzione")}
+              {getSectionTitle("education", "Formazione & Studi")}
             </h2>
 
             <div className={itemSpacingClasses}>
@@ -253,69 +364,6 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
               ))}
             </div>
           </div>
-        );
-
-      case "customSections":
-        if (customSections.length === 0) return null;
-        return (
-          <React.Fragment key="sec-custom">
-            {customSections.map((cSec) => (
-              <div key={cSec.id} className="space-y-3">
-                <h2
-                  className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10"
-                  style={{ color: accentColor }}
-                >
-                  {cSec.title}
-                </h2>
-
-                <div className={itemSpacingClasses}>
-                  {cSec.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="break-inside-avoid page-break-inside-avoid space-y-1"
-                    >
-                      <div className="flex items-baseline justify-between gap-4 flex-wrap">
-                        <div className="min-w-0">
-                          <span
-                            className="font-bold text-[13.5px] break-words"
-                            style={{ color: primaryTextColor }}
-                          >
-                            {item.title}
-                          </span>
-                          {item.subtitle && (
-                            <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>
-                              • {item.subtitle}
-                            </span>
-                          )}
-                        </div>
-                        {item.date && (
-                          <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>
-                            {item.date}
-                          </span>
-                        )}
-                      </div>
-
-                      {item.description && (
-                        <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>
-                          {item.description}
-                        </p>
-                      )}
-
-                      {item.highlights && item.highlights.length > 0 && (
-                        <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
-                          {item.highlights.map((h, i) => (
-                            <li key={i} className="leading-snug break-words whitespace-normal">
-                              {h}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </React.Fragment>
         );
 
       case "skills":
@@ -483,6 +531,32 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
 
       case "projects":
         if (projects.length === 0) return null;
+        if (isSidebar) {
+          return (
+            <div key="sec-projects-sb" className="space-y-2.5 break-inside-avoid page-break-inside-avoid">
+              <h3
+                className="text-xs font-bold uppercase tracking-wider pb-1 border-b"
+                style={{ color: sbTextPrimary, borderColor: sbBorderColor }}
+              >
+                {getSectionTitle("projects", "Progetti")}
+              </h3>
+              <div className="space-y-2 text-xs">
+                {projects.map((p) => (
+                  <div key={p.id} className="space-y-0.5">
+                    <div className="font-semibold break-words leading-snug" style={{ color: sbTextPrimary }}>
+                      {p.name} {p.role ? `(${p.role})` : ""}
+                    </div>
+                    {p.description && (
+                      <p className="text-[11px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>
+                        {p.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
         return (
           <div key="sec-projects" className="space-y-2 break-inside-avoid page-break-inside-avoid">
             <h2
@@ -629,7 +703,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                       style={{ color: secondaryTextColor }}
                     >
                       <LinkedinIcon className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                      <span>{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</span>
+                      <span>{personalInfo.linkedin.replace(/^https?:\/\//, "")}</span>
                     </a>
                   )}
                   {personalInfo.github && (
@@ -641,7 +715,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                       style={{ color: secondaryTextColor }}
                     >
                       <GithubIcon className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                      <span>{personalInfo.github.replace(/^https?:\/\/(www\.)?github\.com\//, "")}</span>
+                      <span>{personalInfo.github.replace(/^https?:\/\//, "")}</span>
                     </a>
                   )}
                 </div>
@@ -669,16 +743,19 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
           {/* Dynamic Reordered Sections */}
           {sectionOrder
             .filter((s) => s.isVisible)
-            .map((section) => renderSectionByKey(section.key))}
+            .map((section) => renderSectionByKey(section.key, false))}
         </div>
       </div>
     );
   }
 
   // =========================================================================
-  // TEMPLATE 2: Modern Sidebar (Fluid Text Wrapping & Customizable Background)
+  // TEMPLATE 2: Modern Sidebar (Split Vertical Columns by section.column)
   // =========================================================================
   if (settings.template === "modern") {
+    const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
+    const mainItems = sectionOrder.filter((s) => s.isVisible && s.column !== "sidebar");
+
     return (
       <div
         id="cv-print-root"
@@ -787,7 +864,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                     className="break-words whitespace-normal hover:underline leading-snug"
                     style={{ color: sbTextSecondary }}
                   >
-                    {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
+                    {personalInfo.linkedin.replace(/^https?:\/\//, "")}
                   </a>
                 </div>
               )}
@@ -801,17 +878,15 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                     className="break-words whitespace-normal hover:underline leading-snug"
                     style={{ color: sbTextSecondary }}
                   >
-                    {personalInfo.github.replace(/^https?:\/\/(www\.)?github\.com\//, "")}
+                    {personalInfo.github.replace(/^https?:\/\//, "")}
                   </a>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Sidebar Skills, Languages & Certifications */}
-          {skillCategories.length > 0 && renderSectionByKey("skills", true)}
-          {languages.length > 0 && renderSectionByKey("languages", true)}
-          {certifications.length > 0 && renderSectionByKey("certifications", true)}
+          {/* Dynamic Sidebar Sections */}
+          {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
         </div>
 
         {/* Right Main Column */}
@@ -831,10 +906,8 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
             </p>
           </div>
 
-          {/* Main column dynamic sections (excluding sidebar elements) */}
-          {sectionOrder
-            .filter((s) => s.isVisible && s.key !== "skills" && s.key !== "languages" && s.key !== "certifications")
-            .map((section) => renderSectionByKey(section.key, false))}
+          {/* Dynamic Main Column Sections */}
+          {mainItems.map((section) => renderSectionByKey(section.key, false))}
         </div>
       </div>
     );
@@ -924,6 +997,16 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
                 className="hover:underline break-all"
               >
                 • {personalInfo.linkedin.replace(/^https?:\/\//, "")}
+              </a>
+            )}
+            {personalInfo.github && (
+              <a
+                href={formatUrl(personalInfo.github)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline break-all"
+              >
+                • {personalInfo.github.replace(/^https?:\/\//, "")}
               </a>
             )}
           </div>
