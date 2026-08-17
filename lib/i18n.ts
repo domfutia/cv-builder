@@ -312,6 +312,7 @@ export const translations = {
       projects: "Progetti di Rilievo",
       contacts: "Contatti",
       present: "Presente",
+      grade: "Voto",
     },
 
     // GDPR Disclaimer Footer
@@ -629,6 +630,7 @@ export const translations = {
       projects: "Featured Projects",
       contacts: "Contacts",
       present: "Present",
+      grade: "Grade",
     },
 
     // GDPR Disclaimer Footer

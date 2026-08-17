@@ -131,17 +131,12 @@ export const CVDocument: React.FC<{
 
   // =========================================================================
   // TRANSFORM-ONLY A4 AUTO-FIT ENGINE (Zero flicker, stable scrollHeight)
-  //
-  // Key insight: CSS transform: scale() does NOT affect the element's layout
-  // box or scrollHeight. This means we can measure the natural (unscaled)
-  // content height, compare it to the A4 target, and apply a visual scale
-  // without creating a feedback loop.
   // =========================================================================
   const calculateAutoFit = useCallback(() => {
     if (!rootRef.current) return;
 
     const A4_HEIGHT_PX = 1122.5; // 297mm at 96 DPI
-    const targetHeight = A4_HEIGHT_PX;
+    const targetHeight = A4_HEIGHT_PX - 28; // Leave margin for bottom-anchored GDPR disclaimer
 
     let naturalHeight = 0;
 
@@ -176,12 +171,10 @@ export const CVDocument: React.FC<{
   }, [settings.template]);
 
   useEffect(() => {
-    // Initial measurements (with small delays for DOM paint)
     calculateAutoFit();
     const t1 = setTimeout(calculateAutoFit, 60);
     const t2 = setTimeout(calculateAutoFit, 300);
 
-    // ResizeObserver with rAF debounce to prevent flicker
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(calculateAutoFit);
@@ -264,14 +257,14 @@ export const CVDocument: React.FC<{
         if (isSidebar) {
           return (
             <div key="sec-summary-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("summary", "Profilo")}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("summary", t.docLabels.summary || "Profilo")}</h3>
               <p className="leading-relaxed font-normal text-xs break-words whitespace-normal" style={{ color: sbTextSecondary }}>{summary}</p>
             </div>
           );
         }
         return (
           <div key="sec-summary" className="break-inside-avoid page-break-inside-avoid space-y-1">
-            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("summary", "Profilo Professionale")}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("summary", t.docLabels.summary || "Profilo Professionale")}</h2>
             <p className="leading-relaxed font-normal text-justify break-words whitespace-normal text-xs" style={{ color: bodyTextColor }}>{summary}</p>
           </div>
         );
@@ -280,7 +273,7 @@ export const CVDocument: React.FC<{
         if (experiences.length === 0) return null;
         return (
           <div key="sec-experience" className="space-y-2 break-inside-avoid page-break-inside-avoid">
-            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("experience", "Esperienze Lavorative")}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("experience", t.docLabels.experience || "Esperienze Lavorative")}</h2>
             <div className={itemSpacingClasses}>
               {experiences.map((exp) => (
                 <div key={exp.id} className="break-inside-avoid page-break-inside-avoid space-y-0.5">
@@ -308,7 +301,7 @@ export const CVDocument: React.FC<{
         if (educations.length === 0) return null;
         return (
           <div key="sec-education" className="space-y-2 break-inside-avoid page-break-inside-avoid">
-            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("education", "Formazione & Studi")}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("education", t.docLabels.education || "Formazione & Studi")}</h2>
             <div className={itemSpacingClasses}>
               {educations.map((edu) => (
                 <div key={edu.id} className="break-inside-avoid page-break-inside-avoid space-y-0.5">
@@ -321,7 +314,7 @@ export const CVDocument: React.FC<{
                   </div>
                   <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: secondaryTextColor }}>
                     {edu.fieldOfStudy && <span className="break-words">{edu.fieldOfStudy}</span>}
-                    {edu.grade && <span className="font-medium" style={{ color: primaryTextColor }}>(Voto: {edu.grade})</span>}
+                    {edu.grade && <span className="font-medium" style={{ color: primaryTextColor }}>({t.docLabels.grade || "Voto"}: {edu.grade})</span>}
                     {edu.location && <span className="opacity-70">• {edu.location}</span>}
                   </div>
                   {edu.details && <p className="text-xs italic mt-0.5 break-words whitespace-normal" style={{ color: bodyTextColor }}>{edu.details}</p>}
@@ -336,7 +329,7 @@ export const CVDocument: React.FC<{
         if (isSidebar) {
           return (
             <div key="sec-skills-sb" className="space-y-2 break-inside-avoid page-break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("skills", "Competenze")}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("skills", t.docLabels.skills || "Competenze")}</h3>
               <div className="space-y-2">
                 {skillCategories.map((cat) => (
                   <div key={cat.id} className="space-y-1">
@@ -354,7 +347,7 @@ export const CVDocument: React.FC<{
         }
         return (
           <div key="sec-skills" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("skills", "Competenze & Tecnologie")}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("skills", t.docLabels.skills || "Competenze & Tecnologie")}</h2>
             <div className="grid grid-cols-1 gap-1.5 pt-0.5">
               {skillCategories.map((cat) => (
                 <div key={cat.id} className="text-xs flex flex-row items-baseline gap-2">
@@ -375,7 +368,7 @@ export const CVDocument: React.FC<{
         if (isSidebar) {
           return (
             <div key="sec-languages-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("languages", "Lingue")}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("languages", t.docLabels.languages || "Lingue")}</h3>
               <div className="space-y-1 text-xs">
                 {languages.map((l) => (
                   <div key={l.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
@@ -389,7 +382,7 @@ export const CVDocument: React.FC<{
         }
         return (
           <div key="sec-languages" className="space-y-1 break-inside-avoid page-break-inside-avoid">
-            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("languages", "Lingue")}</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("languages", t.docLabels.languages || "Lingue")}</h3>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: bodyTextColor }}>
               {languages.map((l) => (
                 <div key={l.id} className="inline-flex items-center gap-1 text-[11px]">
@@ -406,7 +399,7 @@ export const CVDocument: React.FC<{
         if (isSidebar) {
           return (
             <div key="sec-certifications-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("certifications", "Certificazioni")}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("certifications", t.docLabels.certifications || "Certificazioni")}</h3>
               <div className="space-y-1 text-xs">
                 {certifications.map((c) => (
                   <div key={c.id} className="space-y-0.5">
@@ -420,7 +413,7 @@ export const CVDocument: React.FC<{
         }
         return (
           <div key="sec-certifications" className="space-y-1 break-inside-avoid page-break-inside-avoid">
-            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("certifications", "Certificazioni")}</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("certifications", t.docLabels.certifications || "Certificazioni")}</h3>
             <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
               {certifications.map((c) => (
                 <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
@@ -437,7 +430,7 @@ export const CVDocument: React.FC<{
         if (isSidebar) {
           return (
             <div key="sec-projects-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("projects", "Progetti")}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("projects", t.docLabels.projects || "Progetti")}</h3>
               <div className="space-y-1.5 text-xs">
                 {projects.map((p) => (
                   <div key={p.id} className="space-y-0.5">
@@ -451,7 +444,7 @@ export const CVDocument: React.FC<{
         }
         return (
           <div key="sec-projects" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
-            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("projects", "Progetti di Rilievo")}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("projects", t.docLabels.projects || "Progetti di Rilievo")}</h2>
             <div className="grid grid-cols-1 gap-1.5">
               {projects.map((p) => (
                 <div key={p.id} className="text-xs space-y-0.5">
@@ -467,8 +460,8 @@ export const CVDocument: React.FC<{
                   {p.description && <p className="text-xs break-words whitespace-normal" style={{ color: bodyTextColor }}>{p.description}</p>}
                   {p.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-0.5">
-                      {p.technologies.map((t, tIdx) => (
-                        <span key={tIdx} className="px-1.5 py-0.5 rounded text-[9.5px] break-words" style={{ backgroundColor: tagBgColor, color: tagTextColor }}>{t}</span>
+                      {p.technologies.map((tItem, tIdx) => (
+                        <span key={tIdx} className="px-1.5 py-0.5 rounded text-[9.5px] break-words" style={{ backgroundColor: tagBgColor, color: tagTextColor }}>{tItem}</span>
                       ))}
                     </div>
                   )}
@@ -507,7 +500,7 @@ export const CVDocument: React.FC<{
         )}
         style={{ width: "210mm", height: "297mm", minWidth: "210mm", maxWidth: "210mm", minHeight: "297mm", maxHeight: "297mm", backgroundColor: paperBgColor, color: primaryTextColor }}
       >
-        <div ref={contentRef} className={cn("p-8 sm:p-10", fontSizeClasses)} style={scaleWrapperStyle}>
+        <div ref={contentRef} className={cn("p-8 sm:p-10 pb-12", fontSizeClasses)} style={scaleWrapperStyle}>
           <div ref={innerStackRef} className={spacingClasses}>
             {/* Header */}
             <div className="border-b border-black/10 pb-3 break-inside-avoid">
@@ -520,7 +513,7 @@ export const CVDocument: React.FC<{
                     {personalInfo.phone && <a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="inline-flex items-center gap-1 hover:underline transition-colors" style={{ color: secondaryTextColor }}><Phone className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.phone}</span></a>}
                     {personalInfo.location && <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.location}</span></span>}
                     {personalInfo.website && <a href={formatUrl(personalInfo.website)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline transition-colors break-all" style={{ color: secondaryTextColor }}><Globe className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.website.replace(/^https?:\/\//, "")}</span></a>}
-                    {personalInfo.linkedin && <a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline transition-colors break-all" style={{ color: secondaryTextColor }}><LinkedinIcon className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</span></a>}
+                    {personalInfo.linkedin && <a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline transition-colors break-all" style={{ color: secondaryTextColor }}><LinkedinIcon className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.linkedin.replace(/^https?:\/\//, "")}</span></a>}
                     {personalInfo.github && <a href={formatUrl(personalInfo.github)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline transition-colors break-all" style={{ color: secondaryTextColor }}><GithubIcon className="w-3 h-3 opacity-70 shrink-0" /><span>{personalInfo.github.replace(/^https?:\/\//, "")}</span></a>}
                   </div>
                 </div>
@@ -532,12 +525,15 @@ export const CVDocument: React.FC<{
               </div>
             </div>
             {sectionOrder.filter((s) => s.isVisible).map((section) => renderSectionByKey(section.key, false))}
-
-            {/* Standard non-editable GDPR Disclaimer */}
-            <div className="pt-3 text-[8.5px] leading-tight text-center opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
-              {t.gdprDisclaimer}
-            </div>
           </div>
+        </div>
+
+        {/* Standard non-editable GDPR Disclaimer anchored right at the very bottom */}
+        <div
+          className="absolute bottom-2.5 left-8 right-8 text-[8px] leading-tight text-center opacity-65 pointer-events-none select-none z-10"
+          style={{ color: secondaryTextColor }}
+        >
+          {t.gdprDisclaimer}
         </div>
       </div>
     );
@@ -563,7 +559,7 @@ export const CVDocument: React.FC<{
       >
         <div ref={contentRef} className={cn("flex flex-row", fontSizeClasses)} style={scaleWrapperStyle}>
           {/* Left Sidebar */}
-          <div ref={sidebarRef} className="w-[33%] p-6 space-y-4 shrink-0 border-r" style={{ backgroundColor: sidebarBgColor, color: sbTextPrimary, borderColor: sbBorderColor }}>
+          <div ref={sidebarRef} className="w-[33%] p-6 pb-12 space-y-4 shrink-0 border-r" style={{ backgroundColor: sidebarBgColor, color: sbTextPrimary, borderColor: sbBorderColor }}>
             {settings.showAvatar && personalInfo.avatarUrl && (
               <div className={cn("overflow-hidden mx-auto border-2 shadow-sm", avatarSizeClasses, avatarShapeClasses)} style={{ borderColor: sbBorderColor }}>
                 <img src={personalInfo.avatarUrl} alt={personalInfo.fullName} className="w-full h-full object-cover" />
@@ -576,25 +572,28 @@ export const CVDocument: React.FC<{
                 {personalInfo.phone && <div className="flex items-start gap-2"><Phone className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={`tel:${personalInfo.phone.replace(/\s+/g, "")}`} className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.phone}</a></div>}
                 {personalInfo.location && <div className="flex items-start gap-2"><MapPin className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><span className="break-words whitespace-normal leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.location}</span></div>}
                 {personalInfo.website && <div className="flex items-start gap-2"><Globe className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={formatUrl(personalInfo.website)} target="_blank" rel="noopener noreferrer" className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.website.replace(/^https?:\/\//, "")}</a></div>}
-                {personalInfo.linkedin && <div className="flex items-start gap-2"><LinkedinIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</a></div>}
+                {personalInfo.linkedin && <div className="flex items-start gap-2"><LinkedinIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.linkedin.replace(/^https?:\/\//, "")}</a></div>}
                 {personalInfo.github && <div className="flex items-start gap-2"><GithubIcon className="w-3 h-3 shrink-0 mt-0.5" style={{ color: sbTextMuted }} /><a href={formatUrl(personalInfo.github)} target="_blank" rel="noopener noreferrer" className="break-words whitespace-normal hover:underline leading-tight" style={{ color: sbTextSecondary }}>{personalInfo.github.replace(/^https?:\/\//, "")}</a></div>}
               </div>
             </div>
             {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
           </div>
           {/* Right Main */}
-          <div ref={mainColRef} className="w-[67%] p-6 space-y-4 min-w-0">
+          <div ref={mainColRef} className="w-[67%] p-6 pb-12 space-y-4 min-w-0">
             <div className="border-b border-black/10 pb-3 break-inside-avoid">
               <h1 className="text-2xl font-extrabold tracking-tight break-words leading-tight" style={{ color: primaryTextColor }}>{personalInfo.fullName || "Tuo Nome"}</h1>
               <p className="text-sm font-semibold mt-0.5 break-words" style={{ color: accentColor }}>{personalInfo.jobTitle || "Titolo Professionale"}</p>
             </div>
             {mainItems.map((section) => renderSectionByKey(section.key, false))}
-
-            {/* Standard non-editable GDPR Disclaimer */}
-            <div className="pt-3 text-[8.5px] leading-tight opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
-              {t.gdprDisclaimer}
-            </div>
           </div>
+        </div>
+
+        {/* Standard non-editable GDPR Disclaimer anchored right at the very bottom */}
+        <div
+          className="absolute bottom-2.5 left-[35%] right-6 text-[8px] leading-tight opacity-65 pointer-events-none select-none z-10"
+          style={{ color: secondaryTextColor }}
+        >
+          {t.gdprDisclaimer}
         </div>
       </div>
     );
@@ -614,7 +613,7 @@ export const CVDocument: React.FC<{
       )}
       style={{ width: "210mm", height: "297mm", minWidth: "210mm", maxWidth: "210mm", minHeight: "297mm", maxHeight: "297mm", backgroundColor: paperBgColor, color: primaryTextColor }}
     >
-      <div ref={contentRef} className={cn("p-8 sm:p-10", fontSizeClasses)} style={scaleWrapperStyle}>
+      <div ref={contentRef} className={cn("p-8 sm:p-10 pb-12", fontSizeClasses)} style={scaleWrapperStyle}>
         <div ref={innerStackRef} className={spacingClasses}>
           <div className="text-center pb-3 border-b-2 break-inside-avoid space-y-1" style={{ borderColor: accentColor }}>
             {settings.showAvatar && personalInfo.avatarUrl && (
@@ -634,12 +633,15 @@ export const CVDocument: React.FC<{
             </div>
           </div>
           {sectionOrder.filter((s) => s.isVisible).map((section) => renderSectionByKey(section.key, false))}
-
-          {/* Standard non-editable GDPR Disclaimer */}
-          <div className="pt-3 text-[8.5px] leading-tight text-center opacity-65 border-t border-black/5 break-inside-avoid select-none" style={{ color: secondaryTextColor }}>
-            {t.gdprDisclaimer}
-          </div>
         </div>
+      </div>
+
+      {/* Standard non-editable GDPR Disclaimer anchored right at the very bottom */}
+      <div
+        className="absolute bottom-2.5 left-8 right-8 text-[8px] leading-tight text-center opacity-65 pointer-events-none select-none z-10"
+        style={{ color: secondaryTextColor }}
+      >
+        {t.gdprDisclaimer}
       </div>
     </div>
   );
