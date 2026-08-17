@@ -654,9 +654,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       summary: "",
       experiences: [],
       educations: [],
-      skillCategories: [
-        { id: "cat-default", name: "Competenze Principali", skills: [] },
-      ],
+      skillCategories: [],
       languages: [],
       projects: [],
       certifications: [],

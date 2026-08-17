@@ -9,14 +9,12 @@ import {
   ZoomOut,
   Printer,
   Maximize2,
-  Sparkles,
 } from "lucide-react";
 
 export const PreviewPanel: React.FC = () => {
   const { cvData } = useCV();
   const [zoomLevel, setZoomLevel] = useState<number>(0.85);
   const [isExporting, setIsExporting] = useState<boolean>(false);
-  const [autoFitScale, setAutoFitScale] = useState<number>(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const calculateFitZoom = useCallback(() => {
@@ -54,8 +52,8 @@ export const PreviewPanel: React.FC = () => {
     setZoomLevel(calculateFitZoom());
   };
 
-  const handleScaleChange = useCallback((scale: number) => {
-    setAutoFitScale(scale);
+  const handleScaleChange = useCallback(() => {
+    // auto-fit scale callback
   }, []);
 
   const handlePrint = () => {
@@ -118,20 +116,8 @@ export const PreviewPanel: React.FC = () => {
           </button>
         </div>
 
-        {/* Dynamic Auto-Fit Indicator & Print Action */}
+        {/* Print Action */}
         <div className="flex items-center gap-2">
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-mono"
-            title="Adattamento automatico continuo per mantenere tutto il CV esattamente in 1 pagina A4"
-          >
-            <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
-            <span>
-              {autoFitScale < 1
-                ? `Auto-Fit: ${Math.round(autoFitScale * 100)}% (A4 Pagina Singola)`
-                : "Auto-Fit: 100% (A4 Pagina Singola)"}
-            </span>
-          </div>
-
           <Button
             variant="primary"
             size="sm"

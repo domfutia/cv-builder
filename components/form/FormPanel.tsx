@@ -80,6 +80,16 @@ export const FormPanel: React.FC = () => {
           {standardSections.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeTab === sec.id;
+            
+            // Dynamic label resolution from sectionOrder
+            let dynamicLabel = sec.label;
+            if (sec.id !== "settings" && sec.id !== "personal") {
+              const foundInOrder = cvData.settings.sectionOrder?.find((s) => s.key === sec.id);
+              if (foundInOrder && foundInOrder.label?.trim()) {
+                dynamicLabel = foundInOrder.label.trim();
+              }
+            }
+
             return (
               <button
                 key={sec.id}
@@ -93,8 +103,7 @@ export const FormPanel: React.FC = () => {
                 )}
               >
                 <Icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-neutral-500 dark:text-neutral-400")} />
-                <span className="hidden sm:inline">{sec.label}</span>
-                <span className="inline sm:hidden">{sec.shortLabel}</span>
+                <span className="max-w-[150px] truncate">{dynamicLabel}</span>
               </button>
             );
           })}
