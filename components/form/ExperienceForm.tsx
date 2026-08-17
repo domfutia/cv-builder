@@ -38,14 +38,12 @@ import {
 
 interface SortableCardProps {
   exp: ExperienceItem;
-  index: number;
   onUpdate: (data: Partial<ExperienceItem>) => void;
   onRemove: () => void;
 }
 
 const SortableExperienceCard: React.FC<SortableCardProps> = ({
   exp,
-  index,
   onUpdate,
   onRemove,
 }) => {
@@ -322,11 +320,10 @@ export const ExperienceForm: React.FC = () => {
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-4">
-              {cvData.experiences.map((exp, index) => (
+              {cvData.experiences.map((exp) => (
                 <SortableExperienceCard
                   key={exp.id}
                   exp={exp}
-                  index={index}
                   onUpdate={(data) => updateExperience(exp.id, data)}
                   onRemove={() => removeExperience(exp.id)}
                 />

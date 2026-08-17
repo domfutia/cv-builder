@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCV } from "@/context/CVContext";
 import { Button } from "@/components/ui/Button";
@@ -15,14 +15,15 @@ import {
 } from "lucide-react";
 
 export const Navbar: React.FC = () => {
-  const { cvData, resetToSample, clearAll, exportJSON, importJSON } = useCV();
+  const { resetToSample, clearAll, exportJSON, importJSON } = useCV();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { setTheme, resolvedTheme } = useTheme();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,7 +34,7 @@ export const Navbar: React.FC = () => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
         importJSON(parsed);
-      } catch (err) {
+      } catch {
         alert("File JSON non valido o corrotto.");
       }
     };

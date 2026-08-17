@@ -13,10 +13,11 @@ import {
   CustomSection,
   CustomSectionItem,
   CVSettings,
+  SectionOrderConfig,
 } from "@/types/cv";
-import { initialCVData } from "@/data/initialCV";
+import { initialCVData, defaultSectionOrder, themePresets } from "@/data/initialCV";
 
-const STORAGE_KEY = "once_cv_builder_data_v2";
+const STORAGE_KEY = "once_cv_builder_data_v3";
 
 interface CVContextType {
   cvData: CVData;
@@ -52,6 +53,10 @@ interface CVContextType {
   updateCustomSectionItem: (sectionId: string, itemId: string, data: Partial<CustomSectionItem>) => void;
   removeCustomSectionItem: (sectionId: string, itemId: string) => void;
   reorderCustomSectionItems: (sectionId: string, newOrder: CustomSectionItem[]) => void;
+  // Layout Reorder & Themes
+  updateSectionOrder: (newOrder: SectionOrderConfig[]) => void;
+  toggleSectionVisibility: (key: string) => void;
+  applyThemePreset: (presetId: string) => void;
   // Settings & Storage
   updateSettings: (settings: Partial<CVSettings>) => void;
   resetToSample: () => void;
@@ -70,6 +75,13 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         if (saved) {
           const parsed = JSON.parse(saved);
           if (!parsed.customSections) parsed.customSections = initialCVData.customSections;
+          if (!parsed.settings) parsed.settings = initialCVData.settings;
+          if (!parsed.settings.sectionOrder) parsed.settings.sectionOrder = defaultSectionOrder;
+          if (!parsed.settings.avatarShape) parsed.settings.avatarShape = "circle";
+          if (!parsed.settings.avatarSize) parsed.settings.avatarSize = "md";
+          if (!parsed.settings.tagBgColor) parsed.settings.tagBgColor = "#f4f4f5";
+          if (!parsed.settings.tagTextColor) parsed.settings.tagTextColor = "#18181b";
+          if (!parsed.settings.paperBgColor) parsed.settings.paperBgColor = "#ffffff";
           return parsed;
         }
       } catch (err) {
@@ -436,6 +448,47 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     []
   );
 
+  // Section Reordering & Visibility
+  const updateSectionOrder = useCallback((newOrder: SectionOrderConfig[]) => {
+    setCvData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        sectionOrder: newOrder,
+      },
+    }));
+  }, []);
+
+  const toggleSectionVisibility = useCallback((key: string) => {
+    setCvData((prev) => {
+      const currentOrder = prev.settings.sectionOrder || defaultSectionOrder;
+      const updated = currentOrder.map((s) =>
+        s.key === key ? { ...s, isVisible: !s.isVisible } : s
+      );
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          sectionOrder: updated,
+        },
+      };
+    });
+  }, []);
+
+  // Theme Presets
+  const applyThemePreset = useCallback((presetId: string) => {
+    const preset = themePresets.find((p) => p.id === presetId);
+    if (!preset) return;
+    setCvData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        themePreset: preset.id,
+        ...preset.colors,
+      },
+    }));
+  }, []);
+
   // Settings
   const updateSettings = useCallback((settings: Partial<CVSettings>) => {
     setCvData((prev) => ({
@@ -490,6 +543,8 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const importJSON = useCallback((data: CVData) => {
     if (data && data.personalInfo) {
       if (!data.customSections) data.customSections = [];
+      if (!data.settings) data.settings = initialCVData.settings;
+      if (!data.settings.sectionOrder) data.settings.sectionOrder = defaultSectionOrder;
       setCvData(data);
     }
   }, []);
@@ -529,6 +584,9 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateCustomSectionItem,
         removeCustomSectionItem,
         reorderCustomSectionItems,
+        updateSectionOrder,
+        toggleSectionVisibility,
+        applyThemePreset,
         updateSettings,
         resetToSample,
         clearAll,

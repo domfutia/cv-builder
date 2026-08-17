@@ -1,4 +1,116 @@
-import { CVData } from "@/types/cv";
+import { CVData, SectionOrderConfig, ThemeColors } from "@/types/cv";
+
+export const defaultSectionOrder: SectionOrderConfig[] = [
+  { id: "sec-summary", key: "summary", label: "Profilo Professionale", isVisible: true },
+  { id: "sec-experience", key: "experience", label: "Esperienze Lavorative", isVisible: true },
+  { id: "sec-education", key: "education", label: "Formazione & Studi", isVisible: true },
+  { id: "sec-custom", key: "customSections", label: "Sezioni Personalizzate", isVisible: true },
+  { id: "sec-skills", key: "skills", label: "Competenze & Tecnologie", isVisible: true },
+  { id: "sec-projects", key: "projects", label: "Progetti di Rilievo", isVisible: true },
+  { id: "sec-languages", key: "languages", label: "Lingue", isVisible: true },
+  { id: "sec-certifications", key: "certifications", label: "Certificazioni", isVisible: true },
+];
+
+export interface ThemePresetDefinition {
+  id: string;
+  name: string;
+  description: string;
+  previewColors: string[];
+  colors: ThemeColors;
+}
+
+export const themePresets: ThemePresetDefinition[] = [
+  {
+    id: "obsidian",
+    name: "Once Obsidian",
+    description: "Nero profondo, contrasti netti ed eleganza monocromatica",
+    previewColors: ["#0a0a0a", "#18181b", "#ffffff"],
+    colors: {
+      primaryTextColor: "#09090b",
+      secondaryTextColor: "#52525b",
+      bodyTextColor: "#3f3f46",
+      accentColorHex: "#18181b",
+      tagBgColor: "#f4f4f5",
+      tagTextColor: "#18181b",
+      paperBgColor: "#ffffff",
+    },
+  },
+  {
+    id: "nordic",
+    name: "Nordic Minimal",
+    description: "Toni caldi sabbia/pietra con accenti ottone desaturati",
+    previewColors: ["#1c1917", "#b45309", "#fdfbf7"],
+    colors: {
+      primaryTextColor: "#1c1917",
+      secondaryTextColor: "#78716c",
+      bodyTextColor: "#44403c",
+      accentColorHex: "#b45309",
+      tagBgColor: "#f5f0e8",
+      tagTextColor: "#78350f",
+      paperBgColor: "#fdfbf7",
+    },
+  },
+  {
+    id: "slate-executive",
+    name: "Slate Executive",
+    description: "Blu ardesia scuro e finiture formali da leadership",
+    previewColors: ["#0f172a", "#2563eb", "#ffffff"],
+    colors: {
+      primaryTextColor: "#0f172a",
+      secondaryTextColor: "#475569",
+      bodyTextColor: "#334155",
+      accentColorHex: "#2563eb",
+      tagBgColor: "#eff6ff",
+      tagTextColor: "#1e40af",
+      paperBgColor: "#ffffff",
+    },
+  },
+  {
+    id: "emerald-pro",
+    name: "Emerald Forest",
+    description: "Verde pino scuro e accenti smeraldo contemporanei",
+    previewColors: ["#064e3b", "#059669", "#ffffff"],
+    colors: {
+      primaryTextColor: "#064e3b",
+      secondaryTextColor: "#047857",
+      bodyTextColor: "#374151",
+      accentColorHex: "#059669",
+      tagBgColor: "#ecfdf5",
+      tagTextColor: "#065f46",
+      paperBgColor: "#ffffff",
+    },
+  },
+  {
+    id: "violet-modern",
+    name: "Cyber Violet",
+    description: "Indaco profondo con accenti viola tech ad alto impatto",
+    previewColors: ["#1e1b4b", "#7c3aed", "#ffffff"],
+    colors: {
+      primaryTextColor: "#1e1b4b",
+      secondaryTextColor: "#4c1d95",
+      bodyTextColor: "#334155",
+      accentColorHex: "#7c3aed",
+      tagBgColor: "#f5f3ff",
+      tagTextColor: "#5b21b6",
+      paperBgColor: "#ffffff",
+    },
+  },
+  {
+    id: "rose-velvet",
+    name: "Rose Velvet",
+    description: "Toni bacca scura ed eleganza raffinata da design studio",
+    previewColors: ["#4c0519", "#be123c", "#ffffff"],
+    colors: {
+      primaryTextColor: "#4c0519",
+      secondaryTextColor: "#881337",
+      bodyTextColor: "#374151",
+      accentColorHex: "#be123c",
+      tagBgColor: "#fff1f2",
+      tagTextColor: "#9f1239",
+      paperBgColor: "#ffffff",
+    },
+  },
+];
 
 export const initialCVData: CVData = {
   personalInfo: {
@@ -161,12 +273,20 @@ export const initialCVData: CVData = {
   ],
   settings: {
     template: "minimal",
-    accentColor: "monochrome",
-    accentColorHex: "#171717",
-    primaryTextColor: "#0a0a0a",
+    themePreset: "obsidian",
+    primaryTextColor: "#09090b",
+    secondaryTextColor: "#52525b",
+    bodyTextColor: "#3f3f46",
+    accentColorHex: "#18181b",
+    tagBgColor: "#f4f4f5",
+    tagTextColor: "#18181b",
+    paperBgColor: "#ffffff",
     fontFamily: "inter",
     fontSize: "base",
     spacing: "normal",
     showAvatar: false,
+    avatarShape: "circle",
+    avatarSize: "md",
+    sectionOrder: defaultSectionOrder,
   },
 };

@@ -80,20 +80,39 @@ export interface CustomSection {
 }
 
 export type CVTemplate = 'minimal' | 'modern' | 'executive';
-export type CVAccentColor = 'monochrome' | 'zinc' | 'emerald' | 'indigo' | 'sky' | 'rose' | 'amber' | 'custom';
 export type CVFontFamily = 'inter' | 'sans' | 'serif' | 'mono';
 export type CVFontSize = 'sm' | 'base' | 'lg';
 export type CVSpacing = 'compact' | 'normal' | 'relaxed';
+export type AvatarShape = 'circle' | 'rounded' | 'square';
+export type AvatarSize = 'sm' | 'md' | 'lg';
 
-export interface CVSettings {
+export interface SectionOrderConfig {
+  id: string;
+  key: string;
+  label: string;
+  isVisible: boolean;
+}
+
+export interface ThemeColors {
+  primaryTextColor: string;
+  secondaryTextColor: string;
+  bodyTextColor: string;
+  accentColorHex: string;
+  tagBgColor: string;
+  tagTextColor: string;
+  paperBgColor: string;
+}
+
+export interface CVSettings extends ThemeColors {
   template: CVTemplate;
-  accentColor: CVAccentColor;
-  accentColorHex?: string;
-  primaryTextColor?: string;
+  themePreset: string;
   fontFamily: CVFontFamily;
   fontSize: CVFontSize;
   spacing: CVSpacing;
   showAvatar: boolean;
+  avatarShape: AvatarShape;
+  avatarSize: AvatarSize;
+  sectionOrder: SectionOrderConfig[];
 }
 
 export interface CVData {

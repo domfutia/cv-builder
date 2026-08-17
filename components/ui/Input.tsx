@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
@@ -28,13 +28,16 @@ export const Input: React.FC<InputProps> = ({
   type = "text",
   ...props
 }) => {
+  const [prevValue, setPrevValue] = useState<string>(value);
   const [localValue, setLocalValue] = useState<string>(value);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
-  useEffect(() => {
+  // Sync state during render when prop changes
+  if (value !== prevValue) {
+    setPrevValue(value);
     setLocalValue(value);
-  }, [value]);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

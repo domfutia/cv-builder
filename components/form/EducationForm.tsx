@@ -36,14 +36,12 @@ import {
 
 interface SortableEducationCardProps {
   edu: EducationItem;
-  index: number;
   onUpdate: (data: Partial<EducationItem>) => void;
   onRemove: () => void;
 }
 
 const SortableEducationCard: React.FC<SortableEducationCardProps> = ({
   edu,
-  index,
   onUpdate,
   onRemove,
 }) => {
@@ -259,11 +257,10 @@ export const EducationForm: React.FC = () => {
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-4">
-              {cvData.educations.map((edu, index) => (
+              {cvData.educations.map((edu) => (
                 <SortableEducationCard
                   key={edu.id}
                   edu={edu}
-                  index={index}
                   onUpdate={(data) => updateEducation(edu.id, data)}
                   onRemove={() => removeEducation(edu.id)}
                 />

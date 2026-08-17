@@ -23,7 +23,6 @@ import { CustomSection, CustomSectionItem } from "@/types/cv";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
-import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
 import {
   FolderPlus,
@@ -39,14 +38,12 @@ import {
 
 interface SortableCustomItemProps {
   item: CustomSectionItem;
-  sectionId: string;
   onUpdate: (data: Partial<CustomSectionItem>) => void;
   onRemove: () => void;
 }
 
 const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
   item,
-  sectionId,
   onUpdate,
   onRemove,
 }) => {
@@ -369,7 +366,6 @@ export const CustomSectionForm: React.FC<{ section: CustomSection }> = ({ sectio
                 <SortableCustomItemCard
                   key={item.id}
                   item={item}
-                  sectionId={section.id}
                   onUpdate={(data) => updateCustomSectionItem(section.id, item.id, data)}
                   onRemove={() => removeCustomSectionItem(section.id, item.id)}
                 />

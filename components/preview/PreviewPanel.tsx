@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { CVDocument } from "./CVDocument";
 import { Button } from "@/components/ui/Button";
 import {
   ZoomIn,
   ZoomOut,
   Printer,
-  Sparkles,
+  Maximize2,
 } from "lucide-react";
 
 export const PreviewPanel: React.FC = () => {
@@ -15,25 +15,41 @@ export const PreviewPanel: React.FC = () => {
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const calculateFitZoom = useCallback(() => {
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth - 32;
+      const a4WidthPx = 794; // approx 210mm at 96 DPI
+      const fitZoom = Math.min(Math.max(containerWidth / a4WidthPx, 0.35), 1.15);
+      return Number(fitZoom.toFixed(2));
+    }
+    return 0.85;
+  }, []);
+
+  // Automatic smart fit on initial load and resize for mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setZoomLevel(calculateFitZoom());
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [calculateFitZoom]);
+
   const handleZoomIn = () => {
-    setZoomLevel((prev) => Math.min(prev + 0.1, 1.4));
+    setZoomLevel((prev) => Math.min(Number((prev + 0.1).toFixed(2)), 1.4));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => Math.max(prev - 0.1, 0.45));
-  };
-
-  const handleResetZoom = () => {
-    setZoomLevel(0.85);
+    setZoomLevel((prev) => Math.max(Number((prev - 0.1).toFixed(2)), 0.35));
   };
 
   const handleFitWidth = () => {
-    if (containerRef.current) {
-      const containerWidth = containerRef.current.clientWidth - 48;
-      const a4WidthPx = 794;
-      const fitZoom = Math.min(Math.max(containerWidth / a4WidthPx, 0.4), 1.1);
-      setZoomLevel(fitZoom);
-    }
+    setZoomLevel(calculateFitZoom());
   };
 
   const handlePrint = () => {
@@ -47,20 +63,20 @@ export const PreviewPanel: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors">
       {/* Top Toolbar */}
-      <div className="p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-3 transition-colors">
+      <div className="p-2.5 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 transition-colors">
         {/* Zoom Controls */}
-        <div className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-900/80 p-1 rounded-lg border border-neutral-200 dark:border-neutral-800">
+        <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-900/80 p-0.5 sm:p-1 rounded-lg border border-neutral-200 dark:border-neutral-800">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleZoomOut}
-            className="p-1.5 h-7 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            className="p-1 sm:p-1.5 h-7 w-7 sm:w-auto text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
             title="Riduci Zoom"
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </Button>
 
-          <span className="text-[11px] font-mono font-medium text-neutral-700 dark:text-neutral-300 px-2 select-none min-w-[42px] text-center">
+          <span className="text-[11px] font-mono font-medium text-neutral-700 dark:text-neutral-300 px-1.5 select-none min-w-[38px] text-center">
             {Math.round(zoomLevel * 100)}%
           </span>
 
@@ -68,7 +84,7 @@ export const PreviewPanel: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={handleZoomIn}
-            className="p-1.5 h-7 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            className="p-1 sm:p-1.5 h-7 w-7 sm:w-auto text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
             title="Aumenta Zoom"
           >
             <ZoomIn className="w-3.5 h-3.5" />
@@ -78,19 +94,12 @@ export const PreviewPanel: React.FC = () => {
 
           <button
             type="button"
-            onClick={handleResetZoom}
-            className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 px-2 py-0.5 rounded hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-            title="Ripristina 85%"
-          >
-            100%
-          </button>
-          <button
-            type="button"
             onClick={handleFitWidth}
-            className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 px-2 py-0.5 rounded hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-[11px] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 px-2 py-0.5 rounded hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
             title="Adatta alla larghezza dello schermo"
           >
-            Adatta
+            <Maximize2 className="w-3 h-3 hidden sm:inline" />
+            <span>Adatta</span>
           </button>
         </div>
 
@@ -107,9 +116,10 @@ export const PreviewPanel: React.FC = () => {
             onClick={handlePrint}
             disabled={isExporting}
             icon={<Printer className="w-3.5 h-3.5" />}
-            className="shadow-sm font-semibold"
+            className="shadow-sm font-semibold text-xs py-1.5"
           >
-            {isExporting ? "Generazione..." : "Esporta PDF / Stampa"}
+            <span className="hidden sm:inline">{isExporting ? "Generazione..." : "Esporta PDF / Stampa"}</span>
+            <span className="inline sm:hidden">{isExporting ? "..." : "Stampa PDF"}</span>
           </Button>
         </div>
       </div>
@@ -117,7 +127,7 @@ export const PreviewPanel: React.FC = () => {
       {/* Canvas Area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto p-6 sm:p-10 flex items-start justify-center relative select-none"
+        className="flex-1 overflow-auto p-4 sm:p-8 flex items-start justify-center relative select-none"
         style={{
           backgroundImage: `
             radial-gradient(circle at top, rgba(0, 0, 0, 0.03) 0%, transparent 70%),
@@ -126,9 +136,9 @@ export const PreviewPanel: React.FC = () => {
           backgroundSize: "100% 100%, 24px 24px",
         }}
       >
-        {/* Document scaling container with realistic paper drop shadow */}
+        {/* Scaled Sheet with smooth transform */}
         <div
-          className="transition-transform duration-200 origin-top flex justify-center pb-16"
+          className="transition-transform duration-200 origin-top flex justify-center pb-24"
           style={{
             transform: `scale(${zoomLevel})`,
           }}

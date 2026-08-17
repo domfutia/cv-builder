@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface TextareaProps
@@ -27,13 +27,15 @@ export const Textarea: React.FC<TextareaProps> = ({
   disabled,
   ...props
 }) => {
+  const [prevValue, setPrevValue] = useState<string>(value);
   const [localValue, setLocalValue] = useState<string>(value);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const textareaId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setLocalValue(value);
-  }, [value]);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
