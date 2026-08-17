@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useRef, useState, useLayoutEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useCV } from "@/context/CVContext";
 import {
   Mail,
@@ -65,6 +65,12 @@ export const CVDocument: React.FC<{
   const innerStackRef = useRef<HTMLDivElement>(null);
 
   const [autoFitScale, setAutoFitScale] = useState<number>(1);
+  const scaleRef = useRef<number>(1);
+  const onScaleChangeRef = useRef(onScaleChange);
+
+  useEffect(() => {
+    onScaleChangeRef.current = onScaleChange;
+  }, [onScaleChange]);
 
   // Granular colors
   const primaryTextColor = settings.primaryTextColor || "#09090b";
@@ -129,9 +135,9 @@ export const CVDocument: React.FC<{
     : defaultSectionOrder;
 
   // =========================================================================
-  // CONTINUOUS DUAL-STAGE SINGLE-PAGE A4 AUTO-FIT ENGINE
+  // CONTINUOUS DUAL-STAGE SINGLE-PAGE A4 AUTO-FIT ENGINE (Safe from loops)
   // =========================================================================
-  useLayoutEffect(() => {
+  useEffect(() => {
     const calculateAutoFit = () => {
       if (!rootRef.current) return;
 
@@ -153,33 +159,25 @@ export const CVDocument: React.FC<{
       }
 
       if (measuredHeight > 0) {
-        // If measured height exceeds target height, calculate exact scale
-        const currentScale = autoFitScale;
-        const effectiveHeight = measuredHeight * currentScale;
+        let targetScale = 1.0;
+        if (measuredHeight > targetHeight - 4) {
+          targetScale = Math.min(1.0, Math.max(0.3, (targetHeight - 8) / measuredHeight));
+        }
 
-        if (effectiveHeight > targetHeight - 4) {
-          // Scale down smoothly
-          const newScale = Math.min(1.0, Math.max(0.3, (targetHeight - 8) / measuredHeight));
-          const cleanScale = Number(newScale.toFixed(3));
-          if (Math.abs(cleanScale - currentScale) > 0.003) {
-            setAutoFitScale(cleanScale);
-            if (onScaleChange) onScaleChange(cleanScale);
-          }
-        } else if (effectiveHeight < targetHeight - 40 && currentScale < 0.99) {
-          // Scale up smoothly if content reduced
-          const newScale = Math.min(1.0, (targetHeight - 12) / measuredHeight);
-          const cleanScale = Number(newScale.toFixed(3));
-          if (Math.abs(cleanScale - currentScale) > 0.003) {
-            setAutoFitScale(cleanScale);
-            if (onScaleChange) onScaleChange(cleanScale);
+        const cleanScale = Number(targetScale.toFixed(3));
+        if (Math.abs(cleanScale - scaleRef.current) >= 0.01) {
+          scaleRef.current = cleanScale;
+          setAutoFitScale(cleanScale);
+          if (onScaleChangeRef.current) {
+            onScaleChangeRef.current(cleanScale);
           }
         }
       }
     };
 
     calculateAutoFit();
-    const timer1 = setTimeout(calculateAutoFit, 40);
-    const timer2 = setTimeout(calculateAutoFit, 180);
+    const timer1 = setTimeout(calculateAutoFit, 50);
+    const timer2 = setTimeout(calculateAutoFit, 200);
 
     const observer = new ResizeObserver(() => {
       calculateAutoFit();
@@ -195,7 +193,7 @@ export const CVDocument: React.FC<{
       clearTimeout(timer2);
       observer.disconnect();
     };
-  }, [cvData, settings, autoFitScale, onScaleChange]);
+  }, [cvData, settings]);
 
   // Dynamic Section Labels Helper
   const getSectionTitle = (key: string, defaultTitle: string) => {
@@ -1002,7 +1000,7 @@ export const CVDocument: React.FC<{
                       className="break-words whitespace-normal hover:underline leading-tight"
                       style={{ color: sbTextSecondary }}
                     >
-                      {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
+                      {personalInfo.linkedin.replace(/^https?:\/\//, "")}
                     </a>
                   </div>
                 )}

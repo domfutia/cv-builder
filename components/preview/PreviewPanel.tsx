@@ -70,6 +70,10 @@ export const PreviewPanel: React.FC = () => {
     setIsEditingFileName(false);
   };
 
+  const handleScaleChange = useCallback((scale: number) => {
+    setAutoFitScale(scale);
+  }, []);
+
   const handlePrint = () => {
     setIsExporting(true);
     const fileName =
@@ -230,7 +234,7 @@ export const PreviewPanel: React.FC = () => {
           }}
         >
           <div className="w-[210mm] min-w-[210mm] max-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.15),0_0_1px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_1px_rgba(255,255,255,0.2)] overflow-hidden">
-            <CVDocument onScaleChange={setAutoFitScale} />
+            <CVDocument onScaleChange={handleScaleChange} />
           </div>
         </div>
       </div>
