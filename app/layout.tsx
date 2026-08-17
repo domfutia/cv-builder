@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="it" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-neutral-50 dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 dark:selection:bg-neutral-800 transition-colors duration-200">
+    <html lang="it" suppressHydrationWarning className={`${inter.variable} h-full overflow-hidden antialiased`}>
+      <body className="h-full w-full flex flex-col overflow-hidden bg-neutral-50 dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 dark:selection:bg-neutral-800 transition-colors duration-200">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <CVProvider>{children}</CVProvider>
         </ThemeProvider>

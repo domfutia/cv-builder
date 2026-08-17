@@ -25,7 +25,16 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom subtle scrollbar */
+/* Custom subtle scrollbar for all browsers (Webkit + Firefox + Standard) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

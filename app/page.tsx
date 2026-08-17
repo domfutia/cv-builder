@@ -33,17 +33,17 @@ export default function Home() {
   };
 
   return (
-    <div id="app-root" className="min-h-screen flex flex-col bg-neutral-50 dark:bg-[#09090b] transition-colors duration-200">
+    <div id="app-root" className="h-full max-h-full w-full flex flex-col overflow-hidden bg-neutral-50 dark:bg-[#09090b] transition-colors duration-200">
       {/* Top Navigation Bar */}
       <Navbar />
 
       {/* Main Split Screen Layout */}
-      <main className="flex-1 min-h-0 flex flex-col lg:flex-row h-[calc(100dvh-3.5rem)] overflow-hidden split-layout relative">
+      <main className="flex-1 min-h-0 w-full flex flex-col lg:flex-row overflow-hidden split-layout relative">
         {/* Left Column: Form Panel */}
         <section
           id="form-panel-section"
           className={cn(
-            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full min-h-0 flex-col",
+            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] flex-1 lg:flex-initial h-full max-h-full min-h-0 flex flex-col overflow-hidden",
             mobileView === "form" ? "flex" : "hidden lg:flex"
           )}
         >
@@ -54,7 +54,7 @@ export default function Home() {
         <section
           id="preview-panel-section"
           className={cn(
-            "flex-1 h-full min-h-0 flex-col",
+            "flex-1 w-full h-full max-h-full min-h-0 flex flex-col overflow-hidden",
             mobileView === "preview" ? "flex" : "hidden lg:flex"
           )}
         >

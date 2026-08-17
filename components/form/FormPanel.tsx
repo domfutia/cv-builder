@@ -72,7 +72,7 @@ export const FormPanel: React.FC = () => {
   const hasNext = currentIndex < allTabs.length - 1;
 
   return (
-    <div className="flex flex-col h-full min-h-0 w-full overflow-hidden bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
+    <div className="flex-1 flex flex-col h-full max-h-full min-h-0 w-full overflow-hidden bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
       {/* Section Navigation Tabs */}
       <div className="p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
@@ -142,9 +142,10 @@ export const FormPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Form Content Area: Scrollable with bounded min-h-0 */}
+      {/* Form Content Area: Scrollable with bounded height */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 lg:pb-8 overscroll-contain"
+        id="form-content-scroll-area"
+        className="flex-1 min-h-0 max-h-full overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 lg:pb-8 overscroll-contain"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {activeTab === "settings" && <SettingsForm />}

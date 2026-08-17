@@ -89,7 +89,7 @@ export const PreviewPanel: React.FC = () => {
   return (
     <div
       id="preview-panel-root"
-      className="preview-root-container flex flex-col h-full min-h-0 w-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors"
+      className="preview-root-container flex-1 flex flex-col h-full max-h-full min-h-0 w-full bg-neutral-100 dark:bg-[#0c0c0e] relative overflow-hidden transition-colors"
     >
       {/* Top Toolbar */}
       <div className="no-print p-2 sm:p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-2 shrink-0 transition-colors">
