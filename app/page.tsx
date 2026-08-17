@@ -66,6 +66,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setMobileView("form")}
+            aria-label="Passa alla vista modifica modulo"
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer",
               mobileView === "form"
@@ -80,6 +81,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setMobileView("preview")}
+            aria-label="Passa alla vista anteprima CV"
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer",
               mobileView === "preview"
@@ -96,6 +98,7 @@ export default function Home() {
           <button
             type="button"
             onClick={handlePrint}
+            aria-label="Stampa o esporta il documento in formato PDF"
             className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
             title="Stampa / Esporta PDF"
           >

@@ -171,6 +171,7 @@ export const Navbar: React.FC = () => {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
+            aria-label={`Passa a tema ${resolvedTheme === "dark" ? "chiaro" : "scuro"}`}
             className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white h-8 w-8 cursor-pointer"
             title={`Passa a tema ${resolvedTheme === "dark" ? "chiaro" : "scuro"}`}
           >
@@ -187,6 +188,8 @@ export const Navbar: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowDemoMenu(!showDemoMenu)}
+            aria-expanded={showDemoMenu}
+            aria-label="Carica uno dei profili dimostrativi"
             className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-800"
             title="Carica uno dei 5+ profili di esempio preconfigurati"
           >
@@ -244,6 +247,7 @@ export const Navbar: React.FC = () => {
           variant="ghost"
           size="sm"
           onClick={clearAll}
+          aria-label="Svuota tutti i campi del CV"
           icon={<Trash2 className="w-3.5 h-3.5" />}
           className="text-neutral-500 hover:text-red-500 dark:hover:text-red-400 hidden lg:inline-flex text-xs"
           title="Svuota tutti i campi del CV"
@@ -257,6 +261,7 @@ export const Navbar: React.FC = () => {
           variant="secondary"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
+          aria-label="Importa dati da file JSON"
           icon={<Upload className="w-3.5 h-3.5" />}
           className="text-neutral-700 dark:text-neutral-300 hidden md:inline-flex text-xs"
           title="Importa file di backup JSON"
@@ -268,6 +273,7 @@ export const Navbar: React.FC = () => {
           variant="secondary"
           size="sm"
           onClick={exportJSON}
+          aria-label="Esporta dati in formato JSON"
           icon={<Download className="w-3.5 h-3.5" />}
           className="text-neutral-700 dark:text-neutral-300 hidden sm:inline-flex text-xs"
           title="Esporta dati in formato JSON"
@@ -279,6 +285,7 @@ export const Navbar: React.FC = () => {
           variant="primary"
           size="sm"
           onClick={handlePrint}
+          aria-label="Scarica ed esporta PDF del CV"
           icon={<Printer className="w-3.5 h-3.5" />}
           className="font-semibold shadow-xs text-xs px-2.5 sm:px-3.5 py-1.5"
         >

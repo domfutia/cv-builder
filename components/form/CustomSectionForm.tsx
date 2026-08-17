@@ -86,7 +86,7 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="touch-none">
+    <div ref={setNodeRef} style={style} className="w-full">
       <Card className="transition-all duration-200 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 bg-white dark:bg-neutral-900/80">
         <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200 dark:border-neutral-800/60">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -94,7 +94,8 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               type="button"
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              aria-label="Trascina per riordinare elemento"
+              className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
               title="Trascina per riordinare"
             >
               <GripVertical className="w-4 h-4" />
@@ -115,6 +116,8 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-label={isExpanded ? "Comprimi dettagli elemento" : "Espandi dettagli elemento"}
               className="p-1.5 h-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -123,6 +126,7 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
+              aria-label="Elimina elemento"
               className="p-1.5 h-8 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400"
               title="Elimina elemento"
             >

@@ -93,7 +93,7 @@ const SortableSectionItem: React.FC<{
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center justify-between p-2.5 rounded-lg border transition-all select-none touch-none gap-2",
+        "flex items-center justify-between p-2.5 rounded-lg border transition-all select-none gap-2",
         section.isVisible
           ? "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200"
           : "bg-neutral-100/60 dark:bg-neutral-950/60 border-neutral-200/60 dark:border-neutral-800/40 text-neutral-400 dark:text-neutral-600"
@@ -104,7 +104,8 @@ const SortableSectionItem: React.FC<{
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+          aria-label={`Trascina per riordinare sezione ${section.label}`}
+          className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -138,6 +139,7 @@ const SortableSectionItem: React.FC<{
                 setTempLabel(section.label);
                 setIsEditing(true);
               }}
+              aria-label={`Rinomina titolo della sezione ${section.label}`}
               className="opacity-60 hover:opacity-100 p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-opacity cursor-pointer"
               title="Rinomina titolo della sezione"
             >
@@ -153,6 +155,7 @@ const SortableSectionItem: React.FC<{
           <button
             type="button"
             onClick={() => onMoveColumn(isSidebar ? "main" : "sidebar")}
+            aria-label={isSidebar ? `Sposta sezione ${section.label} nella Colonna Principale` : `Sposta sezione ${section.label} nella Sidebar Laterale`}
             className="px-2 py-1 rounded text-[10px] font-medium bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors flex items-center gap-1 cursor-pointer"
             title={isSidebar ? "Sposta nella Colonna Principale" : "Sposta nella Sidebar Laterale"}
           >
@@ -165,6 +168,7 @@ const SortableSectionItem: React.FC<{
         <button
           type="button"
           onClick={onToggleVisibility}
+          aria-label={section.isVisible ? `Nascondi sezione ${section.label} nel CV` : `Mostra sezione ${section.label} nel CV`}
           className={cn(
             "p-1.5 rounded-md transition-colors cursor-pointer",
             section.isVisible
@@ -184,6 +188,7 @@ const SortableSectionItem: React.FC<{
               onDelete();
             }
           }}
+          aria-label={`Elimina sezione ${section.label} dal CV`}
           className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
           title="Elimina questa sezione dal CV"
         >

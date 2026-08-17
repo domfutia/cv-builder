@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import {
   CVData,
   PersonalInfo,
@@ -100,12 +100,17 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return initialCVData;
   });
 
+  // Debounced LocalStorage persistence (400ms) to avoid blocking main thread on every keystroke
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cvData));
-    } catch (err) {
-      console.error("Error saving CV data to localStorage", err);
-    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cvData));
+      } catch (err) {
+        console.error("Error saving CV data to localStorage", err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, [cvData]);
 
   // Personal Info
@@ -676,67 +681,140 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [cvData]);
 
   const importJSON = useCallback((data: CVData) => {
-    if (data && data.personalInfo) {
-      if (!data.customSections) data.customSections = [];
-      if (!data.settings) data.settings = initialCVData.settings;
-      if (!data.settings.sectionOrder) data.settings.sectionOrder = defaultSectionOrder;
-      if (!data.settings.sidebarBgColor) data.settings.sidebarBgColor = "#18181b";
-      if (!data.settings.pdfFileName) data.settings.pdfFileName = "Alex_Vender_CV";
-      setCvData(data);
+    if (data && typeof data === "object" && data.personalInfo) {
+      const sanitized: CVData = {
+        personalInfo: {
+          fullName: data.personalInfo.fullName || "",
+          jobTitle: data.personalInfo.jobTitle || "",
+          email: data.personalInfo.email || "",
+          phone: data.personalInfo.phone || "",
+          location: data.personalInfo.location || "",
+          website: data.personalInfo.website || "",
+          linkedin: data.personalInfo.linkedin || "",
+          github: data.personalInfo.github || "",
+          avatarUrl: data.personalInfo.avatarUrl || "",
+        },
+        summary: typeof data.summary === "string" ? data.summary : "",
+        experiences: Array.isArray(data.experiences) ? data.experiences : [],
+        educations: Array.isArray(data.educations) ? data.educations : [],
+        skillCategories: Array.isArray(data.skillCategories) ? data.skillCategories : [],
+        languages: Array.isArray(data.languages) ? data.languages : [],
+        projects: Array.isArray(data.projects) ? data.projects : [],
+        certifications: Array.isArray(data.certifications) ? data.certifications : [],
+        customSections: Array.isArray(data.customSections) ? data.customSections : [],
+        settings: {
+          ...initialCVData.settings,
+          ...(data.settings || {}),
+          sectionOrder: Array.isArray(data.settings?.sectionOrder) && data.settings.sectionOrder.length > 0
+            ? data.settings.sectionOrder
+            : defaultSectionOrder,
+        },
+      };
+      setCvData(sanitized);
     }
   }, []);
 
+  const contextValue = useMemo<CVContextType>(
+    () => ({
+      cvData,
+      updatePersonalInfo,
+      updateSummary,
+      addExperience,
+      updateExperience,
+      removeExperience,
+      reorderExperiences,
+      addEducation,
+      updateEducation,
+      removeEducation,
+      reorderEducations,
+      addSkillCategory,
+      updateSkillCategoryName,
+      removeSkillCategory,
+      addSkill,
+      removeSkill,
+      addLanguage,
+      updateLanguage,
+      removeLanguage,
+      addProject,
+      updateProject,
+      removeProject,
+      addCertification,
+      updateCertification,
+      removeCertification,
+      addCustomSection,
+      updateCustomSectionTitle,
+      removeCustomSection,
+      addCustomSectionItem,
+      updateCustomSectionItem,
+      removeCustomSectionItem,
+      reorderCustomSectionItems,
+      updateSectionOrder,
+      updateSectionLabel,
+      moveSectionColumn,
+      toggleSectionVisibility,
+      deleteSection,
+      restoreSection,
+      applyThemePreset,
+      updatePdfFileName,
+      updateSettings,
+      resetToSample,
+      loadDemoProfile,
+      clearAll,
+      exportJSON,
+      importJSON,
+    }),
+    [
+      cvData,
+      updatePersonalInfo,
+      updateSummary,
+      addExperience,
+      updateExperience,
+      removeExperience,
+      reorderExperiences,
+      addEducation,
+      updateEducation,
+      removeEducation,
+      reorderEducations,
+      addSkillCategory,
+      updateSkillCategoryName,
+      removeSkillCategory,
+      addSkill,
+      removeSkill,
+      addLanguage,
+      updateLanguage,
+      removeLanguage,
+      addProject,
+      updateProject,
+      removeProject,
+      addCertification,
+      updateCertification,
+      removeCertification,
+      addCustomSection,
+      updateCustomSectionTitle,
+      removeCustomSection,
+      addCustomSectionItem,
+      updateCustomSectionItem,
+      removeCustomSectionItem,
+      reorderCustomSectionItems,
+      updateSectionOrder,
+      updateSectionLabel,
+      moveSectionColumn,
+      toggleSectionVisibility,
+      deleteSection,
+      restoreSection,
+      applyThemePreset,
+      updatePdfFileName,
+      updateSettings,
+      resetToSample,
+      loadDemoProfile,
+      clearAll,
+      exportJSON,
+      importJSON,
+    ]
+  );
+
   return (
-    <CVContext.Provider
-      value={{
-        cvData,
-        updatePersonalInfo,
-        updateSummary,
-        addExperience,
-        updateExperience,
-        removeExperience,
-        reorderExperiences,
-        addEducation,
-        updateEducation,
-        removeEducation,
-        reorderEducations,
-        addSkillCategory,
-        updateSkillCategoryName,
-        removeSkillCategory,
-        addSkill,
-        removeSkill,
-        addLanguage,
-        updateLanguage,
-        removeLanguage,
-        addProject,
-        updateProject,
-        removeProject,
-        addCertification,
-        updateCertification,
-        removeCertification,
-        addCustomSection,
-        updateCustomSectionTitle,
-        removeCustomSection,
-        addCustomSectionItem,
-        updateCustomSectionItem,
-        removeCustomSectionItem,
-        reorderCustomSectionItems,
-        updateSectionOrder,
-        updateSectionLabel,
-        moveSectionColumn,
-        toggleSectionVisibility,
-        deleteSection,
-        restoreSection,
-        applyThemePreset,
-        updatePdfFileName,
-        updateSettings,
-        resetToSample,
-        loadDemoProfile,
-        clearAll,
-        exportJSON,
-        importJSON,
-      }}
-    >
+    <CVContext.Provider value={contextValue}>
       {children}
     </CVContext.Provider>
   );

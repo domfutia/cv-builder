@@ -86,7 +86,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="touch-none">
+    <div ref={setNodeRef} style={style} className="w-full">
       <Card className="transition-all duration-200 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 bg-white dark:bg-neutral-900/80">
         {/* Header with drag handle and collapse */}
         <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200 dark:border-neutral-800/60">
@@ -95,7 +95,8 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               type="button"
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              aria-label="Trascina per riordinare esperienza"
+              className="touch-none cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
               title="Trascina per riordinare"
             >
               <GripVertical className="w-4 h-4" />
@@ -116,6 +117,8 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-label={isExpanded ? "Comprimi dettagli esperienza" : "Espandi dettagli esperienza"}
               className="p-1.5 h-8 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -124,6 +127,7 @@ const SortableExperienceCard: React.FC<SortableCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={onRemove}
+              aria-label="Elimina esperienza lavorativa"
               className="p-1.5 h-8 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
               title="Elimina esperienza"
             >

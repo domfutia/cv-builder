@@ -72,9 +72,9 @@ export const FormPanel: React.FC = () => {
   const hasNext = currentIndex < allTabs.length - 1;
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
+    <div className="flex flex-col h-full min-h-0 w-full overflow-hidden bg-neutral-50/50 dark:bg-neutral-950/60 border-r border-neutral-200 dark:border-neutral-800/80 transition-colors">
       {/* Section Navigation Tabs */}
-      <div className="p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20">
+      <div className="p-3 border-b border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
           {/* Standard sections */}
           {standardSections.map((sec) => {
@@ -142,9 +142,9 @@ export const FormPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Form Content Area */}
+      {/* Form Content Area: Scrollable with bounded min-h-0 */}
       <div
-        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 lg:pb-6 overscroll-contain"
+        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 lg:pb-8 overscroll-contain"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {activeTab === "settings" && <SettingsForm />}
@@ -160,7 +160,7 @@ export const FormPanel: React.FC = () => {
       </div>
 
       {/* Bottom Step Navigation Footer */}
-      <div className="p-3.5 border-t border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 flex items-center justify-between gap-2 transition-colors">
+      <div className="p-3.5 border-t border-neutral-200 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 flex items-center justify-between gap-2 transition-colors shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
           <Sparkles className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
           <span>Salvataggio istantaneo attivo</span>
