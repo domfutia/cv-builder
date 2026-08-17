@@ -39,6 +39,7 @@ import {
   ArrowRightLeft,
   Plus,
   PlusCircle,
+  FileText,
 } from "lucide-react";
 import { CVTemplate, CVFontSize, CVSpacing, SectionOrderConfig } from "@/types/cv";
 import { themePresets, defaultSectionOrder, standardSectionsMeta } from "@/data/initialCV";
@@ -206,8 +207,9 @@ export const SettingsForm: React.FC = () => {
     restoreSection,
     addCustomSection,
     applyThemePreset,
+    updatePdfFileName,
   } = useCV();
-  const { settings } = cvData;
+  const { settings, personalInfo } = cvData;
   const [activeSettingsTab, setActiveSettingsTab] = useState<"layout" | "presets" | "colors">("layout");
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
@@ -282,7 +284,7 @@ export const SettingsForm: React.FC = () => {
   const templates: { id: CVTemplate; name: string; desc: string }[] = [
     {
       id: "minimal",
-      name: "Once UI Minimal",
+      name: "CIVVU Minimal",
       desc: "Tipografia ultra-pulita, contrasti monocromatici, timeline asimmetrica.",
     },
     {
@@ -309,11 +311,15 @@ export const SettingsForm: React.FC = () => {
     { id: "relaxed", name: "Ampio" },
   ];
 
+  const currentFileName =
+    settings.pdfFileName ||
+    `${personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`;
+
   return (
     <div className="space-y-6">
       <SectionHeader
         title="Personalizzazione & Struttura"
-        subtitle="Scegli template, riordina le sezioni del CV, rinomina i titoli e configura gli stili"
+        subtitle="Scegli template, gestisci nome file PDF, riordina le sezioni del CV e configura gli stili"
         icon={<Sliders className="w-5 h-5" />}
       />
 
@@ -363,6 +369,29 @@ export const SettingsForm: React.FC = () => {
       {/* TAB 1: Layout, Template & Riordino Sezioni */}
       {activeSettingsTab === "layout" && (
         <div className="space-y-6">
+          {/* Nome File PDF per Download */}
+          <Card className="p-3.5 bg-white dark:bg-neutral-900/80 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-neutral-500" />
+                <span>Nome File PDF per il Download</span>
+              </label>
+              <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={currentFileName}
+                onChange={(e) => updatePdfFileName(e.target.value)}
+                placeholder="es. Mario_Rossi_CV"
+                className="flex-1 px-3 py-1.5 text-xs font-mono rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-900 dark:focus:ring-neutral-400"
+              />
+            </div>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-snug">
+              Questo nome verrà usato automaticamente quando salvi o stampi il PDF dal browser.
+            </p>
+          </Card>
+
           {/* Template Selector */}
           <div className="space-y-3">
             <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wide flex items-center gap-2">
@@ -545,7 +574,7 @@ export const SettingsForm: React.FC = () => {
 
             {/* Aggiungi / Ripristina Sezioni */}
             <div className="relative pt-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
@@ -652,12 +681,12 @@ export const SettingsForm: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: Stili Predefiniti (4 Temi Professionali Once UI) */}
+      {/* TAB 2: Stili Predefiniti (4 Temi Professionali CIVVU) */}
       {activeSettingsTab === "presets" && (
         <div className="space-y-4">
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-              Palette Curate Once UI
+              Palette Curate CIVVU
             </h4>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
               4 stili cromatici sobri, desaturati e istituzionali adatti a contesti professionali

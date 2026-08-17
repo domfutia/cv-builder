@@ -282,5 +282,6 @@ export const initialCVData: CVData = {
     avatarShape: "circle",
     avatarSize: "md",
     sectionOrder: defaultSectionOrder,
+    pdfFileName: "Alex_Vender_CV",
   },
 };

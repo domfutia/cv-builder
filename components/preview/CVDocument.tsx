@@ -615,7 +615,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   // =========================================================================
-  // TEMPLATE 1: Once UI Minimal (Default)
+  // TEMPLATE 1: CIVVU Minimal (Default)
   // =========================================================================
   if (settings.template === "minimal") {
     return (
@@ -623,7 +623,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
         id="cv-print-root"
         className={cn(
           "w-full shadow-2xl transition-all duration-300 font-sans print:shadow-none print:m-0",
-          "p-8 sm:p-12 min-h-[297mm] box-border relative print:p-8",
+          "p-10 min-h-[297mm] box-border relative print:p-8",
           fontSizeClasses,
           className
         )}
@@ -750,7 +750,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
   }
 
   // =========================================================================
-  // TEMPLATE 2: Modern Sidebar (Split Vertical Columns by section.column)
+  // TEMPLATE 2: Modern Sidebar (Split 2-Column Desktop & Mobile A4 Sheet)
   // =========================================================================
   if (settings.template === "modern") {
     const sidebarItems = sectionOrder.filter((s) => s.isVisible && s.column === "sidebar");
@@ -761,7 +761,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
         id="cv-print-root"
         className={cn(
           "w-full shadow-2xl transition-all duration-300 font-sans print:shadow-none print:m-0",
-          "min-h-[297mm] box-border relative flex flex-col md:flex-row print:flex-row",
+          "min-h-[297mm] box-border relative flex flex-row", // Always 2-column flex-row on A4!
           fontSizeClasses,
           className
         )}
@@ -772,9 +772,9 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
           color: primaryTextColor,
         }}
       >
-        {/* Left Customizable Sidebar with Intelligent Contrast */}
+        {/* Left Customizable Sidebar with Intelligent Contrast (Strict 34% width) */}
         <div
-          className="w-full md:w-[34%] print:w-[34%] p-6 sm:p-7 space-y-6 shrink-0 border-r"
+          className="w-[34%] p-6 sm:p-7 space-y-6 shrink-0 border-r"
           style={{
             backgroundColor: sidebarBgColor,
             color: sbTextPrimary,
@@ -889,8 +889,8 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
           {sidebarItems.map((section) => renderSectionByKey(section.key, true))}
         </div>
 
-        {/* Right Main Column */}
-        <div className="w-full md:w-[66%] print:w-[66%] p-6 sm:p-8 space-y-6 min-w-0">
+        {/* Right Main Column (Strict 66% width) */}
+        <div className="w-[66%] p-6 sm:p-8 space-y-6 min-w-0">
           <div className="border-b border-black/10 pb-4 break-inside-avoid">
             <h1
               className="text-2xl sm:text-3xl font-extrabold tracking-tight break-words"
@@ -921,7 +921,7 @@ export const CVDocument: React.FC<{ className?: string }> = ({ className }) => {
       id="cv-print-root"
       className={cn(
         "w-full shadow-2xl transition-all duration-300 font-sans print:shadow-none print:m-0",
-        "p-8 sm:p-12 min-h-[297mm] box-border relative print:p-8",
+        "p-10 min-h-[297mm] box-border relative print:p-8",
         fontSizeClasses,
         className
       )}

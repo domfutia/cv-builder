@@ -61,7 +61,8 @@ interface CVContextType {
   deleteSection: (key: string) => void;
   restoreSection: (key: string) => void;
   applyThemePreset: (presetId: string) => void;
-  // Settings & Storage
+  // Settings, Filename & Storage
+  updatePdfFileName: (fileName: string) => void;
   updateSettings: (settings: Partial<CVSettings>) => void;
   resetToSample: () => void;
   clearAll: () => void;
@@ -87,6 +88,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           if (!parsed.settings.tagTextColor) parsed.settings.tagTextColor = "#18181b";
           if (!parsed.settings.paperBgColor) parsed.settings.paperBgColor = "#ffffff";
           if (!parsed.settings.sidebarBgColor) parsed.settings.sidebarBgColor = "#18181b";
+          if (!parsed.settings.pdfFileName) parsed.settings.pdfFileName = "Alex_Vender_CV";
           return parsed;
         }
       } catch (err) {
@@ -603,7 +605,18 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }));
   }, []);
 
-  // Settings
+  // PDF File Name & Settings
+  const updatePdfFileName = useCallback((fileName: string) => {
+    const clean = fileName.trim().replace(/[/\\?%*:|"<>]/g, "");
+    setCvData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        pdfFileName: clean,
+      },
+    }));
+  }, []);
+
   const updateSettings = useCallback((settings: Partial<CVSettings>) => {
     setCvData((prev) => ({
       ...prev,
@@ -648,7 +661,8 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cvData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "curriculum"}_cv.json`);
+    const fileName = (cvData.settings.pdfFileName?.trim() || cvData.personalInfo.fullName.replace(/\s+/g, "_") || "curriculum") + "_backup.json";
+    downloadAnchor.setAttribute("download", fileName);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -660,6 +674,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!data.settings) data.settings = initialCVData.settings;
       if (!data.settings.sectionOrder) data.settings.sectionOrder = defaultSectionOrder;
       if (!data.settings.sidebarBgColor) data.settings.sidebarBgColor = "#18181b";
+      if (!data.settings.pdfFileName) data.settings.pdfFileName = "Alex_Vender_CV";
       setCvData(data);
     }
   }, []);
@@ -706,6 +721,7 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteSection,
         restoreSection,
         applyThemePreset,
+        updatePdfFileName,
         updateSettings,
         resetToSample,
         clearAll,

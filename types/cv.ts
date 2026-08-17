@@ -114,6 +114,7 @@ export interface CVSettings extends ThemeColors {
   avatarShape: AvatarShape;
   avatarSize: AvatarSize;
   sectionOrder: SectionOrderConfig[];
+  pdfFileName?: string;
 }
 
 export interface CVData {

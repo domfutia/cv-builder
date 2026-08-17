@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Interactive CV Builder — Once UI Edition",
-  description: "Crea il tuo Curriculum Vitae professionale con anteprima live in tempo reale, sezioni dinamiche personalizzate, drag-and-drop ed esportazione in PDF A4 vettoriale.",
+  title: "CIVVU — Minimalist CV Builder",
+  description: "Crea il tuo Curriculum Vitae professionale con anteprima live in tempo reale, layout a doppia verticalità, stili curati ed esportazione in PDF A4 vettoriale.",
 };
 
 export default function RootLayout({
