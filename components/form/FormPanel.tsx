@@ -143,7 +143,10 @@ export const FormPanel: React.FC = () => {
       </div>
 
       {/* Form Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <div
+        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 lg:pb-6 overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {activeTab === "settings" && <SettingsForm />}
         {activeTab === "personal" && <PersonalInfoForm />}
         {activeTab === "summary" && <SummaryForm />}

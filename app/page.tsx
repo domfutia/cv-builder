@@ -13,15 +13,23 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<"form" | "preview">("form");
 
   const handlePrint = () => {
+    // Ensure preview is active on mobile so print engine has the full rendered tree
+    if (mobileView === "form") {
+      setMobileView("preview");
+    }
+
     const fileName =
       cvData.settings.pdfFileName?.trim() ||
       `${cvData.personalInfo.fullName.replace(/\s+/g, "_") || "Curriculum"}_CV`;
     const prevTitle = document.title;
     document.title = fileName;
-    window.print();
+
     setTimeout(() => {
-      document.title = prevTitle;
-    }, 1000);
+      window.print();
+      setTimeout(() => {
+        document.title = prevTitle;
+      }, 1000);
+    }, 150);
   };
 
   return (
@@ -35,7 +43,7 @@ export default function Home() {
         <section
           id="form-panel-section"
           className={cn(
-            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col pb-20 lg:pb-0",
+            "no-print w-full lg:w-[46%] xl:w-[44%] 2xl:w-[40%] h-full flex-col",
             mobileView === "form" ? "flex" : "hidden lg:flex"
           )}
         >
@@ -46,7 +54,7 @@ export default function Home() {
         <section
           id="preview-panel-section"
           className={cn(
-            "flex-1 h-full flex flex-col pb-20 lg:pb-0",
+            "flex-1 h-full flex-col",
             mobileView === "preview" ? "flex" : "hidden lg:flex"
           )}
         >

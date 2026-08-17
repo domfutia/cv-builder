@@ -141,7 +141,7 @@ export const CVDocument: React.FC<{
     if (!rootRef.current) return;
 
     const A4_HEIGHT_PX = 1122.5; // 297mm at 96 DPI
-    const targetHeight = rootRef.current.clientHeight || A4_HEIGHT_PX;
+    const targetHeight = A4_HEIGHT_PX;
 
     let naturalHeight = 0;
 

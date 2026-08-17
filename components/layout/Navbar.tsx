@@ -107,8 +107,8 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Customizable PDF File Name Chip (Top Left next to CIVVU) */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
-          <FileText className="w-3.5 h-3.5 text-neutral-400" />
+        <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs">
+          <FileText className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
           {isEditingFileName ? (
             <div className="flex items-center gap-1">
               <input
@@ -119,7 +119,7 @@ export const Navbar: React.FC = () => {
                   if (e.key === "Enter") handleSaveFileName();
                   if (e.key === "Escape") setIsEditingFileName(false);
                 }}
-                className="px-1.5 py-0.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-white font-mono focus:outline-none max-w-[150px]"
+                className="px-1.5 py-0.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-white font-mono focus:outline-none max-w-[95px] sm:max-w-[150px]"
                 autoFocus
               />
               <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
@@ -134,7 +134,7 @@ export const Navbar: React.FC = () => {
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <span className="font-mono text-neutral-700 dark:text-neutral-300 max-w-[140px] truncate" title={currentFileName}>
+              <span className="font-mono text-neutral-700 dark:text-neutral-300 max-w-[70px] xs:max-w-[100px] sm:max-w-[140px] truncate text-[11.5px] sm:text-xs" title={currentFileName}>
                 {currentFileName}
               </span>
               <span className="text-[10px] text-neutral-400 font-mono">.pdf</span>
@@ -155,7 +155,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Center / Action buttons */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         {/* Hidden file input for JSON import */}
         <input
           type="file"
@@ -171,7 +171,7 @@ export const Navbar: React.FC = () => {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white h-8 w-8"
+            className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white h-8 w-8 cursor-pointer"
             title={`Passa a tema ${resolvedTheme === "dark" ? "chiaro" : "scuro"}`}
           >
             {resolvedTheme === "dark" ? (
@@ -182,21 +182,21 @@ export const Navbar: React.FC = () => {
           </Button>
         )}
 
-        {/* Demo Profiles Dropdown */}
-        <div className="relative hidden md:inline-block" ref={demoDropdownRef}>
+        {/* Demo Profiles Dropdown (Responsive: Icon on mobile, full label on tablet/desktop) */}
+        <div className="relative inline-block" ref={demoDropdownRef}>
           <button
             type="button"
             onClick={() => setShowDemoMenu(!showDemoMenu)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-800"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-800"
             title="Carica uno dei 5+ profili di esempio preconfigurati"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Profili Demo</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span className="hidden sm:inline">Profili Demo</span>
             <ChevronDown className={cn("w-3 h-3 text-neutral-400 transition-transform", showDemoMenu && "rotate-180")} />
           </button>
 
           {showDemoMenu && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl p-1.5 z-50 space-y-1">
+            <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-auto sm:mt-2 w-72 max-w-[calc(100vw-16px)] rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl p-1.5 z-50 space-y-1">
               <div className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
                 Scegli un profilo di esempio
               </div>
