@@ -78,22 +78,25 @@ export const demoTech: CVData = {
   ],
   languages: [
     { id: "lang-t1", language: "Italiano", proficiency: "Madrelingua" },
-    { id: "lang-t2", language: "Inglese", proficiency: "Fluente (C2 / Professionale)" },
-    { id: "lang-t3", language: "Tedesco", proficiency: "Intermedio (B1)" },
+    { id: "lang-t2", language: "Inglese", proficiency: "Fluente (C2 / Professionale)", details: "Certificato C2 Cambridge (CPE)" },
+    { id: "lang-t3", language: "Tedesco", proficiency: "Intermedio (B1)", details: "Goethe-Zertifikat B1" },
   ],
   projects: [
     {
       id: "proj-t1",
       name: "KubeWatchdog",
       role: "Creator & Maintainer",
+      startDate: "2022",
+      endDate: "",
+      isCurrent: true,
       description: "Tool open-source per il rilevamento di anomalie nei cluster Kubernetes con 1.4k stelle GitHub.",
       link: "https://github.com/marcobianchi/kubewatchdog",
       technologies: ["Go", "Kubernetes API", "Grafana"],
     },
   ],
   certifications: [
-    { id: "cert-t1", name: "AWS Solutions Architect Professional", issuer: "Amazon Web Services", date: "2023" },
-    { id: "cert-t2", name: "Certified Kubernetes Administrator (CKA)", issuer: "Cloud Native Computing Foundation", date: "2022" },
+    { id: "cert-t1", name: "AWS Solutions Architect Professional", issuer: "Amazon Web Services", startDate: "2023", endDate: "2026", date: "2023 — 2026" },
+    { id: "cert-t2", name: "Certified Kubernetes Administrator (CKA)", issuer: "Cloud Native Computing Foundation", startDate: "2022", endDate: "2025", date: "2022 — 2025" },
   ],
   customSections: [
     {
@@ -104,6 +107,8 @@ export const demoTech: CVData = {
           id: "item-t1",
           title: "Speaker a KubeCon Europe",
           subtitle: "Sessione: Multi-Cluster Orchestration Patterns",
+          startDate: "2023",
+          endDate: "2023",
           date: "2023",
           description: "Presentazione tecnica su pattern avanzati di resilienza cluster per 1200 partecipanti.",
         },
@@ -218,13 +223,13 @@ export const demoFinance: CVData = {
   ],
   languages: [
     { id: "lang-f1", language: "Italiano", proficiency: "Madrelingua" },
-    { id: "lang-f2", language: "Inglese", proficiency: "Bilingue (C2 - TOEFL 116)" },
-    { id: "lang-f3", language: "Francese", proficiency: "Fluente (C1 - DALF)" },
+    { id: "lang-f2", language: "Inglese", proficiency: "Bilingue (C2)", details: "Score TOEFL iBT 116/120" },
+    { id: "lang-f3", language: "Francese", proficiency: "Fluente (C1)", details: "Certificato DALF C1" },
   ],
   projects: [],
   certifications: [
-    { id: "cert-f1", name: "CFA Charterholder (Level III Passed)", issuer: "CFA Institute", date: "2023" },
-    { id: "cert-f2", name: "Financial Risk Manager (FRM)", issuer: "GARP", date: "2021" },
+    { id: "cert-f1", name: "CFA Charterholder (Level III Passed)", issuer: "CFA Institute", startDate: "2023", isCurrent: true, date: "2023" },
+    { id: "cert-f2", name: "Financial Risk Manager (FRM)", issuer: "GARP", startDate: "2021", isCurrent: true, date: "2021" },
   ],
   customSections: [
     {
@@ -235,7 +240,9 @@ export const demoFinance: CVData = {
           id: "item-d1",
           title: "Buy-side Advisory — GreenTech Group (€240M)",
           subtitle: "Acquisizione strategica di operatore solare in Iberia",
-          date: "2023",
+          startDate: "2023-03",
+          endDate: "2023-09",
+          date: "Mar 2023 — Set 2023",
           description: "Responsabile del modello LBO integrato, review della SPA e supporto alle negoziazioni bancarie.",
         },
       ],
@@ -360,13 +367,13 @@ export const demoHumanities: CVData = {
   ],
   languages: [
     { id: "lang-h1", language: "Italiano", proficiency: "Madrelingua" },
-    { id: "lang-h2", language: "Francese", proficiency: "C2 Fluente (Certificato Sorbonne)" },
-    { id: "lang-h3", language: "Inglese", proficiency: "C1 Accademico & Professionale" },
-    { id: "lang-h4", language: "Spagnolo", proficiency: "B2 Lavorativo" },
+    { id: "lang-h2", language: "Francese", proficiency: "C2 Fluente", details: "Certificato C2 Sorbonne Nouvelle" },
+    { id: "lang-h3", language: "Inglese", proficiency: "C1 Accademico", details: "Cambridge C1 Advanced (CAE)" },
+    { id: "lang-h4", language: "Spagnolo", proficiency: "B2 Lavorativo", details: "DELE B2 Instituto Cervantes" },
   ],
   projects: [],
   certifications: [
-    { id: "cert-h1", name: "Abilitazione Nazionale Guida & Storico dell'Arte", issuer: "Ministero della Cultura (MiC)", date: "2019" },
+    { id: "cert-h1", name: "Abilitazione Nazionale Guida & Storico dell'Arte", issuer: "Ministero della Cultura (MiC)", startDate: "2019", isCurrent: true, date: "2019" },
   ],
   customSections: [
     {
@@ -377,7 +384,9 @@ export const demoHumanities: CVData = {
           id: "item-p1",
           title: "L'Estetica dello Spazio e della Materia (Monografia)",
           subtitle: "Edizioni Marsilio Arte, Venezia — 280 pag.",
-          date: "2022",
+          startDate: "2021",
+          endDate: "2022",
+          date: "2021 — 2022",
           description: "Volume adottato in corsi universitari di Storia dell'Arte Contemporanea.",
         },
       ],
@@ -490,22 +499,25 @@ export const demoDesign: CVData = {
   ],
   languages: [
     { id: "lang-d1", language: "Italiano", proficiency: "Madrelingua" },
-    { id: "lang-d2", language: "Inglese", proficiency: "Fluente (C1)" },
-    { id: "lang-d3", language: "Portoghese", proficiency: "Elementare (A2)" },
+    { id: "lang-d2", language: "Inglese", proficiency: "Fluente (C1)", details: "IELTS Academic 8.0" },
+    { id: "lang-d3", language: "Portoghese", proficiency: "Elementare (A2)", details: "Corso base Instituto Camões" },
   ],
   projects: [
     {
       id: "proj-des-1",
       name: "Prisma Design System",
       role: "Creator & Design Lead",
+      startDate: "2022-01",
+      endDate: "",
+      isCurrent: true,
       description: "Design system scalabile open token per prodotti fintech multi-piattaforma.",
       link: "https://rinaldi.design/prisma",
       technologies: ["Figma", "Design Tokens", "Storybook"],
     },
   ],
   certifications: [
-    { id: "cert-des-1", name: "Google UX Design Professional Certificate", issuer: "Google", date: "2021" },
-    { id: "cert-des-2", name: "Design Leadership Masterclass", issuer: "Nielsen Norman Group", date: "2023" },
+    { id: "cert-des-1", name: "Google UX Design Professional Certificate", issuer: "Google", startDate: "2021", isCurrent: true, date: "2021" },
+    { id: "cert-des-2", name: "Design Leadership Masterclass", issuer: "Nielsen Norman Group", startDate: "2023", isCurrent: true, date: "2023" },
   ],
   customSections: [
     {
@@ -516,6 +528,8 @@ export const demoDesign: CVData = {
           id: "item-aw1",
           title: "Red Dot Award: Best of the Best 2023",
           subtitle: "Categoria: Financial Apps & Interface Design",
+          startDate: "2023",
+          endDate: "2023",
           date: "2023",
           description: "Premio internazionale assegnato per l'eccellenza dell'esperienza utente.",
         },
@@ -630,13 +644,13 @@ export const demoHealthcare: CVData = {
   ],
   languages: [
     { id: "lang-m1", language: "Italiano", proficiency: "Madrelingua" },
-    { id: "lang-m2", language: "Inglese", proficiency: "Fluente Medico-Scientifico (C1)" },
-    { id: "lang-m3", language: "Tedesco", proficiency: "Intermedio (B2 Medizinisches Deutsch)" },
+    { id: "lang-m2", language: "Inglese", proficiency: "Fluente Medico-Scientifico (C1)", details: "OET Medicine Grade A (C1)" },
+    { id: "lang-m3", language: "Tedesco", proficiency: "Intermedio (B2)", details: "Fachsprachenprüfung B2 Medizinisches Deutsch" },
   ],
   projects: [],
   certifications: [
-    { id: "cert-m1", name: "European Board of Cardiology (EBC)", issuer: "European Society of Cardiology (ESC)", date: "2022" },
-    { id: "cert-m2", name: "Advanced Cardiovascular Life Support (ACLS Provider)", issuer: "American Heart Association (AHA)", date: "2023" },
+    { id: "cert-m1", name: "European Board of Cardiology (EBC)", issuer: "European Society of Cardiology (ESC)", startDate: "2022", isCurrent: true, date: "2022" },
+    { id: "cert-m2", name: "Advanced Cardiovascular Life Support (ACLS Provider)", issuer: "American Heart Association (AHA)", startDate: "2023", endDate: "2025", isCurrent: false, date: "2023 — 2025" },
   ],
   customSections: [
     {
@@ -647,7 +661,9 @@ export const demoHealthcare: CVData = {
           id: "item-tr1",
           title: "Co-Investigatore nello Studio Europeo EU-SHOCK Trial",
           subtitle: "European Heart Journal (IF 39.3) — Co-Autore",
-          date: "2023",
+          startDate: "2022-01",
+          endDate: "2023-12",
+          date: "2022 — 2023",
           description: "Studio prospettico multicentrico sull'ottimizzazione del supporto meccanico nello shock cardiogeno.",
         },
       ],

@@ -33,12 +33,16 @@ export interface LanguageItem {
   id: string;
   language: string;
   proficiency: string;
+  details?: string;
 }
 
 export interface ProjectItem {
   id: string;
   name: string;
   role?: string;
+  startDate?: string;
+  endDate?: string;
+  isCurrent?: boolean;
   description: string;
   link?: string;
   technologies: string[];
@@ -48,7 +52,10 @@ export interface CertificationItem {
   id: string;
   name: string;
   issuer: string;
-  date: string;
+  startDate?: string;
+  endDate?: string;
+  isCurrent?: boolean;
+  date?: string;
   link?: string;
 }
 
@@ -56,6 +63,9 @@ export interface CustomSectionItem {
   id: string;
   title: string;
   subtitle?: string;
+  startDate?: string;
+  endDate?: string;
+  isCurrent?: boolean;
   date?: string;
   description?: string;
   highlights?: string[];

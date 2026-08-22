@@ -108,8 +108,12 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
                 {item.title || t.customSection.itemTitlePlaceholder}
                 {item.subtitle ? ` • ${item.subtitle}` : ""}
               </h4>
-              {item.date && (
-                <p className="text-xs text-neutral-500 truncate">{item.date}</p>
+              {(item.startDate || item.endDate || item.isCurrent || item.date) && (
+                <p className="text-xs text-neutral-500 truncate">
+                  {item.startDate
+                    ? `${item.startDate} — ${item.isCurrent ? (t.docLabels.present || "In corso") : item.endDate || (t.docLabels.present || "Presente")}`
+                    : item.date}
+                </p>
               )}
             </div>
           </div>
@@ -157,11 +161,34 @@ const SortableCustomItemCard: React.FC<SortableCustomItemProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label={t.customSection.itemDate}
-                placeholder={t.customSection.itemDatePlaceholder}
-                value={item.date || ""}
-                onChange={(val) => onUpdate({ date: val })}
+                label={t.customSection.startDate}
+                placeholder={t.customSection.startDatePlaceholder}
+                value={item.startDate || item.date || ""}
+                onChange={(val) => onUpdate({ startDate: val, date: val })}
               />
+              <Input
+                label={t.customSection.endDate}
+                placeholder={t.customSection.endDatePlaceholder}
+                value={item.endDate || ""}
+                disabled={item.isCurrent}
+                onChange={(val) => onUpdate({ endDate: val })}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id={`custom-isCurrent-${item.id}`}
+                checked={item.isCurrent || false}
+                onChange={(e) => onUpdate({ isCurrent: e.target.checked })}
+                className="w-4 h-4 rounded bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-200 focus:ring-neutral-500 cursor-pointer"
+              />
+              <label
+                htmlFor={`custom-isCurrent-${item.id}`}
+                className="text-xs text-neutral-700 dark:text-neutral-300 select-none cursor-pointer"
+              >
+                {t.customSection.isCurrent}
+              </label>
             </div>
 
             <Textarea

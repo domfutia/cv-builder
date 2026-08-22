@@ -213,13 +213,22 @@ export const CVDocument: React.FC<{
           <div key={`sec-custom-${matchingCustom.id}-sb`} className="space-y-2 break-inside-avoid page-break-inside-avoid">
             <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{title}</h3>
             <div className="space-y-1.5 text-xs">
-              {matchingCustom.items.map((item) => (
-                <div key={item.id} className="space-y-0.5">
-                  <div className="font-semibold break-words leading-snug" style={{ color: sbTextPrimary }}>{item.title}</div>
-                  {item.subtitle && <div className="text-[11px] break-words" style={{ color: sbTextMuted }}>{item.subtitle} {item.date ? `(${item.date})` : ""}</div>}
-                  {item.description && <p className="text-[11px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>{item.description}</p>}
-                </div>
-              ))}
+              {matchingCustom.items.map((item) => {
+                const dateStr = item.startDate
+                  ? `${item.startDate} — ${item.isCurrent ? (t.docLabels.present || "Presente") : item.endDate || (t.docLabels.present || "Presente")}`
+                  : item.date || "";
+                return (
+                  <div key={item.id} className="space-y-0.5">
+                    <div className="font-semibold break-words leading-snug" style={{ color: sbTextPrimary }}>{item.title}</div>
+                    {(item.subtitle || dateStr) && (
+                      <div className="text-[11px] break-words" style={{ color: sbTextMuted }}>
+                        {item.subtitle} {dateStr ? `(${dateStr})` : ""}
+                      </div>
+                    )}
+                    {item.description && <p className="text-[11px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>{item.description}</p>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -229,23 +238,28 @@ export const CVDocument: React.FC<{
         <div key={`sec-custom-${matchingCustom.id}`} className={cn("space-y-2 break-inside-avoid page-break-inside-avoid")}>
           <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{title}</h2>
           <div className={itemSpacingClasses}>
-            {matchingCustom.items.map((item) => (
-              <div key={item.id} className="break-inside-avoid page-break-inside-avoid space-y-0.5">
-                <div className="flex items-baseline justify-between gap-4 flex-wrap">
-                  <div className="min-w-0">
-                    <span className="font-bold text-[12.5px] break-words" style={{ color: primaryTextColor }}>{item.title}</span>
-                    {item.subtitle && <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>• {item.subtitle}</span>}
+            {matchingCustom.items.map((item) => {
+              const dateStr = item.startDate
+                ? `${item.startDate} — ${item.isCurrent ? (t.docLabels.present || "Presente") : item.endDate || (t.docLabels.present || "Presente")}`
+                : item.date || "";
+              return (
+                <div key={item.id} className="break-inside-avoid page-break-inside-avoid space-y-0.5">
+                  <div className="flex items-baseline justify-between gap-4 flex-wrap">
+                    <div className="min-w-0">
+                      <span className="font-bold text-[12.5px] break-words" style={{ color: primaryTextColor }}>{item.title}</span>
+                      {item.subtitle && <span className="font-medium ml-1.5 break-words" style={{ color: secondaryTextColor }}>• {item.subtitle}</span>}
+                    </div>
+                    {dateStr && <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{dateStr}</span>}
                   </div>
-                  {item.date && <span className="text-xs font-mono shrink-0 opacity-80" style={{ color: secondaryTextColor }}>{item.date}</span>}
+                  {item.description && <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>{item.description}</p>}
+                  {item.highlights && item.highlights.length > 0 && (
+                    <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
+                      {item.highlights.map((h, i) => <li key={i} className="leading-snug break-words whitespace-normal">{h}</li>)}
+                    </ul>
+                  )}
                 </div>
-                {item.description && <p className="text-xs leading-normal break-words whitespace-normal" style={{ color: bodyTextColor }}>{item.description}</p>}
-                {item.highlights && item.highlights.length > 0 && (
-                  <ul className="list-disc list-outside ml-4 space-y-0.5 text-xs" style={{ color: bodyTextColor }}>
-                    {item.highlights.map((h, i) => <li key={i} className="leading-snug break-words whitespace-normal">{h}</li>)}
-                  </ul>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -369,11 +383,18 @@ export const CVDocument: React.FC<{
           return (
             <div key="sec-languages-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
               <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("languages", t.docLabels.languages || "Lingue")}</h3>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1.5 text-xs">
                 {languages.map((l) => (
-                  <div key={l.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
-                    <span className="font-semibold break-words" style={{ color: sbTextPrimary }}>{l.language}</span>
-                    <span className="break-words" style={{ color: sbTextMuted }}>{l.proficiency}</span>
+                  <div key={l.id} className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between gap-2 flex-wrap">
+                      <span className="font-semibold break-words" style={{ color: sbTextPrimary }}>{l.language}</span>
+                      <span className="break-words" style={{ color: sbTextMuted }}>{l.proficiency}</span>
+                    </div>
+                    {l.details && (
+                      <div className="text-[10px] italic break-words" style={{ color: sbTextMuted }}>
+                        {l.details}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -385,9 +406,14 @@ export const CVDocument: React.FC<{
             <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("languages", t.docLabels.languages || "Lingue")}</h3>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: bodyTextColor }}>
               {languages.map((l) => (
-                <div key={l.id} className="inline-flex items-center gap-1 text-[11px]">
+                <div key={l.id} className="inline-flex items-baseline gap-1 text-[11px]">
                   <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{l.language}:</span>
                   <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>{l.proficiency}</span>
+                  {l.details && (
+                    <span className="opacity-75 italic text-[10.5px] break-words" style={{ color: secondaryTextColor }}>
+                      ({l.details})
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -401,12 +427,17 @@ export const CVDocument: React.FC<{
             <div key="sec-certifications-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
               <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("certifications", t.docLabels.certifications || "Certificazioni")}</h3>
               <div className="space-y-1 text-xs">
-                {certifications.map((c) => (
-                  <div key={c.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>{c.name}</div>
-                    <div className="text-[10px] break-words" style={{ color: sbTextMuted }}>{c.issuer} {c.date ? `(${c.date})` : ""}</div>
-                  </div>
-                ))}
+                {certifications.map((c) => {
+                  const dateStr = c.startDate
+                    ? `${c.startDate} — ${c.isCurrent ? (t.docLabels.present || "Presente") : c.endDate || (t.docLabels.present || "Presente")}`
+                    : c.date || "";
+                  return (
+                    <div key={c.id} className="space-y-0.5">
+                      <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>{c.name}</div>
+                      <div className="text-[10px] break-words" style={{ color: sbTextMuted }}>{c.issuer} {dateStr ? `(${dateStr})` : ""}</div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
@@ -415,12 +446,19 @@ export const CVDocument: React.FC<{
           <div key="sec-certifications" className="space-y-1 break-inside-avoid page-break-inside-avoid">
             <h3 className="text-xs font-bold uppercase tracking-widest pb-0.5 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("certifications", t.docLabels.certifications || "Certificazioni")}</h3>
             <div className="space-y-1 text-xs" style={{ color: bodyTextColor }}>
-              {certifications.map((c) => (
-                <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
-                  <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{c.name}</span>
-                  <span className="opacity-80 break-words" style={{ color: secondaryTextColor }}>{c.issuer} ({c.date})</span>
-                </div>
-              ))}
+              {certifications.map((c) => {
+                const dateStr = c.startDate
+                  ? `${c.startDate} — ${c.isCurrent ? (t.docLabels.present || "Presente") : c.endDate || (t.docLabels.present || "Presente")}`
+                  : c.date || "";
+                return (
+                  <div key={c.id} className="flex justify-between gap-2 flex-wrap text-[11px]">
+                    <span className="font-semibold break-words" style={{ color: primaryTextColor }}>{c.name}</span>
+                    <span className="opacity-80 break-words shrink-0" style={{ color: secondaryTextColor }}>
+                      {c.issuer}{dateStr ? ` (${dateStr})` : ""}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -432,12 +470,19 @@ export const CVDocument: React.FC<{
             <div key="sec-projects-sb" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
               <h3 className="text-xs font-bold uppercase tracking-wider pb-1 border-b" style={{ color: sbTextPrimary, borderColor: sbBorderColor }}>{getSectionTitle("projects", t.docLabels.projects || "Progetti")}</h3>
               <div className="space-y-1.5 text-xs">
-                {projects.map((p) => (
-                  <div key={p.id} className="space-y-0.5">
-                    <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>{p.name} {p.role ? `(${p.role})` : ""}</div>
-                    {p.description && <p className="text-[10px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>{p.description}</p>}
-                  </div>
-                ))}
+                {projects.map((p) => {
+                  const dateStr = p.startDate
+                    ? `${p.startDate} — ${p.isCurrent ? (t.docLabels.present || "Presente") : p.endDate || (t.docLabels.present || "Presente")}`
+                    : "";
+                  return (
+                    <div key={p.id} className="space-y-0.5">
+                      <div className="font-semibold break-words leading-tight text-[11px]" style={{ color: sbTextPrimary }}>
+                        {p.name} {p.role ? `(${p.role})` : ""} {dateStr ? `• ${dateStr}` : ""}
+                      </div>
+                      {p.description && <p className="text-[10px] leading-snug break-words whitespace-normal" style={{ color: sbTextSecondary }}>{p.description}</p>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
@@ -446,27 +491,38 @@ export const CVDocument: React.FC<{
           <div key="sec-projects" className="space-y-1.5 break-inside-avoid page-break-inside-avoid">
             <h2 className="text-xs font-bold uppercase tracking-widest pb-1 border-b border-black/10" style={{ color: accentColor }}>{getSectionTitle("projects", t.docLabels.projects || "Progetti di Rilievo")}</h2>
             <div className="grid grid-cols-1 gap-1.5">
-              {projects.map((p) => (
-                <div key={p.id} className="text-xs space-y-0.5">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <span className="font-bold break-words text-[12px]" style={{ color: primaryTextColor }}>{p.name} {p.role ? `(${p.role})` : ""}</span>
-                    {p.link && (
-                      <a href={formatUrl(p.link)} target="_blank" rel="noopener noreferrer" className="text-[10.5px] font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all" style={{ color: secondaryTextColor }}>
-                        <span>{p.link.replace(/^https?:\/\//, "")}</span>
-                        <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                      </a>
+              {projects.map((p) => {
+                const dateStr = p.startDate
+                  ? `${p.startDate} — ${p.isCurrent ? (t.docLabels.present || "Presente") : p.endDate || (t.docLabels.present || "Presente")}`
+                  : "";
+                return (
+                  <div key={p.id} className="text-xs space-y-0.5">
+                    <div className="flex items-baseline justify-between flex-wrap gap-2">
+                      <div className="min-w-0 flex items-baseline gap-2 flex-wrap">
+                        <span className="font-bold break-words text-[12px]" style={{ color: primaryTextColor }}>{p.name}</span>
+                        {p.role && <span className="font-medium text-xs break-words" style={{ color: secondaryTextColor }}>• {p.role}</span>}
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {dateStr && <span className="text-xs font-mono opacity-80" style={{ color: secondaryTextColor }}>{dateStr}</span>}
+                        {p.link && (
+                          <a href={formatUrl(p.link)} target="_blank" rel="noopener noreferrer" className="text-[10.5px] font-mono hover:underline inline-flex items-center gap-1 opacity-80 break-all" style={{ color: secondaryTextColor }}>
+                            <span>{p.link.replace(/^https?:\/\//, "")}</span>
+                            <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    {p.description && <p className="text-xs break-words whitespace-normal" style={{ color: bodyTextColor }}>{p.description}</p>}
+                    {p.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-0.5">
+                        {p.technologies.map((tItem, tIdx) => (
+                          <span key={tIdx} className="px-1.5 py-0.5 rounded text-[9.5px] break-words" style={{ backgroundColor: tagBgColor, color: tagTextColor }}>{tItem}</span>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {p.description && <p className="text-xs break-words whitespace-normal" style={{ color: bodyTextColor }}>{p.description}</p>}
-                  {p.technologies.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-0.5">
-                      {p.technologies.map((tItem, tIdx) => (
-                        <span key={tIdx} className="px-1.5 py-0.5 rounded text-[9.5px] break-words" style={{ backgroundColor: tagBgColor, color: tagTextColor }}>{tItem}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
